@@ -82,6 +82,7 @@ end
 
 task :prereq do
   sh "sudo yum install -y #{packages_base}" 
+  sh "sudo usermod -a -G mock $USER"
 end
 
 desc "Inizializza il sistema per compilare localmente"
@@ -90,10 +91,13 @@ task :build_env do
   sh "make {sipx,lib}.deps-list | grep -v sipx | xargs sudo yum install -y"
   sh "make {sipx,lib}.deps-build-list | grep -v sipx | xargs sudo yum install -y"
   gem_extra.split.each { |x| sh "sudo gem install #{x}" }
+  sh "echo \"%_topdir      $HOME/rpmbuild\" >> ~/.rpmmacros"
+  sh "mkdir -p ~/rpmbuild/{BUILD,SOURCES,RPMS,SRPMS,SPECS}"
 end
 
 
 task :create_mak do
+  puts "add sip2ser stuff"
   p_list = load_projects
   f1 = IO.readlines("#{$our_dir}/mak/11-s2s.mk.in")
   f2 = File.new("#{$build_dir}/mak/11-s2s.mk","w")
