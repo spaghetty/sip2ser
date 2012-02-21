@@ -30,7 +30,7 @@ sed -e "s,@SRC_DIR\@,$src_dir,g"   \
     -e "s,@FASTDATATEL_DIR\@,$sip2ser_dir,g" \
     $sip2ser_dir/Rakefile.in > $build_dir/Rakefile
 
-ln -s $sip2ser_dir/tests $build_dir
+#ln -s $sip2ser_dir/tests $build_dir
 
 echo -ne "ruby and rake are necessary "
 
@@ -63,5 +63,15 @@ if [[ -f $reconfig_command && ! -z $reconfig_command ]]; then
     $reconfig_command -if
 else
     echo "FAIL"
-    echo "autoreconf missing: remember to run prereq task and then rerun autoreconfig -if"
+    echo "autoreconf command is missied on you system do you want install?[y/*]"
+    read choose
+    if [ $choose=="y" ]; then
+        echo "installing ...."
+        sudo yum install -y autoconf automake
+    else
+        echo "your choose -> $choose <- is considered as no"
+	echo "autoreconf missing: remember to run prereq task and then rerun autoreconfig -if"
+    fi
+
+
 fi

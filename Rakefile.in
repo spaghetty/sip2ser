@@ -10,20 +10,10 @@ $log_file="fastdatatel_action.log"
 
 logger = Logger.new($log_file)
 
-base_config_string="--cache-file=`pwd`/ac-cache-file --prefix=/opt/`pwd | gawk -F /  '{ print $NF  }'` SIPXPBXUSER=`whoami` SIPXECS_NAME=OpSip OPENFIRE_HOME=/opt/openfire/ --enable-mrtg"
+base_config_string="--cache-file=`pwd`/ac-cache-file --prefix=/opt/`pwd | gawk -F /  '{ print $NF  }'` SIPXPBXUSER=`whoami` SIPXECS_NAME=OpSip OPENFIRE_HOME=/opt/openfire/ --enable-mrtg --enable-rpm"
 
-packages_base = "autoconf 
-automake 
-make
-libtool 
-createrepo 
-gcc-c++ 
-rpm-build
-ruby
-rubygem-rake
-libxml2
-libxml2-devel
-js"
+packages_base = "autoconf automake make libtool createrepo gcc-c++ \
+ rpm-build ruby rubygem-rake libxml2 libxml2-devel js git mock thttpd"
 
 
 gem_extra = "htmlentities
@@ -31,46 +21,46 @@ libxml-ruby
 zip
 net-scp"
 
-packages_mock = "git
-mock 
-thttpd"
+# packages_mock = "git
+# mock 
+# thttpd"
 
-# NON VENGONO USATI
-packages_lev1 = "ant-commons-logging
-ant-junit
-ant-nodeps
-ant-trax
-apr-devel
-automake
-cppunit-devel
-doxygen
-findutils
-gcc-c++
-httpd-devel
-jakarta-commons-beanutils
-jakarta-commons-collections
-java-devel
-js
-net-snmp-devel
-nsis
-openssl-devel
-pcre-devel
-python
-ruby
-ruby-devel
-rubygem-rake
-rubygems
-shadow-utils
-stunnel
-unixODBC-devel
-xalan-j2
-xerces-c-devel
-zip
-patch
-patchutils
-freeswitch-ruby" # ESL
+# # NON VENGONO USATI
+# packages_lev1 = "ant-commons-logging
+# ant-junit
+# ant-nodeps
+# ant-trax
+# apr-devel
+# automake
+# cppunit-devel
+# doxygen
+# findutils
+# gcc-c++
+# httpd-devel
+# jakarta-commons-beanutils
+# jakarta-commons-collections
+# java-devel
+# js
+# net-snmp-devel
+# nsis
+# openssl-devel
+# pcre-devel
+# python
+# ruby
+# ruby-devel
+# rubygem-rake
+# rubygems
+# shadow-utils
+# stunnel
+# unixODBC-devel
+# xalan-j2
+# xerces-c-devel
+# zip
+# patch
+# patchutils
+# freeswitch-ruby" # ESL
 
-import "tests/tests.rake"
+# import "tests/tests.rake"
 
 
 task :default => :config
@@ -80,152 +70,123 @@ task :test do
   puts $our_dir
 end
 
-desc "Installa i pacchetti necessari alle operazioni di base"
 task :prereq do
-  packages_base.split.each { |x| sh "sudo yum install -y #{x}" }
-end
-
-desc "Installa i pacchetti necessari per creare gli rpm col mock"
-task :prereq_mock do
-  Rake::Task[:prereq].invoke
-  packages_mock.split.each { |x| sh "sudo yum install -y #{x}" }
+  sh "sudo yum install -y #{packages_base}" 
 end
 
 desc "Inizializza il sistema per compilare localmente"
 task :build_env do
-  sh "make {sipx,lib}.deps-list | xargs sudo yum install -y"
-  sh "make {sipx,lib}.deps-build-list | xargs sudo yum install -y"
+  Rake::Task[:prereq].invoke()
+  sh "make {sipx,lib}.deps-list | grep -v sipx | xargs sudo yum install -y"
+  sh "make {sipx,lib}.deps-build-list | grep -v sipx | xargs sudo yum install -y"
   gem_extra.split.each { |x| sh "sudo gem install #{x}" }
 end
 
-desc "Lancia il configure minimo"
-task :config do
-  sh "#{$src_dir}/configure #{base_config_string}"
-end
-
-desc "Lancia il configure con support per la generazione degli rpm"
-task :config_rpm do
-  sh "#{$src_dir}/configure #{base_config_string} --enable-rpm"
-end
-
-desc "Lancia il configure completo piu' JAVA_DEBUG a on"
-task :config_debug do
-  sh "#{$src_dir}/configure  JAVAC_DEBUG=on #{base_config_string} --enable-rpm"
+desc "Lancia il configure per attivare la modalita' di debug basta mettere come parametro la costante DEBUG"
+task :config, [ :jdb ] do |t, args|
+  if args[:jdb]=="DEBUG"
+    sh "#{$src_dir}/configure  JAVAC_DEBUG=on #{base_config_string}"
+  else
+    sh "#{$src_dir}/configure #{base_config_string}"
+  end
 end
 
 desc "Applica tutte le patch di base nel file default_patch.list"
-task :default_patch do
-  patch = "#{$our_dir}/default_patch.list"
-  file = File.new(patch, "r")
-  while (line = file.gets)
-    begin
-      Rake::Task[:patch].execute({:patch_set => line.chomp})
-    rescue
+task :default_patch, [:action] do |t, args|
+  patchs = "#{$our_dir}/default_patch.list"
+  if args[:action]=="list" 
+    sh "cat #{$patchs}"
+  else
+    file = File.new(patchs, "r")
+    while (line = file.gets)
+      begin
+        Rake::Task[:patch].execute({:patch_set => line.chomp})
+      rescue
+      end
     end
+    file.close
   end
-  file.close
 end
 
 desc "Applica una patch"
-task :patch, [ :patch_set ] do |t, args|
-  patch_dir = "#{$our_dir}/patchs/#{args[:patch_set]}"
-  logger.info("Applico le patch del set: #{args[:patch_set]}")
-  Dir.foreach(patch_dir) do |f| 
-    if not File.directory?(f) and f[-5..-1] == "patch"
-      res = sh "patch -d#{$src_dir} -p1 < #{patch_dir}/#{f}"
-      logger.info("#{f}: #{res}")
-    end
-  end
-  base_resource = "#{$our_dir}/resources/#{args[:patch_set]}" 
-  Find.find(base_resource) do |f|
-    f.sub!(base_resource,"")
-    #tmp_base = base_resource.sub("../","")
-    tmp_base = "fastdatatel"+base_resource.sub(/(.+)fastdatatel/,"")
-    dir_deep = (f.count("/") >= 1) ? f.count("/")-1 : 0
-    dir_backcursor = "../"*dir_deep
-    if not File.exist? "#{$src_dir}/#{f}"
-      sh "ln -sn #{dir_backcursor}#{tmp_base}#{f} #{$src_dir}#{f}"
-      Find.prune
-    end
-  end
-  Dir.foreach(patch_dir) do |f| 
-    if not File.directory?(f) and f[-4..-1] == "post"
-      if not File.executable?("#{patch_dir}/#{f}")
-        File.chmod(0777, "#{patch_dir}/#{f}")
+task :patch, [ :action,  :patch_set ] do |t, args|
+  if args[:action]=="list"
+    temp = Dir.new("#{$our_dir}/patchs").entries
+    temp.delete(".")
+    temp.delete("..")
+    temp.delete("README")
+    text = File.read("#{$our_dir}/default_patch.list")
+    temp.each do |patch|
+      if text =~ /#{patch}/
+        puts patch + " ***"
+      else
+        puts patch 
       end
-      res = sh "#{patch_dir}/#{f} #{$src_dir} #{$our_dir} #{$build_dir}"
     end
-  end
-  Rake::Task[:config_rpm].invoke()
-end
-
-desc "Lista delle patch"
-task :list do
-  temp = Dir.new("#{$our_dir}/patchs").entries
-  temp.delete(".")
-  temp.delete("..")
-  temp.delete("README")
-  text = File.read("#{$our_dir}/default_patch.list")
-  temp.each do |patch|
-    if text =~ /#{patch}/
-      puts patch + " ***"
-    else
-      puts patch 
+  else
+    patch_dir = "#{$our_dir}/patchs/#{args[:patch_set]}"
+    logger.info("Applico le patch del set: #{args[:patch_set]}")
+    Dir.foreach(patch_dir) do |f| 
+      if not File.directory?(f) and f[-5..-1] == "patch"
+        res = sh "patch -d#{$src_dir} -p1 < #{patch_dir}/#{f}"
+        logger.info("#{f}: #{res}")
+      end
     end
-  end
-end
-
-desc "Elenca fixture disponibili per postgres"
-task :pglist do |t, args|
-  Dir.foreach("#{$our_dir}/resources") do |f|
-    if f[0..4]=="psql_"
-      puts f
+    base_resource = "#{$our_dir}/resources/#{args[:patch_set]}" 
+    Find.find(base_resource) do |f|
+      f.sub!(base_resource,"")
+      #tmp_base = base_resource.sub("../","")
+      tmp_base = "fastdatatel"+base_resource.sub(/(.+)fastdatatel/,"")
+      dir_deep = (f.count("/") >= 1) ? f.count("/")-1 : 0
+      dir_backcursor = "../"*dir_deep
+      if not File.exist? "#{$src_dir}/#{f}"
+        sh "ln -sn #{dir_backcursor}#{tmp_base}#{f} #{$src_dir}#{f}"
+        Find.prune
+      end
     end
+    Dir.foreach(patch_dir) do |f| 
+      if not File.directory?(f) and f[-4..-1] == "post"
+        if not File.executable?("#{patch_dir}/#{f}")
+          File.chmod(0777, "#{patch_dir}/#{f}")
+        end
+        res = sh "#{patch_dir}/#{f} #{$src_dir} #{$our_dir} #{$build_dir}"
+      end
+    end
+    Rake::Task[:config].invoke()
   end
 end
 
-desc "Applica il tema custom Opsip"
-task :theme do
-  path = "/"
-  begin
-    temp = %x[grep -e '"prefix".=' config.status]
-    path = temp.split("=")[1].strip.gsub("\"", "")
-  rescue
-  end
-  Rake::Task[:base_customization].invoke()
-  sh "cp -r #{$our_dir}/theme/opsip-theme-1.0/* #{path}/etc/sipxpbx/"
-end
+# desc "Applica il tema custom Opsip"
+# task :theme do
+#   path = "/"
+#   begin
+#     temp = %x[grep -e '"prefix".=' config.status]
+#     path = temp.split("=")[1].strip.gsub("\"", "")
+#   rescue
+#   end
+#   Rake::Task[:base_customization].invoke()
+#   sh "cp -r #{$our_dir}/theme/opsip-theme-1.0/* #{path}/etc/sipxpbx/"
+# end
 
-desc "Applica customizzazioni base e il file che include plugins futuri"
-task :base_customization do
-  path = "/"
-  begin
-    temp = %x[grep -e '"prefix".=' config.status]
-    path = temp.split("=")[1].strip.gsub("\"", "")
-  rescue
-  end
-  if not File.exist?("#{path}/etc/sipxpbx/sipxplugin.beans.xml")
-    sh "cp #{$our_dir}/base_plugin/opsip-plugin-1.0/sipxplugin.beans.xml #{path}/etc/sipxpbx/"
-    sh "cp #{$our_dir}/base_plugin/opsip-plugin-1.0/myres.properties #{path}/etc/sipxpbx/"
-    sh "cp #{$our_dir}/base_plugin/opsip-plugin-1.0/myres_it.properties #{path}/etc/sipxpbx/"
-  end
-end
+# desc "Applica customizzazioni base e il file che include plugins futuri"
+# task :base_customization do
+#   path = "/"
+#   begin
+#     temp = %x[grep -e '"prefix".=' config.status]
+#     path = temp.split("=")[1].strip.gsub("\"", "")
+#   rescue
+#   end
+#   if not File.exist?("#{path}/etc/sipxpbx/sipxplugin.beans.xml")
+#     sh "cp #{$our_dir}/base_plugin/opsip-plugin-1.0/sipxplugin.beans.xml #{path}/etc/sipxpbx/"
+#     sh "cp #{$our_dir}/base_plugin/opsip-plugin-1.0/myres.properties #{path}/etc/sipxpbx/"
+#     sh "cp #{$our_dir}/base_plugin/opsip-plugin-1.0/myres_it.properties #{path}/etc/sipxpbx/"
+#   end
+# end
 
-desc "Applica fixture a postgres"
-task :pgpatch, [:fixture_file] do |t, args|
-  sh "psql -U postgres -f #{$our_dir}/resources/#{:fixture_file} postgres"
-end
-
-desc "Installa un repo yum fastdatatel"
-task :wget, [:repo, :opsip_vers] do |t, args|
-  sh "wget http://packages.fastdatatel.net/repos/#{args[:repo]}-#{args[:opsip_vers]}.repo -O /etc/yum.repos.d/#{args[:repo]}-#{args[:opsip_vers]}.repo"
-end
-
-desc "Upload gli rpm in un repository fastdatatel"
-task :upload, [:path, :release, :arch, :opsip_vers, :repo] do |t, args|
-  sh "scp #{args[:path]}/*rpm repositories@192.168.64.1:/var/www/html/pkg/repos/#{args[:release]}/#{args[:arch]}/#{args[:opsip_vers]}/#{args[:repo]}/"
-  sh "ssh repositories@192.168.64.1 createrepo /var/www/html/pkg/repos/#{args[:release]}/#{args[:arch]}/#{args[:opsip_vers]}/#{args[:repo]}/"
-end
+# desc "Applica fixture a postgres"
+# task :pgpatch, [:fixture_file] do |t, args|
+#   sh "psql -U postgres -f #{$our_dir}/resources/#{:fixture_file} postgres"
+# end
 
 desc "Sistemare il problema di data e ora del sistema"
 task :datetime do
