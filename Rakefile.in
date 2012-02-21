@@ -7,6 +7,7 @@ $src_dir="@SRC_DIR@"
 $our_dir="@FASTDATATEL_DIR@"
 $build_dir="@BUILD_DIR@"
 $log_file="fastdatatel_action.log"
+$projects_file = "#{$our_dir}/projects"
 
 logger = Logger.new($log_file)
 
@@ -20,6 +21,15 @@ gem_extra = "htmlentities
 libxml-ruby
 zip
 net-scp"
+
+
+def load_projects
+  a = IO.readlines($projects_file)
+  a.each() { | x |
+    x.chomp!
+  }
+  return a
+end
 
 # packages_mock = "git
 # mock 
@@ -82,12 +92,47 @@ task :build_env do
   gem_extra.split.each { |x| sh "sudo gem install #{x}" }
 end
 
+
+task :create_mak do
+  p_list = load_projects
+  f1 = IO.readlines("#{$our_dir}/mak/11-s2s.mk.in")
+  f2 = File.new("#{$build_dir}/mak/11-s2s.mk","w")
+  f1.each do | x |
+    if x.include?("{% projects %}")
+      p_list.each do | prj |
+        f2.puts("\t#{prj} \\")
+      end
+    else
+      f2.puts(x.chomp)
+    end
+  end
+  f2.close()
+end
+
 desc "Lancia il configure per attivare la modalita' di debug basta mettere come parametro la costante DEBUG"
 task :config, [ :jdb ] do |t, args|
+  p_list = load_projects
+  if not File.directory? "#{$src_dir}/#{p_list[0]}"
+    Rake::Task[:projects].execute({:action => "get" })
+  end
   if args[:jdb]=="DEBUG"
     sh "#{$src_dir}/configure  JAVAC_DEBUG=on #{base_config_string}"
   else
     sh "#{$src_dir}/configure #{base_config_string}"
+  end
+  Rake::Task[:create_mak].invoke()
+end
+
+desc "Gestisce l'integrazione dei progetti esterni"
+task :projects, [:action] do |t, args|
+  p_list = load_projects
+  if args[:action] == "list"
+    puts p_list
+  elsif args[:action] == "get"
+    p_list.each { | x |
+      # here we need a more sophisticate techniques to manage exact git revision checkout
+      sh "git clone http://git.sip2ser.net/#{x.downcase} #{$src_dir}/#{x}"
+    }
   end
 end
 
