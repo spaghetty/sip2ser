@@ -87,12 +87,16 @@ end
 
 desc "Inizializza il sistema per compilare localmente"
 task :build_env do
-  Rake::Task[:prereq].invoke()
-  sh "make {sipx,lib}.deps-list | grep -v sipx | xargs sudo yum install -y"
-  sh "make {sipx,lib}.deps-build-list | grep -v sipx | xargs sudo yum install -y"
-  gem_extra.split.each { |x| sh "sudo gem install #{x}" }
-  sh "echo \"%_topdir      $HOME/rpmbuild\" >> ~/.rpmmacros"
-  sh "mkdir -p ~/rpmbuild/{BUILD,SOURCES,RPMS,SRPMS,SPECS}"
+  if File.exists?("#{$build_dir}/config.status")
+    Rake::Task[:prereq].invoke()
+    sh "make {sipx,lib}.deps-list | grep -v sipx | xargs sudo yum install -y"
+    sh "make {sipx,lib}.deps-build-list | grep -v sipx | xargs sudo yum install -y"
+    gem_extra.split.each { |x| sh "sudo gem install #{x}" }
+    sh "echo \"%_topdir      $HOME/rpmbuild\" >> ~/.rpmmacros"
+    sh "mkdir -p ~/rpmbuild/{BUILD,SOURCES,RPMS,SRPMS,SPECS}"
+  else
+    puts "run _rake config_ first"
+  end
 end
 
 
