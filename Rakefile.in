@@ -120,9 +120,7 @@ end
 desc "Lancia il configure per attivare la modalita' di debug basta mettere come parametro la costante DEBUG"
 task :config, [ :jdb ] do |t, args|
   p_list = load_projects
-  if not File.directory? "#{$src_dir}/#{p_list[0]}"
-    Rake::Task[:projects].execute({:action => "get" })
-  end
+  Rake::Task[:projects].execute({:action => "get" })
   if args[:jdb]=="DEBUG"
     sh "#{$src_dir}/configure  JAVAC_DEBUG=on #{base_config_string}"
   else
