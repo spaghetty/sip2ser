@@ -10,7 +10,7 @@ if [ ! -d "./sip2ser" ]; then
 	cd ..
     else
 	#we probably are in build dir
-	echo "Warn we can't be sure on where we are. if you are in your build dir all ok"
+	echo "Warn we can't be sure on where we are. if you are in your build dir that's ok"
 	cd ..
     fi
 fi
@@ -37,6 +37,19 @@ echo -ne "ruby and rake are necessary "
 system_rake=`whereis rake | awk '{ print $2}'`
 system_ruby=`whereis ruby | awk '{ print $2}'`
 
+echo  "setting up some environments ...."
+
+LIBS=$sip2ser_dir/libs/*
+
+for f in $LIBS
+do
+  dest=$(basename $f)
+  if [[ ! -e $src_dir/$dest ]]; then
+      echo "Processing $f folder..."
+      ln -s $f $src_dir/$dest
+  fi
+done
+
 echo -ne "checking for  availability .....\t\t"
 
 if [[ ! -f $system_rake || ! -f $system_ruby ]]; then
@@ -57,7 +70,7 @@ fi
 echo -ne "autoreconf needed, check for availability .....\t\t"
 
 reconfig_command=`whereis autoreconf | awk '{ print $2}'`
-    
+
 if [[ -f $reconfig_command && ! -z $reconfig_command ]]; then
     echo "OK"
     $reconfig_command -if
@@ -72,6 +85,4 @@ else
         echo "your choose -> $choose <- is considered as no"
 	echo "autoreconf missing: remember to run prereq task and then rerun autoreconfig -if"
     fi
-
-
 fi
