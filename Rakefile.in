@@ -111,7 +111,7 @@ task :create_mak do
         f2.puts("\t#{prj} \\")
       end
     elsif x.include?("{% libs %}")
-      Dir.foreach("#${our_dir}/libs/") do | prj |
+      Dir.foreach("#{$our_dir}/libs/") do | prj |
         next if prj=='.' or prj=='..'
         f2.puts("\t#{prj} \\")
       end
