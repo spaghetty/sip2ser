@@ -11,8 +11,11 @@ s2s = \
 
 all = $(sipx) $(lib) $(s2s)
 
+.PHONY: s2s s2s.%
+
+s2s : s2s.build
 s2s.% : 
-	$(MAKE) $(foreach P,$(s2s),$(P)).$*
+	$(MAKE) $(foreach P,$(s2s),$(P).$*)
 
 
 $(foreach T,$(s2s),$(T)) : % : %.build;
