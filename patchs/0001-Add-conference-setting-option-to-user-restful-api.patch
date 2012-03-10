@@ -1,0 +1,74 @@
+From 59bab036182139051b8f60f938dd8c11debe1681 Mon Sep 17 00:00:00 2001
+From: Domenico Chierico <domenico.chierico@sip2ser.it>
+Date: Sat, 10 Mar 2012 15:09:46 +0100
+Subject: [PATCH] Add conference setting option to user restful api
+
+---
+ .../rest/UserConferenceCommandsResource.java       |   34 +++++++++++++++++++-
+ 1 files changed, 33 insertions(+), 1 deletions(-)
+
+diff --git a/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceCommandsResource.java b/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceCommandsResource.java
+index 0ede48e..5b59180 100644
+--- a/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceCommandsResource.java
++++ b/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceCommandsResource.java
+@@ -16,6 +16,9 @@
+  */
+ package org.sipfoundry.sipxconfig.rest;
+ 
++import java.util.Collection;
++import java.util.Collections;
++
+ import org.apache.commons.lang.StringUtils;
+ import org.restlet.Context;
+ import org.restlet.data.MediaType;
+@@ -26,9 +29,11 @@ import org.restlet.resource.Representation;
+ import org.restlet.resource.ResourceException;
+ import org.restlet.resource.StringRepresentation;
+ import org.restlet.resource.Variant;
++import org.sipfoundry.sipxconfig.admin.commserver.SipxProcessContext;
+ import org.sipfoundry.sipxconfig.conference.ActiveConferenceContext;
+ import org.sipfoundry.sipxconfig.conference.Conference;
+ import org.sipfoundry.sipxconfig.conference.ConferenceBridgeContext;
++import org.sipfoundry.sipxconfig.conference.Bridge;
+ import org.springframework.beans.factory.annotation.Required;
+ 
+ public class UserConferenceCommandsResource extends UserResource {
+@@ -75,7 +80,34 @@ public class UserConferenceCommandsResource extends UserResource {
+             } else {
+                 throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, INCORECT_INVITE_COMMAND);
+             }
+-        }
++        } else if (StringUtils.equals(m_arguments[0], "setstate")) {
++	    Boolean setTo = false;
++	    if (m_arguments.length == 2) {
++		if (StringUtils.equals(m_arguments[1],"enabled")) {
++			setTo = true;
++		} else if (StringUtils.equals(m_arguments[1],"disabled")) {
++			setTo = false;
++		} else {
++		    return new StringRepresentation("<command-response>Wrong Parameter: " +
++						    m_arguments[1] +" Use enabled/disabled</command-response>");
++		}
++		conference.setEnabled(setTo);
++		m_conferenceBridgeContext.store(conference);
++		conference.getBridge().getFreeswitchService().onReload();
++		return new StringRepresentation("<command-response>Conference state changed to: " +
++						conference.isEnabled() +"</command-response>");
++	    } else {
++		return new StringRepresentation("<command-response>Something goes wrong with parameter count</command-response>");
++	    }
++	} else if (StringUtils.equals(m_arguments[0], "setpin")) {
++	    if (m_arguments.length == 2 ) {
++		conference.setSettingValue(Conference.PARTICIPANT_CODE, m_arguments[1]);
++		m_conferenceBridgeContext.store(conference);
++		conference.getBridge().getFreeswitchService().onReload();
++		return new StringRepresentation("<command-response>Pin setted to: " +
++						    m_arguments[1] +"</command-response>");
++	    }
++	}
+         String response = m_activeConferenceContext.executeCommand(conference, m_arguments);
+         return new StringRepresentation(response);
+     }
+-- 
+1.7.4.4
+
