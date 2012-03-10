@@ -1,0 +1,10 @@
+Name Convention
+
+we have:
+
+OrdinalNumbering-PathCode-common-infoname bla blabla.patch
+
+
+so ordinal number give sort capability into patch that are related 0001 come before 0002
+
+the oridinal capability are considered between patch that belongs to the same group indicate by PathCode

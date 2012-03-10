@@ -78,6 +78,7 @@ task :default => :config
 task :test do
   puts $src_dir
   puts $our_dir
+  Rake::Task[:apply_staged].execute()
 end
 
 task :prereq do
@@ -91,7 +92,7 @@ task :build_env do
     Rake::Task[:prereq].invoke()
     sh "make {sipx,lib}.deps-list | grep -v sipx | xargs sudo yum install -y"
     sh "make {sipx,lib}.deps-build-list | grep -v sipx | xargs sudo yum install -y"
-    gem_extra.split.each { |x| sh "sudo gem install #{x}" }
+    gem_extra.split.each { |x| sh "sudo gem install #{x}" } #we need to remove this and start using our rpm
     sh "echo \"%_topdir      $HOME/rpmbuild\" >> ~/.rpmmacros"
     sh "mkdir -p ~/rpmbuild/{BUILD,SOURCES,RPMS,SRPMS,SPECS}"
   else
@@ -149,68 +150,23 @@ task :projects, [:action] do |t, args|
   end
 end
 
-desc "Applica tutte le patch di base nel file default_patch.list"
-task :default_patch, [:action] do |t, args|
-  patchs = "#{$our_dir}/default_patch.list"
-  if args[:action]=="list" 
-    sh "cat #{$patchs}"
-  else
-    file = File.new(patchs, "r")
-    while (line = file.gets)
-      begin
-        Rake::Task[:patch].execute({:patch_set => line.chomp})
-      rescue
-      end
-    end
-    file.close
-  end
+
+# numbering patch is funtamental task consider that 0003 meens that you nust install first 0001 and 0002 to succesfull install this.
+
+
+desc "Managing unstaged patchs" #we have so many hard things to be considered into unstaged stuff.. patch dependencies bla bla bla
+task :apply_unstaged, [:patch] do |t, args|
 end
 
-desc "Applica una patch"
-task :patch, [ :action,  :patch_set ] do |t, args|
-  if args[:action]=="list"
-    temp = Dir.new("#{$our_dir}/patchs").entries
-    temp.delete(".")
-    temp.delete("..")
-    temp.delete("README")
-    text = File.read("#{$our_dir}/default_patch.list")
-    temp.each do |patch|
-      if text =~ /#{patch}/
-        puts patch + " ***"
-      else
-        puts patch 
-      end
+desc "Applica le patch staged"
+task :apply_staged  do 
+  Dir.foreach("#{$our_dir}/staged/") do | f |
+    logger.info("Applico le patch staged")
+    if not File.directory?(f) and f[-5..-1] == "patch"
+      res = sh "patch -N -d#{$src_dir} -p1 < #{$our_dir}/staged/#{f}"
+      logger.info("#{f}: #{res}")
     end
-  else
-    patch_dir = "#{$our_dir}/patchs/#{args[:patch_set]}"
-    logger.info("Applico le patch del set: #{args[:patch_set]}")
-    Dir.foreach(patch_dir) do |f| 
-      if not File.directory?(f) and f[-5..-1] == "patch"
-        res = sh "patch -d#{$src_dir} -p1 < #{patch_dir}/#{f}"
-        logger.info("#{f}: #{res}")
-      end
-    end
-    base_resource = "#{$our_dir}/resources/#{args[:patch_set]}" 
-    Find.find(base_resource) do |f|
-      f.sub!(base_resource,"")
-      #tmp_base = base_resource.sub("../","")
-      tmp_base = "fastdatatel"+base_resource.sub(/(.+)fastdatatel/,"")
-      dir_deep = (f.count("/") >= 1) ? f.count("/")-1 : 0
-      dir_backcursor = "../"*dir_deep
-      if not File.exist? "#{$src_dir}/#{f}"
-        sh "ln -sn #{dir_backcursor}#{tmp_base}#{f} #{$src_dir}#{f}"
-        Find.prune
-      end
-    end
-    Dir.foreach(patch_dir) do |f| 
-      if not File.directory?(f) and f[-4..-1] == "post"
-        if not File.executable?("#{patch_dir}/#{f}")
-          File.chmod(0777, "#{patch_dir}/#{f}")
-        end
-        res = sh "#{patch_dir}/#{f} #{$src_dir} #{$our_dir} #{$build_dir}"
-      end
-    end
-    Rake::Task[:config].invoke()
+    # Rake::Task[:config].invoke() # don't run tasks implicitly into tasks that are called implicitly themselves
   end
 end
 
