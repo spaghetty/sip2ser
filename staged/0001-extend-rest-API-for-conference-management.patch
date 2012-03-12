@@ -1,0 +1,274 @@
+From 4de15610fd56d65690577ff4f083443040465790 Mon Sep 17 00:00:00 2001
+From: Domenico Chierico <domenico.chierico@sip2ser.it>
+Date: Mon, 12 Mar 2012 04:27:46 +0100
+Subject: [PATCH] extend rest API for conference management
+
+---
+ .../rest/UserConferenceCommandsResource.java       |  148 ++++++++++++++++++++
+ .../sipxconfig/rest/UserConferenceResource.java    |   15 ++
+ .../org/sipfoundry/sipxconfig/rest/rest.beans.xml  |    3 +-
+ 3 files changed, 165 insertions(+), 1 deletions(-)
+
+diff --git a/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceCommandsResource.java b/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceCommandsResource.java
+index 0ede48e..f05c64e 100644
+--- a/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceCommandsResource.java
++++ b/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceCommandsResource.java
+@@ -16,6 +16,9 @@
+  */
+ package org.sipfoundry.sipxconfig.rest;
+ 
++import java.io.Serializable;
++import com.thoughtworks.xstream.XStream;
++
+ import org.apache.commons.lang.StringUtils;
+ import org.restlet.Context;
+ import org.restlet.data.MediaType;
+@@ -26,10 +29,12 @@ import org.restlet.resource.Representation;
+ import org.restlet.resource.ResourceException;
+ import org.restlet.resource.StringRepresentation;
+ import org.restlet.resource.Variant;
++import org.sipfoundry.sipxconfig.common.BeanWithId;
+ import org.sipfoundry.sipxconfig.conference.ActiveConferenceContext;
+ import org.sipfoundry.sipxconfig.conference.Conference;
+ import org.sipfoundry.sipxconfig.conference.ConferenceBridgeContext;
+ import org.springframework.beans.factory.annotation.Required;
++import org.sipfoundry.sipxconfig.admin.commserver.SipxProcessContext;
+ 
+ public class UserConferenceCommandsResource extends UserResource {
+     private static final String INVITATION_SENT = "<command-response>Invitation sent</command-response>";
+@@ -37,6 +42,7 @@ public class UserConferenceCommandsResource extends UserResource {
+ 
+     private ConferenceBridgeContext m_conferenceBridgeContext;
+     private ActiveConferenceContext m_activeConferenceContext;
++    private SipxProcessContext m_sipxProcessContext;
+     private String m_confName;
+     private String[] m_arguments;
+ 
+@@ -47,6 +53,7 @@ public class UserConferenceCommandsResource extends UserResource {
+         String argumentList = (String) getRequest().getAttributes().get("command");
+         m_arguments = StringUtils.split(argumentList, '&');
+         getVariants().add(new Variant(MediaType.TEXT_ALL));
++	getVariants().add(new Variant(MediaType.TEXT_XML));
+     }
+ 
+     @Override
+@@ -80,6 +87,61 @@ public class UserConferenceCommandsResource extends UserResource {
+         return new StringRepresentation(response);
+     }
+ 
++    @Override
++    public void storeRepresentation( Representation entity) throws ResourceException {
++	Conference conference = m_conferenceBridgeContext.findConferenceByName(m_confName);
++	if (conference == null) {
++	    throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "conference not found");
++        }
++        if (!(conference.hasOwner() && StringUtils.equals(conference.getOwner().getName(), getUser().getName())) &&
++	    !getUser().isAdmin()) {
++	    throw new ResourceException(Status.CLIENT_ERROR_FORBIDDEN, "User is not owner of this conference " + getUser().getName()+ " " + conference.getOwner().getName() );
++        }
++        if (m_arguments == null || m_arguments.length == 0) {
++            throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "No conference command specified");
++        }
++	if (entity == null) {
++	   throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "No data defined");
++	}
++	if (StringUtils.equals(m_arguments[0], "change")) {
++	    ConferenceRepresentation conferenceRep = new ConferenceRepresentation(entity);
++	    Representable confValue = conferenceRep.getObject();
++	    //if (!confValue.isEnabled()==null) {
++	    conference.setEnabled(confValue.isEnabled());
++		//}
++	    if (StringUtils.isNotBlank(confValue.getName())) {
++		conference.setName(confValue.getName());
++	    }
++	    if (StringUtils.isNotBlank(confValue.getDescription())) {
++		conference.setDescription(confValue.getDescription());
++	    }
++	    if (StringUtils.isNotBlank(confValue.getExtension())) {
++		conference.setExtension(confValue.getExtension());
++	    }
++	    if (StringUtils.isNotBlank(confValue.getParticipantAccessCode())) {
++		conference.setSettingValue(Conference.PARTICIPANT_CODE,
++					   confValue.getParticipantAccessCode());
++	    }
++	    if (StringUtils.isNotBlank(confValue.getOrganizerAccessCode())) {
++		conference.setSettingValue(Conference.ORGANIZER_CODE,
++					   confValue.getOrganizerAccessCode());
++	    }
++	    if (StringUtils.isNotBlank(confValue.getMaxLegs())) {
++		conference.setSettingValue(Conference.MAX_LEGS,
++					   confValue.getMaxLegs());
++	    }
++	    m_conferenceBridgeContext.store(conference);
++	    m_sipxProcessContext.reloadMarkedServices(conference.getBridge().getLocation());
++	    getResponse().setStatus(Status.CLIENT_ERROR_BAD_REQUEST, "done " + StringUtils.isNotBlank(confValue.getDescription()));
++	    //remember to call SipxProcessContext.reloadMarkedSerices
++	}
++    }
++
++    @Required
++    public void setSipxProcessContext(SipxProcessContext sipxProcessContext) {
++	m_sipxProcessContext = sipxProcessContext;
++    }
++
+     @Required
+     public void setConferenceBridgeContext(ConferenceBridgeContext conferenceBridgeContext) {
+         m_conferenceBridgeContext = conferenceBridgeContext;
+@@ -90,6 +152,92 @@ public class UserConferenceCommandsResource extends UserResource {
+         m_activeConferenceContext = activeConferenceContext;
+     }
+ 
++    @SuppressWarnings("serial")
++    static class Representable implements Serializable {
++        @SuppressWarnings("unused")
++        private boolean m_enabled;
++        @SuppressWarnings("unused")
++        private String m_name;
++        @SuppressWarnings("unused")
++        private String m_description;
++        @SuppressWarnings("unused")
++        private String m_extension;
++	@SuppressWarnings("unused")
++	private String m_participantAccessCode;
++	@SuppressWarnings("unused")
++	private String m_organizerAccessCode;
++	@SuppressWarnings("unused")
++	private String m_maxLegs;
++
++        public Representable(Conference conference) {
++            m_enabled = conference.isEnabled();
++            m_name = conference.getName();
++            m_description = conference.getDescription();
++            m_extension = conference.getExtension();
++	    m_participantAccessCode = conference.getParticipantAccessCode();
++	    m_organizerAccessCode = conference.getOrganizerAccessCode();
++	    m_maxLegs = conference.getSettingValue(Conference.MAX_LEGS);
++        }
++
++	public Boolean isEnabled() {
++	    return m_enabled;
++	}
++
++	public String getName() {
++	    return m_name;
++	}
++
++	public String getDescription() {
++	    return m_description;
++	}
++
++	public String getExtension() {
++	    return m_extension;
++	}
++
++	public String getParticipantAccessCode() {
++	    return m_participantAccessCode;
++	}
++
++	public String getOrganizerAccessCode() {
++	    return m_organizerAccessCode;
++	}
++
++	public String getMaxLegs() {
++	    return m_maxLegs;
++	}
++    }
++
++    
++    static class ConferenceRepresentation extends XStreamRepresentation<Representable> {
++        private static final String ID = "m_id";
++        private static final String ENABLED = "enabled";
++        private static final String NAME = "name";
++        private static final String DESCRIPTION = "description";
++        private static final String EXTENSION = "extension";
++	private static final String PARTICIPANT_AC = "participantAccessCode";
++	private static final String ORGANIZER_AC = "organizerAccessCode";
++	private static final String MAX_LEGS = "maxLegs";
++
++        public ConferenceRepresentation(Representation representation) {
++            super(representation);
++        }
++
++        @Override
++        protected void configureXStream(XStream xstream) {
++            xstream.omitField(BeanWithId.class, ID);
++            xstream.alias("conference", Representable.class);
++            xstream.aliasField(ENABLED, Representable.class, ENABLED);
++            xstream.aliasField(NAME, Representable.class, NAME);
++            xstream.aliasField(DESCRIPTION, Representable.class, DESCRIPTION);
++            xstream.aliasField(EXTENSION, Representable.class, EXTENSION);
++	    xstream.aliasField(PARTICIPANT_AC, Representable.class, PARTICIPANT_AC);
++	    xstream.aliasField(ORGANIZER_AC, Representable.class, ORGANIZER_AC);
++	    xstream.aliasField(MAX_LEGS, Representable.class, MAX_LEGS);
++            xstream.omitField(Representable.class, ID);
++        }
++    }
++
+     public String[] getArguments() {
+         return m_arguments;
+     }
+diff --git a/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceResource.java b/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceResource.java
+index 1eadd8d..aa4bbc8 100644
+--- a/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceResource.java
++++ b/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceResource.java
+@@ -73,12 +73,21 @@ public class UserConferenceResource extends UserResource {
+         private String m_description;
+         @SuppressWarnings("unused")
+         private String m_extension;
++	@SuppressWarnings("unused")
++	private String m_participantAccessCode;
++	@SuppressWarnings("unused")
++	private String m_organizerAccessCode;
++	@SuppressWarnings("unused")
++	private String m_maxLegs;
+ 
+         public Representable(Conference conference) {
+             m_enabled = conference.isEnabled();
+             m_name = conference.getName();
+             m_description = conference.getDescription();
+             m_extension = conference.getExtension();
++	    m_participantAccessCode = conference.getParticipantAccessCode();
++	    m_organizerAccessCode = conference.getOrganizerAccessCode();
++	    m_maxLegs = conference.getSettingValue(Conference.MAX_LEGS);
+         }
+     }
+ 
+@@ -88,6 +97,9 @@ public class UserConferenceResource extends UserResource {
+         private static final String NAME = "name";
+         private static final String DESCRIPTION = "description";
+         private static final String EXTENSION = "extension";
++	private static final String PARTICIPANT_AC = "participantAccessCode";
++	private static final String ORGANIZER_AC = "organizerAccessCode";
++	private static final String MAX_LEGS = "maxLegs";
+ 
+         public ConferenceRepresentation(MediaType mediaType, Collection<Representable> object) {
+             super(mediaType, object);
+@@ -106,6 +118,9 @@ public class UserConferenceResource extends UserResource {
+             xstream.aliasField(NAME, Representable.class, NAME);
+             xstream.aliasField(DESCRIPTION, Representable.class, DESCRIPTION);
+             xstream.aliasField(EXTENSION, Representable.class, EXTENSION);
++	    xstream.aliasField(PARTICIPANT_AC, Representable.class, PARTICIPANT_AC);
++	    xstream.aliasField(ORGANIZER_AC, Representable.class, ORGANIZER_AC);
++	    xstream.aliasField(MAX_LEGS, Representable.class, MAX_LEGS);
+             xstream.omitField(Representable.class, ID);
+         }
+     }
+diff --git a/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/rest.beans.xml b/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/rest.beans.xml
+index 589a6eb..66abe4b 100644
+--- a/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/rest.beans.xml
++++ b/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/rest.beans.xml
+@@ -205,9 +205,10 @@
+     <property name="coreContext" ref="coreContext" />
+     <property name="conferenceBridgeContext" ref="conferenceBridgeContext" />
+     <property name="activeConferenceContext" ref="activeConferenceContext" />
++    <property name="sipxProcessContext" ref="sipxProcessContext" />
+     <property name="available" value="true" />
+     <property name="readable" value="true" />
+-    <property name="modifiable" value="false" />
++    <property name="modifiable" value="true" />
+   </bean>
+   <alias name="conferenceCommandsResource" alias="/my/conference/{confName}/{command}" />
+ 
+-- 
+1.7.4.4
+
