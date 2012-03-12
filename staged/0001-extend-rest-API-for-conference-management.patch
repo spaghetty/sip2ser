@@ -1,16 +1,16 @@
-From 4de15610fd56d65690577ff4f083443040465790 Mon Sep 17 00:00:00 2001
+From eacfe1618dabf5a6fac74828f8324085cd5b584a Mon Sep 17 00:00:00 2001
 From: Domenico Chierico <domenico.chierico@sip2ser.it>
-Date: Mon, 12 Mar 2012 04:27:46 +0100
+Date: Mon, 12 Mar 2012 06:35:19 +0100
 Subject: [PATCH] extend rest API for conference management
 
 ---
- .../rest/UserConferenceCommandsResource.java       |  148 ++++++++++++++++++++
+ .../rest/UserConferenceCommandsResource.java       |  148 +++++++++++++++++++-
  .../sipxconfig/rest/UserConferenceResource.java    |   15 ++
  .../org/sipfoundry/sipxconfig/rest/rest.beans.xml  |    3 +-
- 3 files changed, 165 insertions(+), 1 deletions(-)
+ 3 files changed, 164 insertions(+), 2 deletions(-)
 
 diff --git a/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceCommandsResource.java b/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceCommandsResource.java
-index 0ede48e..f05c64e 100644
+index 0ede48e..59b239f 100644
 --- a/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceCommandsResource.java
 +++ b/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceCommandsResource.java
 @@ -16,6 +16,9 @@
@@ -52,7 +52,7 @@ index 0ede48e..f05c64e 100644
      }
  
      @Override
-@@ -80,6 +87,61 @@ public class UserConferenceCommandsResource extends UserResource {
+@@ -80,6 +87,60 @@ public class UserConferenceCommandsResource extends UserResource {
          return new StringRepresentation(response);
      }
  
@@ -75,9 +75,9 @@ index 0ede48e..f05c64e 100644
 +	if (StringUtils.equals(m_arguments[0], "change")) {
 +	    ConferenceRepresentation conferenceRep = new ConferenceRepresentation(entity);
 +	    Representable confValue = conferenceRep.getObject();
-+	    //if (!confValue.isEnabled()==null) {
++
 +	    conference.setEnabled(confValue.isEnabled());
-+		//}
++
 +	    if (StringUtils.isNotBlank(confValue.getName())) {
 +		conference.setName(confValue.getName());
 +	    }
@@ -101,8 +101,7 @@ index 0ede48e..f05c64e 100644
 +	    }
 +	    m_conferenceBridgeContext.store(conference);
 +	    m_sipxProcessContext.reloadMarkedServices(conference.getBridge().getLocation());
-+	    getResponse().setStatus(Status.CLIENT_ERROR_BAD_REQUEST, "done " + StringUtils.isNotBlank(confValue.getDescription()));
-+	    //remember to call SipxProcessContext.reloadMarkedSerices
++	    getResponse().setStatus(Status.SUCCESS_OK, "changed done");
 +	}
 +    }
 +
@@ -114,7 +113,7 @@ index 0ede48e..f05c64e 100644
      @Required
      public void setConferenceBridgeContext(ConferenceBridgeContext conferenceBridgeContext) {
          m_conferenceBridgeContext = conferenceBridgeContext;
-@@ -90,6 +152,92 @@ public class UserConferenceCommandsResource extends UserResource {
+@@ -90,7 +151,92 @@ public class UserConferenceCommandsResource extends UserResource {
          m_activeConferenceContext = activeConferenceContext;
      }
  
@@ -174,7 +173,6 @@ index 0ede48e..f05c64e 100644
 +	}
 +    }
 +
-+    
 +    static class ConferenceRepresentation extends XStreamRepresentation<Representable> {
 +        private static final String ID = "m_id";
 +        private static final String ENABLED = "enabled";
@@ -207,6 +205,9 @@ index 0ede48e..f05c64e 100644
      public String[] getArguments() {
          return m_arguments;
      }
+-}
++}
+\ No newline at end of file
 diff --git a/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceResource.java b/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceResource.java
 index 1eadd8d..aa4bbc8 100644
 --- a/sipXconfig/web/src/org/sipfoundry/sipxconfig/rest/UserConferenceResource.java
