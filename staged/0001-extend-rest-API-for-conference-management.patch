@@ -64,7 +64,7 @@ index 0ede48e..59b239f 100644
 +        }
 +        if (!(conference.hasOwner() && StringUtils.equals(conference.getOwner().getName(), getUser().getName())) &&
 +	    !getUser().isAdmin()) {
-+	    throw new ResourceException(Status.CLIENT_ERROR_FORBIDDEN, "User is not owner of this conference " + getUser().getName()+ " " + conference.getOwner().getName() );
++	    throw new ResourceException(Status.CLIENT_ERROR_FORBIDDEN, "User is not owner of this conference ");
 +        }
 +        if (m_arguments == null || m_arguments.length == 0) {
 +            throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "No conference command specified");
