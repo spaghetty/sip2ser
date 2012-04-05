@@ -1,0 +1,125 @@
+From a725c8fab5ddce930b24c6f2bf6c8d40895aa738 Mon Sep 17 00:00:00 2001
+From: Domenico Chierico <domenico.chierico@sip2ser.it>
+Date: Thu, 5 Apr 2012 02:03:20 +0200
+Subject: [PATCH] (XX-9113) added more filters
+
+---
+ .../org/sipfoundry/sipxconfig/cdr/CdrSearch.java   |   39 ++++++++++++++++----
+ .../web/context/WEB-INF/cdr/CdrFilter.properties   |    4 ++
+ .../context/WEB-INF/cdr/CdrFilter_it.properties    |    4 ++
+ 3 files changed, 40 insertions(+), 7 deletions(-)
+
+diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
+index 3472d91..e40d88f 100644
+--- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
++++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
+@@ -21,6 +21,7 @@ public class CdrSearch {
+     public static final String CLOSED_PARANTHESIS = ")"; //  Closed paranthesis
+     public static final String AND = " AND ";
+     public static final String OR = " OR ";
++    public static final String NOT = " NOT ";
+     public static final String SINGLE_QUOTE = "'";
+     public static final String LIKE_WITH_WILDCARD = " LIKE '%";
+     public static final String EQUALS_SQM = "='";
+@@ -36,7 +37,7 @@ public class CdrSearch {
+     }
+ 
+     public enum Mode {
+-        NONE, CALLER, CALLEE, ANY
++        NONE, CALLER, CALLEE, INTCALLER, INTCALLEE, EXTCALLER, EXTCALLEE, ANY
+     }
+ 
+     private Mode m_mode = Mode.NONE;
+@@ -83,18 +84,12 @@ public class CdrSearch {
+         sql.append(OPEN_PARANTHESIS);
+         sql.append(CdrManagerImpl.CALLER_AOR);
+         appendSearchTermSql(sql);
+-        sql.append(AND);
+-        sql.append(CdrManagerImpl.CALLER_INTERNAL);
+-        sql.append("=true)");
+     }
+ 
+     private void appendCalleeSql(StringBuilder sql) {
+         sql.append(OPEN_PARANTHESIS);
+         sql.append(CdrManagerImpl.CALLEE_AOR);
+         appendSearchTermSql(sql);
+-        sql.append(AND);
+-        appendCalleeInternalRouteSql(sql);
+-        sql.append(CLOSED_PARANTHESIS);
+     }
+ 
+     private void appendCalleeInternalRouteSql(StringBuilder sql) {
+@@ -139,13 +134,43 @@ public class CdrSearch {
+         case CALLER:
+             sql.append(AND);
+             appendCallerSql(sql);
++	    sql.append(CLOSED_PARANTHESIS);
+             break;
+         case CALLEE:
+             sql.append(AND);
+             appendCalleeSql(sql);
+             break;
++	case INTCALLER:
++	    sql.append(AND);
++	    appendCallerSql(sql);
++	    sql.append(AND);
++	    sql.append(CdrManagerImpl.CALLER_INTERNAL);
++	    sql.append("=true)");
++	    break;
++	case INTCALLEE:
++	    sql.append(AND);
++	    appendCalleeSql(sql);
++	    sql.append(AND);
++	    appendCalleeInternalRouteSql(sql);
++	    sql.append(CLOSED_PARANTHESIS);
++	    break;
++	case EXTCALLER:
++	    sql.append(AND);
++	    appendCallerSql(sql);
++	    sql.append(AND);
++	    sql.append(CdrManagerImpl.CALLER_INTERNAL);
++	    sql.append("=false)");
++	    break;
++	case EXTCALLEE:
++	    sql.append(AND);
++	    appendCalleeSql(sql);
++	    sql.append(AND);
++	    appendCalleeInternalRouteSql(sql);
++	    sql.append(CLOSED_PARANTHESIS);
++	    break;
+         case ANY:
+             sql.append(AND);
++	    sql.append(NOT);
+             sql.append(OPEN_PARANTHESIS);
+             appendCallerSql(sql);
+             sql.append(OR);
+diff --git a/sipXconfig/web/context/WEB-INF/cdr/CdrFilter.properties b/sipXconfig/web/context/WEB-INF/cdr/CdrFilter.properties
+index 645fb55..2a80855 100644
+--- a/sipXconfig/web/context/WEB-INF/cdr/CdrFilter.properties
++++ b/sipXconfig/web/context/WEB-INF/cdr/CdrFilter.properties
+@@ -3,4 +3,8 @@ filter.CALLER=From
+ filter.CALLEE=To
+ filter.ANY=From or To
+ filter.NONE=- all -
++filter.INTCALLER=(Int) From
++filter.INTCALLEE=(Int) To
++filter.EXTCALLER=(Ext) From
++filter.EXTCALLEE=(Ext) To
+ title=CDR filter
+\ No newline at end of file
+diff --git a/sipXconfig/web/context/WEB-INF/cdr/CdrFilter_it.properties b/sipXconfig/web/context/WEB-INF/cdr/CdrFilter_it.properties
+index ff2b2f1..9daebbe 100644
+--- a/sipXconfig/web/context/WEB-INF/cdr/CdrFilter_it.properties
++++ b/sipXconfig/web/context/WEB-INF/cdr/CdrFilter_it.properties
+@@ -4,4 +4,8 @@ filter.ANY=Da o A
+ filter.CALLEE=A
+ filter.CALLER=Da
+ filter.NONE=- tutte -
++filter.INTCALLER=Da interno
++filter.INTCALLEE=A interno
++filter.EXTCALLER=Da esterno
++filter.EXTCALLEE=A esterno
+ label.filter=Filtra per...
+-- 
+1.7.4.4
+
