@@ -1,0 +1,73 @@
+From cb431afede7f05ef2f480e61cb1006e0fb0acf04 Mon Sep 17 00:00:00 2001
+From: amatig <amatig@gmail.com>
+Date: Fri, 7 Oct 2011 11:25:22 +0200
+Subject: [PATCH] proxy port new patch
+
+---
+ sipXproxy/src/sipXproxymain.cpp |   29 ++++++++++++++++++++++++++++-
+ 1 files changed, 28 insertions(+), 1 deletions(-)
+
+diff --git a/sipXproxy/src/sipXproxymain.cpp b/sipXproxy/src/sipXproxymain.cpp
+index d5444d9..56bfc95 100644
+--- a/sipXproxy/src/sipXproxymain.cpp
++++ b/sipXproxy/src/sipXproxymain.cpp
+@@ -35,6 +35,7 @@
+ #include <ForwardRules.h>
+ 
+ #include <SipXProxyCseObserver.h>
++#include <SipXProxyCstaObserver.h>
+ #include "config.h"
+ 
+ //uncomment next line to enable bound checker checking with 'b' key
+@@ -91,6 +92,8 @@ static const char* CALL_STATE_DATABASE_USER =
+ static const char* CALL_STATE_DATABASE_DRIVER =
+    "{PostgreSQL}";
+ static const char* PROXY_CONFIG_PREFIX = "SIPX_PROXY";
++static const char* CONFIG_SETTING_CTI_PORT =
++  "FDT_PROXY_ENABLE_CTI_PORT";
+ 
+ // STRUCTS
+ // TYPEDEFS
+@@ -702,6 +705,7 @@ proxy( int argc, char* argv[] )
+ 
+     // Create the CSE observer, either writing to file or database
+     SipXProxyCseObserver* cseObserver = NULL;
++    SipXProxyCstaObserver* cstaObserver = NULL;
+     CallStateEventWriter* pEventWriter = NULL;    
+     if (enableCallStateLogObserver)
+     {
+@@ -715,7 +719,30 @@ proxy( int argc, char* argv[] )
+                                                   callStateDbUserName,
+                                                   callStateDbDriver);      
+     }                                            
+-       
++
++    int ctiPort;
++    ctiPort = configDb.getPort(CONFIG_SETTING_CTI_PORT);
++    OsSysLog::add(FAC_SIP, PRI_INFO,
++                  "SipXProxyCstaObserver:: Port: %d", ctiPort
++                  );
++    if (!portIsValid(ctiPort))
++    {
++	OsSysLog::add(FAC_SIP, PRI_INFO,
++		      "SipXProxyCstaObserver:: problem reading port!"
++		      );
++    }
++    else
++    {
++      OsSysLog::add(FAC_SIP, PRI_INFO,
++		    "SipXProxyCstaObserver:: Enabled... starting"
++		    );
++      cstaObserver = new SipXProxyCstaObserver(*pSipUserAgent, ctiPort);
++      cstaObserver->start();
++      OsSysLog::add(FAC_SIP, PRI_INFO,
++		    "SipXProxyCstaObserver:: ok"
++		    );
++    }
++
+     if (pEventWriter)
+     {
+        // get the identifier for this observer
+-- 
+1.7.4.4
+
