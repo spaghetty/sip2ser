@@ -1,0 +1,24 @@
+From ba9d71cf0d9c28ea905e3643136315035a8e151b Mon Sep 17 00:00:00 2001
+From: Domenico Chierico <spaghetty@gmail.com>
+Date: Wed, 18 May 2011 10:04:37 +0200
+Subject: [PATCH 2/3] add fdtcti in sipxproxy.properties
+
+---
+ .../neoconf/etc/sipxproxy/sipxproxy.properties     |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/sipXconfig/neoconf/etc/sipxproxy/sipxproxy.properties b/sipXconfig/neoconf/etc/sipxproxy/sipxproxy.properties
+index 370f111..422eb03 100644
+--- a/sipXconfig/neoconf/etc/sipxproxy/sipxproxy.properties
++++ b/sipXconfig/neoconf/etc/sipxproxy/sipxproxy.properties
+@@ -19,6 +19,7 @@ proxy-configuration.SIPX_PROXY_DIALOG_SUBSCRIBE_AUTHENTICATION.description=Warni
+ proxy-configuration.SIP_PORT.label=SIP Port
+ proxy-configuration.TLS_SIP_PORT.label=TLS SIP Port
+ proxy-configuration.ENABLE_BRIDGE_PROXY_RELAY.label=Enable bridge-proxy relay
++proxy-configuration.FDT_PROXY_ENABLE_CTI_PORT.label=FDT Cti Link Port 
+ 
+ proxy-configuration.alert-info.label=Alert-Info
+ proxy-configuration.alert-info.description=The Alert-Info header field can trigger alternate ringer sounds on many \
+-- 
+1.7.4.2
+
