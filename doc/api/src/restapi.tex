@@ -1,0 +1,142 @@
+\section{Introduzione}
+
+Le API di tipo rest\footnote{http://www.restlet.org/} sono oramai diventate uno standard ``de facto'' per l'accesso servizi web.
+Questo tipo di tecnologia sostituisce alle piu tradizionali API strutturate come collezioni di funzioni, una costituita da una collezione di URL attivabili attraverso protocollo http.
+
+\section{Overview}
+
+L'accesso remoto ai servizi di OpSip si struttura in quattro macrogruppi:
+
+\medskip
+
+\begin{tabular}{l |l}
+contesto & punto di accesso \\
+\hline
+servizi di amministrazione & \texttt{https://host.example.com:8443/sipxconfig/rest} \\
+servizi utente & \texttt{https://host.example.com:8443/sipxconfig/rest/my} \\
+servizi di chiamata & \texttt{https://host.example.com:6666/callcontroller/} \\
+servizi CDR & \texttt{https://host.examle.com:6666/cdr/} \\
+\end{tabular}
+
+\medskip
+
+ogniuno di questi contesti offre particolari funzionalit\'a di controllo e gestione.
+
+\section{Servizi di Amministrazione}
+
+Per utilizzare queste funzioni dell'API \'e necessario avere le credenziali di un utente con permessi di amministratore.
+Le funzioni consultano solo strutture di configurazione globali.
+
+Il portotipo dell'url da chiamare \'e indicato di seguito:
+\bigskip
+
+\texttt{https://<username>:<passwd>@<host>:8443/sipxconfig/rest/}
+
+\bigskip
+
+Come esempio d'uso vediamo la chiamata alla funzione ``phonebook''\footnote{come tool di test useremo \texttt{curl} che supporta tutte i metodi http(http://curl.haxx.se/)}:
+\bigskip
+
+\begin{lstlisting}
+>> curl --digest -k -X GET "https://admin:123@host:8443/sipxconfig/rest/phonebook"
+<< <?xml version="1.0" encoding="UTF-8"?>
+       <phonebooks>
+           <phonebook name="meeting_planner"/>
+       </phonebooks>
+\end{lstlisting}
+
+\bigskip
+
+\begin{tabular}[c]{l | c || l || p{5cm}}
+Function Name & Parameters & Http Method & Notes \\
+\hline \hline
+\texttt{/phonebook} & & GET & Ritorna una lista (XML) con tutte le rubriche telefoniche definite nel sistema \\
+\hline 
+\texttt{/phonebook} & {name} & GET  & Ritorna una lista (CSV) degli elementi della lista \\
+\hline
+\end{tabular}
+
+\section{Servizi Utente}
+
+Questa parte specifica di API si rivolge invece alle configurazioni specifiche di un utente e delle sue risorse.
+Il meccanismo e sempre il medesimo e nella richiesta la particella ``my'' aiuta a raggruppare visivamente queste funzionalita'.
+\bigskip
+
+\begin{tabular}[c]{l | c || l || p{5cm}}
+Function Name & Parameters & Http Method & Notes \\
+\hline \hline
+\texttt{/my/call/} & {to} & PUT/GET & Iniza una chiamata dall'untete che si autentica verso il numero specificato nel {to}.\\ \hline
+\texttt{/my/voicemail/pin/} & {pin} & PUT & Cambia il personal PIN (sia quello della voice mail che quello del portale utente).\\ \hline
+\texttt{/my/conferences} & & GET & restituisce l'elenco delle stanze di conferenza associate allo specifico utente. \\ \hline
+\texttt{/my/conference/\emph{name}/change} & & PUT & Cambia lo stato di una conferenza. \\ \hline
+\texttt{/my/logindetails} & & GET & restituisce l'username reale di un alias. Ad esempio se si cerca di fare login usando l'alias \\ \hline
+\end{tabular}
+
+\bigskip
+Alcuni esempi d'uso sono:
+\bigskip
+
+\begin{lstlisting}
+>>curl --digest -k -X GET "https://<us>:<pw>@<host>:8443/sipxconfig/rest/my/conferences"
+<<<conferences>
+  <conference>
+    <enabled>false</enabled>
+    <name>StanzaTest2</name>
+    <description>prova description dfslfksmdfl</description>
+    <extension>65665</extension>
+    <participantAccessCode>04344</participantAccessCode>
+    <maxLegs>3</maxLegs>
+  </conference>
+  <conference>
+    <enabled>true</enabled>
+    <name>StanzaTest</name>
+    <description>dfafdas</description>
+    <extension>2053</extension>
+    <participantAccessCode>1111</participantAccessCode>
+    <maxLegs>2</maxLegs>
+  </conference>
+\end{lstlisting}
+\bigskip
+
+Il cambio del pin:
+\bigskip
+\begin{lstlisting}
+>> curl --digest -k -X PUT ``https://<us>:<pw>@<host>:8443/sipxconfig/rest/my/voicemail/pin/123''
+\end{lstlisting}
+\bigskip
+
+questo imposter\`a il pin utente a ``123''
+\bigskip
+\begin{lstlisting}
+>> curl --digest -k -X PUT ``https://<us>:<pw>@<host>:8443/sipxconfig/rest/my/conference/ppp/change'' --data-binary ``<conference><name>ppp</name><enabled>true</enabled></conference>
+\end{lstlisting}
+
+\subsection{Gestione Conference}
+
+Questa parte di API \'e una sottosezione della parte interente ai ``Servizi Utente'' ed \`e relativa al controllo/gestione delle conference 
+\textbf{attive}\footnote{con attive ci si riferisce ad una conferenza in cui \'e gia presente almeno 1 partecipante}
+questo insieme di funzioni \'e raggiungibile sotto l'url:
+
+\bigskip
+
+\texttt{https://<us>:<pw>@<host>:8443/sipxconfig/rest/my/conference/\emph{name}/}
+
+dove ``name'' indica il nome identificativo della conferenza a cui faranno riferimento i comandi.
+
+\bigskip
+
+\begin{tabular}[c]{l | c || l || p{5cm}}
+Function Name & Parameters & Http Method & Notes \\
+\hline \hline
+\texttt{list} & & PUT/GET & elenca gli utenti presenti nella conferenza specificata.\\ \hline
+\texttt{xml\_list} & & PUT/GET & genera il medesimo elenco di ``list'' ma in formato xml. \\ \hline
+\texttt{kick} & memberid (all|last) & PUT/GET & disconnette gli utenti indicati. \\ \hline
+\texttt{mute} & memberid (all|last) & PUT/GET & attiva il mute sugli utenti indicati. \\ \hline
+\texttt{unmute} & memberid (all|last) & PUT/GET & disattiva il mute sugli utenti indicati. \\ \hline
+\texttt{deaf} & memberid (all|last) & PUT/GET & inibisce la possibilit\'a di ascoltare agli utenti indicati. \\ \hline
+\texttt{undeaf} & memberid (all|last) & PUT/GET & attiva la possibilit\'a di ascoltare agli utenti indicati. \\ \hline
+\texttt{lock} & & PUT/GET & blocca una conferenza in modo che nessun altro partecipante possa entrare. \\ \hline
+\texttt{unlock} & & PUT/GET & sblocca una conferenza in modo che altri partecipanti possano entrare. \\ \hline
+
+
+\end{tabular}

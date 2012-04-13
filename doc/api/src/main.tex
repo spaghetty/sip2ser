@@ -1,0 +1,28 @@
+%this is the main template for tecnical docs 
+
+\documentclass{article}
+\usepackage[english,italian]{babel}
+\usepackage{fancyhdr,graphicx}
+\usepackage{listings}
+\graphicspath{{../img/}}
+\fancyhead[L]{}
+\fancyhead[R]{
+S2S\emph{Documentation Project}
+\includegraphics[width=0.7cm]{company-logo.png}
+}
+\setlength{\parindent}{0pt} 
+\lstset{
+         basicstyle=\footnotesize\ttfamily,
+         breaklines=true,
+}
+
+
+\input{authoring.tex}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+\input{contents.tex}
+
+\end{document}
