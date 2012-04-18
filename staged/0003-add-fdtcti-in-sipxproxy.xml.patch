@@ -1,0 +1,29 @@
+From 23c50eb3ef412caea9b847b68794ad2c83d36c5c Mon Sep 17 00:00:00 2001
+From: Domenico Chierico <spaghetty@gmail.com>
+Date: Wed, 18 May 2011 10:05:21 +0200
+Subject: [PATCH 3/3] add fdtcti in sipxproxy.xml
+
+---
+ sipXconfig/neoconf/etc/sipxproxy/sipxproxy.xml |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+diff --git a/sipXconfig/neoconf/etc/sipxproxy/sipxproxy.xml b/sipXconfig/neoconf/etc/sipxproxy/sipxproxy.xml
+index 41c60dc..099cb22 100644
+--- a/sipXconfig/neoconf/etc/sipxproxy/sipxproxy.xml
++++ b/sipXconfig/neoconf/etc/sipxproxy/sipxproxy.xml
+@@ -79,6 +79,12 @@
+       </type>
+       <value>5061</value>
+     </setting>
++    <setting name="FDT_PROXY_ENABLE_CTI_PORT">
++      <type>
++        <integer />
++      </type>
++      <value>8731</value>
++    </setting>
+     <setting name="ENABLE_BRIDGE_PROXY_RELAY" advanced="yes">
+       <type>
+         <boolean>
+-- 
+1.7.4.2
+
