@@ -15,7 +15,7 @@ index 370f111..422eb03 100644
  proxy-configuration.SIP_PORT.label=SIP Port
  proxy-configuration.TLS_SIP_PORT.label=TLS SIP Port
  proxy-configuration.ENABLE_BRIDGE_PROXY_RELAY.label=Enable bridge-proxy relay
-+proxy-configuration.FDT_PROXY_ENABLE_CTI_PORT.label=FDT Cti Link Port 
++proxy-configuration.PROXY_ENABLE_CTI_PORT.label=S2S Cti Link Port 
  
  proxy-configuration.alert-info.label=Alert-Info
  proxy-configuration.alert-info.description=The Alert-Info header field can trigger alternate ringer sounds on many \

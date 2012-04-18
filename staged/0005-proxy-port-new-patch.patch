@@ -24,7 +24,7 @@ index d5444d9..56bfc95 100644
     "{PostgreSQL}";
  static const char* PROXY_CONFIG_PREFIX = "SIPX_PROXY";
 +static const char* CONFIG_SETTING_CTI_PORT =
-+  "FDT_PROXY_ENABLE_CTI_PORT";
++  "PROXY_ENABLE_CTI_PORT";
  
  // STRUCTS
  // TYPEDEFS
