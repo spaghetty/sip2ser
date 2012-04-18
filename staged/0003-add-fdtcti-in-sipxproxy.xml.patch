@@ -15,7 +15,7 @@ index 41c60dc..099cb22 100644
        </type>
        <value>5061</value>
      </setting>
-+    <setting name="FDT_PROXY_ENABLE_CTI_PORT">
++    <setting name="PROXY_ENABLE_CTI_PORT">
 +      <type>
 +        <integer />
 +      </type>
