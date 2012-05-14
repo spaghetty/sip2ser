@@ -1,0 +1,24 @@
+From dce6fd85197fe4116e83872794fdca482971b7fe Mon Sep 17 00:00:00 2001
+From: Domenico Chierico <domenico.chierico@sip2ser.it>
+Date: Wed, 2 May 2012 23:41:24 +0200
+Subject: [PATCH] fix sipxconfig-agent require issue
+
+---
+ sipXconfig/agent/bin/sipxconfig-agent.in |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/sipXconfig/agent/bin/sipxconfig-agent.in b/sipXconfig/agent/bin/sipxconfig-agent.in
+index 1e730fa..3a45704 100644
+--- a/sipXconfig/agent/bin/sipxconfig-agent.in
++++ b/sipXconfig/agent/bin/sipxconfig-agent.in
+@@ -69,6 +69,7 @@ load_config_properties
+ parse(ARGV)
+ 
+ require 'rubygems'
++gem 'sipXconfig-agent'
+ require 'main'
+ 
+ pid=File.open('@SIPX_RUNDIR@/sipxconfig-agent.pid', 'w')
+-- 
+1.7.4.4
+
