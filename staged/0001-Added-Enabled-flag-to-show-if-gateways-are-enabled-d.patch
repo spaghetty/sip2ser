@@ -1,0 +1,53 @@
+From 86d376ae43256670e81e7a7eff9e081fb7c0d108 Mon Sep 17 00:00:00 2001
+From: admin <admin@testhost.opsip.local>
+Date: Tue, 7 Feb 2012 11:09:59 +0100
+Subject: [PATCH] Added Enabled flag to show if gateways are enabled/disabled
+
+---
+ .../web/context/WEB-INF/gateway/GatewayTable.html  |    3 +++
+ .../web/context/WEB-INF/gateway/GatewayTable.jwc   |    2 +-
+ .../WEB-INF/gateway/GatewayTable.properties        |    1 +
+ 3 files changed, 5 insertions(+), 1 deletions(-)
+
+diff --git a/sipXconfig/web/context/WEB-INF/gateway/GatewayTable.html b/sipXconfig/web/context/WEB-INF/gateway/GatewayTable.html
+index 20b4d29..99d3b7f 100644
+--- a/sipXconfig/web/context/WEB-INF/gateway/GatewayTable.html
++++ b/sipXconfig/web/context/WEB-INF/gateway/GatewayTable.html
+@@ -5,6 +5,9 @@
+ 		</span>
+ 		<span jwcid="editRowLink"><span jwcid="nameText"/></span>
+ 	</span>
++	<span jwcid="enabledColumnValue@Block">
++	  <span jwcid="@common/EnabledColumn" value="ognl:currentRow.enabled"/>
++	</span>
+ 	<span jwcid="modelColumnValue@Block">
+ 		<span jwcid="@Insert" value="ognl:currentRow.model.label"/>
+ 	</span>
+diff --git a/sipXconfig/web/context/WEB-INF/gateway/GatewayTable.jwc b/sipXconfig/web/context/WEB-INF/gateway/GatewayTable.jwc
+index ccfe9e0..58549ac 100644
+--- a/sipXconfig/web/context/WEB-INF/gateway/GatewayTable.jwc
++++ b/sipXconfig/web/context/WEB-INF/gateway/GatewayTable.jwc
+@@ -11,7 +11,7 @@
+   <property name="selections" />
+   <!-- C O M P O N E N T S -->
+   <component id="table" type="common/Table">
+-    <binding name="columns" value="literal:* name,address,site,model,description" />
++    <binding name="columns" value="literal:* name,enabled,address,site,model,description" />
+     <binding name="source" value="gatewayCollection" />
+     <binding name="row" value="currentRow" />
+     <binding name="selections" value="selections" />
+diff --git a/sipXconfig/web/context/WEB-INF/gateway/GatewayTable.properties b/sipXconfig/web/context/WEB-INF/gateway/GatewayTable.properties
+index 5559a3b..988541d 100644
+--- a/sipXconfig/web/context/WEB-INF/gateway/GatewayTable.properties
++++ b/sipXconfig/web/context/WEB-INF/gateway/GatewayTable.properties
+@@ -1,5 +1,6 @@
+ # 'name' and 'description' translations are in application bundle (sipXconfig-web.properties) 
+ address=Address
++enabled=Enabled
+ model=Model
+ site=Location
+ all=All
+\ No newline at end of file
+-- 
+1.7.4.4
+
