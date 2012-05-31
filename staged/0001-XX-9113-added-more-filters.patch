@@ -34,6 +34,7 @@ index 3472d91..e40d88f 100644
          sql.append(OPEN_PARANTHESIS);
          sql.append(CdrManagerImpl.CALLER_AOR);
          appendSearchTermSql(sql);
+	 sql.append(CLOSED_PARANTHESIS);
 -        sql.append(AND);
 -        sql.append(CdrManagerImpl.CALLER_INTERNAL);
 -        sql.append("=true)");
@@ -45,7 +46,6 @@ index 3472d91..e40d88f 100644
          appendSearchTermSql(sql);
 -        sql.append(AND);
 -        appendCalleeInternalRouteSql(sql);
--        sql.append(CLOSED_PARANTHESIS);
      }
  
      private void appendCalleeInternalRouteSql(StringBuilder sql) {
