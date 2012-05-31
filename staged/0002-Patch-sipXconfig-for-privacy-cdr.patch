@@ -1,0 +1,66 @@
+From 073387fa738b430660a59151f36d4be22bd30339 Mon Sep 17 00:00:00 2001
+From: amatig <amatig@gmail.com>
+Date: Wed, 26 Jan 2011 12:07:36 +0100
+Subject: [PATCH] Patch sipXconfig for privacy cdr
+
+---
+ .../etc/sipxcallresolver/callresolver-config.vm    |    2 ++
+ .../sipxcallresolver/sipxcallresolver.properties   |    7 +++++++
+ .../etc/sipxcallresolver/sipxcallresolver.xml      |   12 ++++++++++++
+ 3 files changed, 21 insertions(+), 0 deletions(-)
+
+diff --git a/sipXconfig/neoconf/etc/sipxcallresolver/callresolver-config.vm b/sipXconfig/neoconf/etc/sipxcallresolver/callresolver-config.vm
+index 572f4e3..c748c30 100644
+--- a/sipXconfig/neoconf/etc/sipxcallresolver/callresolver-config.vm
++++ b/sipXconfig/neoconf/etc/sipxcallresolver/callresolver-config.vm
+@@ -4,6 +4,8 @@ SIP_CALLRESOLVER_LOG_LEVEL : $settings.getSetting('SIP_CALLRESOLVER_LOG_LEVEL').
+ SIP_CALLRESOLVER_PURGE : $settings.getSetting('SIP_CALLRESOLVER_PURGE').Value
+ SIP_CALLRESOLVER_PURGE_AGE_CDR : $settings.getSetting('SIP_CALLRESOLVER_PURGE_AGE_CDR').Value
+ SIP_CALLRESOLVER_PURGE_AGE_CSE : $settings.getSetting('SIP_CALLRESOLVER_PURGE_AGE_CSE').Value
++SIP_CALLRESOLVER_PRIVACY : $settings.getSetting('SIP_CALLRESOLVER_PRIVACY').Value
++SIP_CALLRESOLVER_PRIVACY_EXT : $settings.getSetting('SIP_CALLRESOLVER_PRIVACY_EXT').Value
+ SIP_CALLRESOLVER_CSE_POLLING_INTERVAL : 10
+ SIP_CALLRESOLVER_CALL_DIRECTION : $settings.getSetting('SIP_CALLRESOLVER_CALL_DIRECTION').Value
+ SIP_CALLRESOLVER_AGENT_PORT : ${callresolverService.agentPort}
+diff --git a/sipXconfig/neoconf/etc/sipxcallresolver/sipxcallresolver.properties b/sipXconfig/neoconf/etc/sipxcallresolver/sipxcallresolver.properties
+index 2cbb5af..de85bb9 100644
+--- a/sipXconfig/neoconf/etc/sipxcallresolver/sipxcallresolver.properties
++++ b/sipXconfig/neoconf/etc/sipxcallresolver/sipxcallresolver.properties
+@@ -27,3 +27,10 @@ callresolver.SIP_CALLRESOLVER_CALL_DIRECTION.label=Call direction
+ callresolver.SIP_CALLRESOLVER_CALL_DIRECTION.description=Compute call direction. Call direction labels calls as incoming, outgoing, or \
+  intra-network based on whether the call came from a PSTN gateway, went to a PSTN gateway, \
+  or neither, respectively.
++
++callresolver.SIP_CALLRESOLVER_PRIVACY.label=Enable Privacy
++callresolver.SIP_CALLRESOLVER_PRIVACY.description=This enable the hiding of last 3 digit into outogoing dialed numb\
++ers. This is for privacy reasons.
++callresolver.SIP_CALLRESOLVER_PRIVACY_EXT.label=Privacy extension
++callresolver.SIP_CALLRESOLVER_PRIVACY_EXT.description=Extentions to be mask into cdr separate from space. This need\
++ed for privacy stuff.
+\ No newline at end of file
+diff --git a/sipXconfig/neoconf/etc/sipxcallresolver/sipxcallresolver.xml b/sipXconfig/neoconf/etc/sipxcallresolver/sipxcallresolver.xml
+index 9545d2e..c47ac5f 100644
+--- a/sipXconfig/neoconf/etc/sipxcallresolver/sipxcallresolver.xml
++++ b/sipXconfig/neoconf/etc/sipxcallresolver/sipxcallresolver.xml
+@@ -72,6 +72,18 @@
+       <type refid="enablestate" />
+       <value>DISABLE</value>
+     </setting>
++    <setting name="SIP_CALLRESOLVER_PRIVACY" advanced="yes">
++      <type refid="enablestate" />
++      <value>DISABLE</value>
++    </setting>
++    <setting name="SIP_CALLRESOLVER_PRIVACY_EXT" advanced="yes">
++      <type>
++        <string>
++          <pattern>[0-9\ \+]*</pattern>
++        </string>
++      </type>
++      <value>0</value>
++    </setting>
+     <setting name="SIP_CALLRESOLVER_LOG_LEVEL" hidden="yes">
+       <type refid="loglevel" />
+       <value>NOTICE</value>
+-- 
+1.7.3.5
+
