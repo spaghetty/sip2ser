@@ -1,16 +1,16 @@
-From a725c8fab5ddce930b24c6f2bf6c8d40895aa738 Mon Sep 17 00:00:00 2001
+From 182ce76c41a3f504c2164dd20aae7cf4a2b73aa0 Mon Sep 17 00:00:00 2001
 From: Domenico Chierico <domenico.chierico@sip2ser.it>
-Date: Thu, 5 Apr 2012 02:03:20 +0200
-Subject: [PATCH] (XX-9113) added more filters
+Date: Thu, 31 May 2012 15:35:46 +0200
+Subject: [PATCH] XX 9113 added more filters
 
 ---
- .../org/sipfoundry/sipxconfig/cdr/CdrSearch.java   |   39 ++++++++++++++++----
+ .../org/sipfoundry/sipxconfig/cdr/CdrSearch.java   |   41 ++++++++++++++++---
  .../web/context/WEB-INF/cdr/CdrFilter.properties   |    4 ++
  .../context/WEB-INF/cdr/CdrFilter_it.properties    |    4 ++
- 3 files changed, 40 insertions(+), 7 deletions(-)
+ 3 files changed, 42 insertions(+), 7 deletions(-)
 
 diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
-index 3472d91..e40d88f 100644
+index 3472d91..b4f8878 100644
 --- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
 +++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
 @@ -21,6 +21,7 @@ public class CdrSearch {
@@ -30,14 +30,14 @@ index 3472d91..e40d88f 100644
      }
  
      private Mode m_mode = Mode.NONE;
-@@ -83,18 +84,12 @@ public class CdrSearch {
+@@ -83,18 +84,14 @@ public class CdrSearch {
          sql.append(OPEN_PARANTHESIS);
          sql.append(CdrManagerImpl.CALLER_AOR);
          appendSearchTermSql(sql);
-	 sql.append(CLOSED_PARANTHESIS);
 -        sql.append(AND);
 -        sql.append(CdrManagerImpl.CALLER_INTERNAL);
 -        sql.append("=true)");
++	sql.append(CLOSED_PARANTHESIS);
      }
  
      private void appendCalleeSql(StringBuilder sql) {
@@ -46,10 +46,12 @@ index 3472d91..e40d88f 100644
          appendSearchTermSql(sql);
 -        sql.append(AND);
 -        appendCalleeInternalRouteSql(sql);
+-        sql.append(CLOSED_PARANTHESIS);
++	sql.append(CLOSED_PARANTHESIS);
      }
  
      private void appendCalleeInternalRouteSql(StringBuilder sql) {
-@@ -139,13 +134,43 @@ public class CdrSearch {
+@@ -139,13 +136,43 @@ public class CdrSearch {
          case CALLER:
              sql.append(AND);
              appendCallerSql(sql);
