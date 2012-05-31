@@ -9,6 +9,7 @@ $build_dir="@BUILD_DIR@"
 $log_file="fastdatatel_action.log"
 $projects_file = "#{$our_dir}/projects"
 
+
 logger = Logger.new($log_file)
 
 base_config_string="--cache-file=`pwd`/ac-cache-file --prefix=/opt/`pwd | gawk -F /  '{ print $NF  }'` SIPXPBXUSER=`whoami` SIPXECS_NAME=OpSip OPENFIRE_HOME=/opt/openfire/ --enable-mrtg --enable-agent --enable-rpm"
@@ -224,3 +225,5 @@ task :datetime do
   sh "sudo echo UTC=true >> /etc/sysconfig/clock"
   sh "sudo hwclock --systohc --utc"
 end
+
+import "#{$our_dir}/resources/ks/Rakefile"
