@@ -1,0 +1,31 @@
+$pungi_arg =  "pungi --nosource --nodebuginfo --flavor Fedora --name Opsip --ver 14 --nosplitmedia -c /tmp/base_install.ks --force -B -G -C"
+$mkiso_command = "usr/bin/mkisofs -v -U -J -R -T -m repoview -m boot.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -V 'Opsip 14 x86_64' -o /14/Fedora/x86_64/iso/Opsip-14-x86_64.iso /14/Fedora/x86_64/os"
+
+
+desc "create installer fs image"
+task :generate_fs_44 do 
+  #use base_install 'cose it has more rpm set
+  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/base_install.ks /tmp/"
+  sh "mock -r fedora-14-x86_64 --shell \"#{$pungi_arg}\""
+end 
+
+desc "add some stuff to the installer image"
+task :update_fs_44 do
+  #start adding stuff to the system
+  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/embedded-install-opsip.ks /14/Fedora/x86_64/os"
+  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/minimal-install-opsip.ks /14/Fedora/x86_64/os"
+  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/minnon-install-opsip.ks /14/Fedora/x86_64/os"
+  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/splash.jpg /14/Fedora/x86_64/os/isolinux"
+  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/syslinux-vesa-splash.jpg /14/Fedora/x86_64/os/isolinux"
+  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/isolinux.cfg /14/Fedora/x86_64/os/isolinux/"
+end
+
+
+desc "create the iso image"
+task :iso_44 do
+     sh "mock -r fedora-14-x86_64 --shell \"#{$mkiso_command}\""
+     if(FileTest.exist?("Opsip-14-x86_64.iso"))
+        sh "mv Opsip-14-x86_64.iso Opsip-14-x86_64.iso.old"
+     end
+     sh "mock -r fedora-14-x86_64 --copyout 14/Fedora/x86_64/iso/Opsip-14-x86_64.iso ."
+end
