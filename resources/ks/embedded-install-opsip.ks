@@ -71,7 +71,6 @@ mv /usr/sbin/firstboot /usr/sbin/firstboot-old
 ln -s /usr/bin/opsip-setup-system /usr/sbin/firstboot
 
 #creazione archivio
-tar czpvf /mnt/sysimage/usr/local/image/system_backpu.tar.gz --exclude="/mnt/sysimage/lost+found/*" --exclude="/mnt/sysimage/usr/local/image/*" --exclude="/mnt/sysimage/proc/*" --exclude="/mnt/sysimage/sys/*" -C /mnt/sysimage/ *
-
+tar czpvf /mnt/sysimage/usr/local/image/system_backup.tar.gz -C /mnt/sysimage/ bin boot cgroup etc home lib lib64 media opt root sbin selinux srv usr var
 
 %end

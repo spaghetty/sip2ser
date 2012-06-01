@@ -65,6 +65,10 @@ s2scdrextractor
 s2srecorder
 s2sfaxspool
 s2sivr
+conferencereservation
+ivrgui
+getmail
+ssmtp
 %end
 
 %post
