@@ -13,6 +13,7 @@ desc "add some stuff to the installer image"
 task :update_fs_44 do
   #start adding stuff to the system
   sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/embedded-install-opsip.ks /14/Fedora/x86_64/os"
+  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/embnon-install-opsip.ks /14/Fedora/x86_64/os"
   sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/minimal-install-opsip.ks /14/Fedora/x86_64/os"
   sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/minnon-install-opsip.ks /14/Fedora/x86_64/os"
   sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/splash.jpg /14/Fedora/x86_64/os/isolinux"
