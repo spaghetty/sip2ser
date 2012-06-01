@@ -22,7 +22,10 @@ packages_base = "autoconf automake make libtool createrepo gcc-c++ \
 gem_extra = "htmlentities
 libxml-ruby
 zip
-net-scp"
+net-scp
+treetop
+polyglot
+rmail"
 
 
 def load_projects
