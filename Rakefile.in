@@ -16,7 +16,7 @@ base_config_string="--cache-file=`pwd`/ac-cache-file --prefix=/opt/`pwd | gawk -
 
 packages_base = "autoconf automake make libtool createrepo gcc-c++ \
  rpm-build ruby rubygem-treetop rubygem-polyglot rubygem-mail rubygem-net-scp \
- rubygem-zip rubygem-libxml rubygem-rmail rubygem-htmlentities rubygem-rake \
+ rubygem-zip rubygem-libxml rubygem-rmail rubygem-htmlentities-4.3.1 rubygem-rake \
  libxml2 libxml2-devel js git wget  mock thttpd \
  python-twisted-web python-lxml python-httplib2"
 
