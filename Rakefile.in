@@ -15,14 +15,13 @@ logger = Logger.new($log_file)
 base_config_string="--cache-file=`pwd`/ac-cache-file --prefix=/opt/`pwd | gawk -F /  '{ print $NF  }'` SIPXPBXUSER=`whoami` SIPXECS_NAME=OpSip OPENFIRE_HOME=/opt/openfire/ --enable-mrtg --enable-agent --enable-rpm"
 
 packages_base = "autoconf automake make libtool createrepo gcc-c++ \
- rpm-build ruby rubygem-rake libxml2 libxml2-devel js git wget  mock thttpd \
- python-twisted-web python-lxml python-httplib2"
+ rpm-build ruby rubygem-treetop rubygem-polyglot rubygem-mail rubygem-net-scp \
+ rubygem-zip rubygem-libxml rubygem-rmail rubygem-htmlentities-4.3.1 rubygem-rake \
+ libxml2 libxml2-devel js git wget  mock thttpd \
+ python-twisted-web python-lxml python-httplib2 sipx-openfire"
 
 
-gem_extra = "htmlentities
-libxml-ruby
-zip
-net-scp"
+gem_extra = ""
 
 
 def load_projects
