@@ -68,6 +68,14 @@ echo "%wheel  ALL=(ALL)   ALL" >> /etc/sudoers
 mv /usr/sbin/firstboot /usr/sbin/firstboot-old
 ln -s /usr/bin/opsip-setup-system /usr/sbin/firstboot
 
+chkconfig NetworkManager off
+
+sed 's:127\.0\.0\.1.*:127\.0\.0\.1	localhost.localdomain	localhost:' /etc/hosts > /etc/hosts
+
+echo "#!/bin/bash \n unicode_start" > /etc/init.d/unicode
+chmod 777 /etc/init.d/unicode
+chkconfig unicode on
+
 #creazione archivio
 tar czpvf /mnt/sysimage/usr/local/image/system_backup.tar.gz -C /mnt/sysimage/ bin boot cgroup etc home lib lib64 media opt root sbin selinux srv usr var
 

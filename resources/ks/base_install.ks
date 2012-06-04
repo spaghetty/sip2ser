@@ -79,6 +79,8 @@ echo "%wheel  ALL=(ALL)   ALL" >> /etc/sudoers
 mv /usr/sbin/firstboot /usr/sbin/firstboot-old
 ln -s /usr/bin/opsip-setup-system /usr/sbin/firstboot
 
+chkconfig NetworkManager off
+
 #creazione archivio
 tar czpvf /mnt/sysimage/usr/local/image/system_backpu.tar.gz --exclude="/mnt/sysimage/lost+found/*" --exclude="/mnt/sysimage/usr/local/image/*" --exclude="/mnt/sysimage/proc/*" --exclude="/mnt/sysimage/sys/*" -C /mnt/sysimage/ *
 
