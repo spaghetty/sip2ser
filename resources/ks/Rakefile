@@ -1,3 +1,5 @@
+require 'erb'
+
 $pungi_arg =  "pungi --nosource --nodebuginfo --flavor Fedora --name Opsip --ver 14 --nosplitmedia -c /tmp/base_install.ks --force -B -G -C"
 $mkiso_command = "usr/bin/mkisofs -v -U -J -R -T -m repoview -m boot.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -V 'Opsip 14 x86_64' -o /14/Fedora/x86_64/iso/Opsip-14-x86_64.iso /14/Fedora/x86_64/os"
 
@@ -12,10 +14,10 @@ end
 desc "add some stuff to the installer image"
 task :update_fs_44 do
   #start adding stuff to the system
-  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/embedded-install-opsip.ks /14/Fedora/x86_64/os"
-  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/embnon-install-opsip.ks /14/Fedora/x86_64/os"
-  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/minimal-install-opsip.ks /14/Fedora/x86_64/os"
-  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/minnon-install-opsip.ks /14/Fedora/x86_64/os"
+  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/embedded_install_opsip.ks /14/Fedora/x86_64/os"
+  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/embnon_install_opsip.ks /14/Fedora/x86_64/os"
+  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/minimal_install_opsip.ks /14/Fedora/x86_64/os"
+  sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/minnon_install_opsip.ks /14/Fedora/x86_64/os"
   sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/splash.jpg /14/Fedora/x86_64/os/isolinux"
   sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/syslinux-vesa-splash.jpg /14/Fedora/x86_64/os/isolinux"
   sh "mock -r fedora-14-x86_64 --copyin #{$our_dir}/resources/ks/isolinux.cfg /14/Fedora/x86_64/os/isolinux/"
@@ -29,4 +31,41 @@ task :iso_44 do
         sh "mv Opsip-14-x86_64.iso Opsip-14-x86_64.iso.old"
      end
      sh "mock -r fedora-14-x86_64 --copyout 14/Fedora/x86_64/iso/Opsip-14-x86_64.iso ."
+end
+
+
+desc "generate solutions"
+task :generate_ks do
+
+  class Controller
+    attr_accessor :generic_options, :nonet_options, :s10_disk, :s40_disk, :generic_pre, :opsip_pkg, :generic_post, :min_post
+
+    def setup 
+      @generic_options = File.read("#{$our_dir}/resources/ks/parts/common_option.ks")
+      @nonet_options = File.read("#{$our_dir}/resources/ks/parts/nonet_option.ks")
+      @s10_disk = File.read("#{$our_dir}/resources/ks/parts/part_10.ks")
+      @s40_disk = File.read("#{$our_dir}/resources/ks/parts/part_40.ks")
+      @generic_pre = File.read("#{$our_dir}/resources/ks/parts/generic_pre.ks")
+      @opsip_pkg = File.read("#{$our_dir}/resources/ks/parts/opsip_packages.ks")
+      @generic_post = File.read("#{$our_dir}/resources/ks/parts/full_post.ks")
+      @min_post  = File.read("#{$our_dir}/resources/ks/parts/min_post.ks")
+    end
+    
+    def get_binding
+      binding
+    end
+
+  end
+  
+  c = Controller.new
+  c.setup
+
+  t_dir = "#{$our_dir}/resources/ks/"
+  Dir.new(t_dir).each do | n |
+    if n =~ /\w+\.erb$/
+      minnon = ERB.new(File.read(t_dir+n), 0, "%<>")
+      File.open(t_dir+n.chomp(File.extname(n))+".ks", 'w+') {|f| f.write(minnon.result(c.get_binding)) }
+    end
+  end
+
 end
