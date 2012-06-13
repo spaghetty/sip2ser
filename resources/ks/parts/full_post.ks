@@ -17,6 +17,7 @@ echo "" >> /etc/init.d/unicode
 echo "unicode_start" >> /etc/init.d/unicode
 chmod 777 /etc/init.d/unicode
 chkconfig unicode on
+chkconfig --level 3 haldaemon on
 
 #creazione archivio
 tar czpvf /usr/local/image/system_backup.tar.gz -C / bin boot cgroup etc home lib lib64 media opt root sbin selinux srv usr var
