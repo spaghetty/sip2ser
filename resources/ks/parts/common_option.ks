@@ -19,3 +19,4 @@ firstboot --enable
 halt
 
 network --bootproto=dhcp
+
