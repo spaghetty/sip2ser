@@ -1,16 +1,16 @@
-From 182ce76c41a3f504c2164dd20aae7cf4a2b73aa0 Mon Sep 17 00:00:00 2001
+From 156fcb16c81feb9ea5788197c5e32044a9918fb2 Mon Sep 17 00:00:00 2001
 From: Domenico Chierico <domenico.chierico@sip2ser.it>
-Date: Thu, 31 May 2012 15:35:46 +0200
+Date: Fri, 15 Jun 2012 15:06:09 +0200
 Subject: [PATCH] XX 9113 added more filters
 
 ---
- .../org/sipfoundry/sipxconfig/cdr/CdrSearch.java   |   41 ++++++++++++++++---
+ .../org/sipfoundry/sipxconfig/cdr/CdrSearch.java   |   44 ++++++++++++++++---
  .../web/context/WEB-INF/cdr/CdrFilter.properties   |    4 ++
  .../context/WEB-INF/cdr/CdrFilter_it.properties    |    4 ++
- 3 files changed, 42 insertions(+), 7 deletions(-)
+ 3 files changed, 45 insertions(+), 7 deletions(-)
 
 diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
-index 3472d91..b4f8878 100644
+index 3472d91..b6f5214 100644
 --- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
 +++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
 @@ -21,6 +21,7 @@ public class CdrSearch {
@@ -37,7 +37,7 @@ index 3472d91..b4f8878 100644
 -        sql.append(AND);
 -        sql.append(CdrManagerImpl.CALLER_INTERNAL);
 -        sql.append("=true)");
-+	sql.append(CLOSED_PARANTHESIS);
++	//sql.append(CLOSED_PARANTHESIS);
      }
  
      private void appendCalleeSql(StringBuilder sql) {
@@ -47,11 +47,11 @@ index 3472d91..b4f8878 100644
 -        sql.append(AND);
 -        appendCalleeInternalRouteSql(sql);
 -        sql.append(CLOSED_PARANTHESIS);
-+	sql.append(CLOSED_PARANTHESIS);
++	//sql.append(CLOSED_PARANTHESIS);
      }
  
      private void appendCalleeInternalRouteSql(StringBuilder sql) {
-@@ -139,13 +136,43 @@ public class CdrSearch {
+@@ -139,18 +136,51 @@ public class CdrSearch {
          case CALLER:
              sql.append(AND);
              appendCallerSql(sql);
@@ -60,6 +60,7 @@ index 3472d91..b4f8878 100644
          case CALLEE:
              sql.append(AND);
              appendCalleeSql(sql);
++	    sql.append(CLOSED_PARANTHESIS);
              break;
 +	case INTCALLER:
 +	    sql.append(AND);
@@ -94,7 +95,14 @@ index 3472d91..b4f8878 100644
 +	    sql.append(NOT);
              sql.append(OPEN_PARANTHESIS);
              appendCallerSql(sql);
++	    sql.append(CLOSED_PARANTHESIS);
              sql.append(OR);
+             appendCalleeSql(sql);
+             sql.append(CLOSED_PARANTHESIS);
++            sql.append(CLOSED_PARANTHESIS);
+             break;
+         default:
+             return false;
 diff --git a/sipXconfig/web/context/WEB-INF/cdr/CdrFilter.properties b/sipXconfig/web/context/WEB-INF/cdr/CdrFilter.properties
 index 645fb55..2a80855 100644
 --- a/sipXconfig/web/context/WEB-INF/cdr/CdrFilter.properties
