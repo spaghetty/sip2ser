@@ -56,7 +56,7 @@ network --bootproto=dhcp
 @GNOME Desktop Environment
 wireshark-gnome	
 telnet
-emacs
+emacs-nox
 firefox
 dhcp
 s2sopsip
