@@ -1,16 +1,16 @@
-From 156fcb16c81feb9ea5788197c5e32044a9918fb2 Mon Sep 17 00:00:00 2001
+From 460218647bd6ba682882ab3620016e0f9d8928fc Mon Sep 17 00:00:00 2001
 From: Domenico Chierico <domenico.chierico@sip2ser.it>
-Date: Fri, 15 Jun 2012 15:06:09 +0200
+Date: Mon, 18 Jun 2012 12:58:48 +0200
 Subject: [PATCH] XX 9113 added more filters
 
 ---
- .../org/sipfoundry/sipxconfig/cdr/CdrSearch.java   |   44 ++++++++++++++++---
+ .../org/sipfoundry/sipxconfig/cdr/CdrSearch.java   |   43 ++++++++++++++++---
  .../web/context/WEB-INF/cdr/CdrFilter.properties   |    4 ++
  .../context/WEB-INF/cdr/CdrFilter_it.properties    |    4 ++
- 3 files changed, 45 insertions(+), 7 deletions(-)
+ 3 files changed, 44 insertions(+), 7 deletions(-)
 
 diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
-index 3472d91..b6f5214 100644
+index 3472d91..8146062 100644
 --- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
 +++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
 @@ -21,6 +21,7 @@ public class CdrSearch {
@@ -51,7 +51,7 @@ index 3472d91..b6f5214 100644
      }
  
      private void appendCalleeInternalRouteSql(StringBuilder sql) {
-@@ -139,18 +136,51 @@ public class CdrSearch {
+@@ -139,18 +136,50 @@ public class CdrSearch {
          case CALLER:
              sql.append(AND);
              appendCallerSql(sql);
@@ -92,7 +92,6 @@ index 3472d91..b6f5214 100644
 +	    break;
          case ANY:
              sql.append(AND);
-+	    sql.append(NOT);
              sql.append(OPEN_PARANTHESIS);
              appendCallerSql(sql);
 +	    sql.append(CLOSED_PARANTHESIS);
