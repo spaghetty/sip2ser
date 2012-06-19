@@ -18,7 +18,7 @@ packages_base = "autoconf automake make libtool createrepo gcc-c++ \
  rpm-build ruby rubygem-treetop rubygem-polyglot rubygem-mail rubygem-net-scp \
  rubygem-zip rubygem-libxml rubygem-rmail rubygem-htmlentities-4.3.1 rubygem-rake \
  libxml2 libxml2-devel js git wget  mock thttpd \
- python-twisted-web python-lxml python-httplib2 sipx-openfire"
+ psycopg2 python-twisted-web python-lxml python-httplib2 sipx-openfire"
 
 
 gem_extra = ""
