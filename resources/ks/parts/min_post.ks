@@ -18,6 +18,15 @@ echo "unicode_start" >> /etc/init.d/unicode
 chmod 777 /etc/init.d/unicode
 chkconfig unicode on
 
+echo "#!/bin/bash"  > /etc/init.d/udisks
+echo "# udisks	    Starts udisks daemon." >> /etc/init.d/udisks
+echo "# chkconfig:  23 50 90 " >> /etc/init.d/udisks
+echo "" >> /etc/init.d/udisks
+echo "/usr/libexec/udisks-daemon &> /var/log/udisk-daemon &"  >> /etc/init.d/udisks
+chmod 777 /etc/init.d/udisks
+chkconfig udisks on
+
+
 #creazione archivio
 
 %end
