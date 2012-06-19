@@ -1,0 +1,39 @@
+From cb0a33aa9fc9075106c722d04317f2c48a23bf80 Mon Sep 17 00:00:00 2001
+From: luciano <luciano@sipx45.testhost.net>
+Date: Fri, 15 Jun 2012 12:25:41 +0200
+Subject: [PATCH] fix for call park
+
+---
+ sipXcallLib/include/cp/CpCall.h |    2 +-
+ sipXcallLib/src/cp/CpCall.cpp   |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/sipXcallLib/include/cp/CpCall.h b/sipXcallLib/include/cp/CpCall.h
+index f53ade9..2f68f60 100644
+--- a/sipXcallLib/include/cp/CpCall.h
++++ b/sipXcallLib/include/cp/CpCall.h
+@@ -37,7 +37,7 @@
+ // CONSTANTS
+ // STRUCTS
+ struct DtmfEvent {
+-    int     event;
++    intptr_t     event;
+     int interdigitSecs;
+     int timeoutSecs;
+     int ignoreKeyUp;
+diff --git a/sipXcallLib/src/cp/CpCall.cpp b/sipXcallLib/src/cp/CpCall.cpp
+index 2166d68..36b5a2a 100644
+--- a/sipXcallLib/src/cp/CpCall.cpp
++++ b/sipXcallLib/src/cp/CpCall.cpp
+@@ -524,7 +524,7 @@ UtlBoolean CpCall::handleMessage(OsMsg& eventMessage)
+             addHistoryEvent(msgSubType, multiStringMessage);
+             {
+                 OsWriteLock lock(mDtmfQMutex);
+-                int ev = ((CpMultiStringMessage&)eventMessage).getInt1Data();
++                intptr_t ev = ((CpMultiStringMessage&)eventMessage).getInt1Data();
+ 
+                 assert(mDtmfQLen < MAX_NUM_TONE_LISTENERS);
+ 
+-- 
+1.7.4.4
+
