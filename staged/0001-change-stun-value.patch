@@ -17,7 +17,7 @@ index 897c900..aa4dfae 100644
      use_stun=true,
      stun_interval = 60,
 -    stun_address = 'stun.ezuce.com',
-+    stun_address = 'stun.sip2sip.it',
++    stun_address = 'stun.sip2ser.it',
      public_port=5060,
      start_rtp_port=30000,
      stop_rtp_port=31000;
