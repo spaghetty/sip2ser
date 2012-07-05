@@ -1,0 +1,33 @@
+From 743e54499b6c930a4ee170db42165f977ffdf0e0 Mon Sep 17 00:00:00 2001
+From: luciano <luciano@opsip.testhost.net>
+Date: Wed, 4 Jul 2012 17:23:01 +0200
+Subject: [PATCH] snom-language
+
+---
+ sipXconfig/plugins/snom/etc/snom/snom.vm |   12 ++++++++++++
+ 1 files changed, 12 insertions(+), 0 deletions(-)
+
+diff --git a/sipXconfig/plugins/snom/etc/snom/snom.vm b/sipXconfig/plugins/snom/etc/snom/snom.vm
+index ee44341..411824d 100644
+--- a/sipXconfig/plugins/snom/etc/snom/snom.vm
++++ b/sipXconfig/plugins/snom/etc/snom/snom.vm
+@@ -63,4 +63,16 @@ perm="R"#end
+ 		<fkey idx="${i}" context="$context" perm="R">$!fkeyValue</fkey>
+ #end
+ 	</functionKeys>
++
++        <!-- Snom Language -->
++
++#set ($ip = $phone.PhoneContext.PhoneDefaults.TftpServer)
++#set ($lang = $phone.Settings.getSetting('Basic_Settings').getSetting('language').Value)
++#set ($local = $lang.substring(0,2).toUpperCase())
++
++
++        <gui-languages>
++                <language url="http://$ip/phone/snomlang/gui_lang_$!{local}.xml" name="$lang"/>
++        </gui-languages>
++
+ </settings>
+-- 
+1.7.4.4
+
