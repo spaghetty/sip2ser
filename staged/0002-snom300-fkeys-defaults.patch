@@ -24,7 +24,7 @@ index 930dadf..b42c9bc 100644
  #set ($type = $key.getSetting('type').Value)
  #set ($number = $key.getSetting('number').Value)
 +#set ($i = $velocityCount - 1)
-+#if ($phone.Model.Label=="Snom 300" && $i>=2 && $i<=4 && $number=="")
++#if ($phone.Model.Label=="Snom 300" && $i>=2 && $i<=4 && $number=="" && $context=="active" && $type=="line" )
 +#set ($context = "active")
 +#set ($type = "keyevent")
 +#if ($i==2)
