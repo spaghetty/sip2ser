@@ -1,0 +1,38 @@
+From c25dba6c97463e5f76f6cdc45a827ff93110fbdf Mon Sep 17 00:00:00 2001
+From: luciano <luciano@opsip.testhost.net>
+Date: Fri, 13 Jul 2012 15:25:26 +0200
+Subject: [PATCH 2/2] sno-ringtone-unlock
+
+---
+ sipXconfig/plugins/snom/etc/snom/line.xml |    1 +
+ sipXconfig/plugins/snom/etc/snom/snom.vm  |    2 +-
+ 2 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/sipXconfig/plugins/snom/etc/snom/line.xml b/sipXconfig/plugins/snom/etc/snom/line.xml
+index 422bc81..f07dc48 100644
+--- a/sipXconfig/plugins/snom/etc/snom/line.xml
++++ b/sipXconfig/plugins/snom/etc/snom/line.xml
+@@ -63,6 +63,7 @@
+       <value />
+     </setting>
+     <setting name="user_ringer">
++      <profileName>user_ringer$</profileName>
+       <type refid="ringer" />
+       <value>Ringer1</value>
+     </setting>
+diff --git a/sipXconfig/plugins/snom/etc/snom/snom.vm b/sipXconfig/plugins/snom/etc/snom/snom.vm
+index 4ebf0a5..d28ebcc 100644
+--- a/sipXconfig/plugins/snom/etc/snom/snom.vm
++++ b/sipXconfig/plugins/snom/etc/snom/snom.vm
+@@ -31,7 +31,7 @@ perm="R"#end
+ #set ($i = $velocityCount)
+ #foreach ($group in $line.Values)
+ #foreach ($setting in $group.Values)
+-		<${setting.ProfileName} idx="${i}" #perm( $setting )>$!{setting.Value}</${setting.ProfileName}>
++		<${setting.name} idx="${i}" #perm( $setting )>$!{setting.Value}</${setting.name}>
+ #end
+ #end
+ #end
+-- 
+1.7.4.4
+
