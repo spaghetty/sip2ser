@@ -1,0 +1,50 @@
+From 426faf7cee2eefc86ce78239e294a83173c64cd3 Mon Sep 17 00:00:00 2001
+From: Domenico Chierico <domenico.chierico@sip2ser.it>
+Date: Mon, 3 Sep 2012 17:19:58 +0200
+Subject: [PATCH] support jaK keepalive
+
+---
+ sipXtackLib/src/net/SipClient.cpp |   13 +++++++++++--
+ 1 files changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/sipXtackLib/src/net/SipClient.cpp b/sipXtackLib/src/net/SipClient.cpp
+index 715a775..d81a42d 100644
+--- a/sipXtackLib/src/net/SipClient.cpp
++++ b/sipXtackLib/src/net/SipClient.cpp
+@@ -671,6 +671,7 @@ int SipClient::run(void* runArg)
+          // Note that input was processed at this time.
+          touch();
+ 	 int crlfCount = 0;
++	 bool isJak = false;
+ 	 for (int i = 0; i < res; i+=2) {
+ 	   if (readBuffer(i) == '\r' && readBuffer(i+1) == '\n')
+ 	     crlfCount+=2;
+@@ -678,7 +679,12 @@ int SipClient::run(void* runArg)
+ 	     break;
+ 	 }
+ 
+-         if (crlfCount == res)
++	 if ( readBuffer(0) == 'j' &&
++	      readBuffer(1) == 'a' &&
++	      readBuffer(2) == 'K') 
++	   isJak = true;
++
++         if (crlfCount == res || isJak)
+          {
+              repeatedEOFs = 0;
+              // The 'message' was a keepalive (CR-LF or CR-LF-CR-LF).
+@@ -688,7 +694,10 @@ int SipClient::run(void* runArg)
+              int bufferLen;
+ 
+              // send one CRLF set in the reply
+-             buffer.append("\r\n");
++	     if (!isJak)
++	       buffer.append("\r\n");
++	     else
++	       buffer.append("\njaK\n");
+              bufferLen = buffer.length();
+ 
+              // Get the send address for response.
+-- 
+1.7.4.4
+
