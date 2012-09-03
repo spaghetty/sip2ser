@@ -173,7 +173,7 @@ end
 desc "Applica le patch staged"
 task :apply_staged  do 
   Rake::Task[:proxy_fixup].execute()
-  Dir.foreach("#{$our_dir}/staged/") do | f |
+  Dir.entries("#{$our_dir}/staged/").sort.each do | f |
     logger.info("Applico le patch staged")
     if not File.directory?(f) and f[-5..-1] == "patch"
       begin
