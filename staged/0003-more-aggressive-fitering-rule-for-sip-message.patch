@@ -1,0 +1,103 @@
+From 0939e6a6318373fc94f0695771c25e30b8b6ee25 Mon Sep 17 00:00:00 2001
+From: admin <admin@testpbx.labsip2ser.net>
+Date: Tue, 4 Sep 2012 16:11:15 +0200
+Subject: [PATCH] more aggressive fitering rule for sip message
+
+---
+ sipXtackLib/src/net/SipClient.cpp |   73 +++++++++++++++++++------------------
+ 1 files changed, 38 insertions(+), 35 deletions(-)
+
+diff --git a/sipXtackLib/src/net/SipClient.cpp b/sipXtackLib/src/net/SipClient.cpp
+index 715a775..d538d76 100644
+--- a/sipXtackLib/src/net/SipClient.cpp
++++ b/sipXtackLib/src/net/SipClient.cpp
+@@ -768,7 +768,7 @@ int SipClient::run(void* runArg)
+             readBuffer.remove(0, res);
+          }  // end keep-alive msg
+ 
+-         else if (res > 0)      // got message, but not keep-alive
++         else if (res > 10)      // got message, but not keep-alive
+          {
+             // Message successfully read.
+             repeatedEOFs = 0;
+@@ -798,40 +798,43 @@ int SipClient::run(void* runArg)
+                           "readBuffer = '%.1000s'",
+                           mName.data(), res, errno, readBuffer.data());
+ 
+-            OsSysLog::add(FAC_SIP, PRI_DEBUG,
+-                          "SipClient[%s]::run error wait status  "
+-                          "tcpOnErrWaitForSend-%d waitingToReportErr-%d "
+-                          "mbTcpOnErrWaitForSend-%d repeatedEOFs-%d "
+-                          "protocol %d framed %d",
+-                          mName.data(),
+-                          tcpOnErrWaitForSend, waitingToReportErr,
+-                          mbTcpOnErrWaitForSend, repeatedEOFs,
+-                          mClientSocket->getIpProtocol(),
+-                          OsSocket::isFramed(mClientSocket->getIpProtocol()));
+-
+-            // If the socket is not framed (is connection-oriented),
+-            // we need to abort the connection and post a message
+-            // :TODO: This doesn't work right for framed connection-oriented
+-            // protocols (like SCTP), but OsSocket doesn't have an EOF-query
+-            // method -- we need to close all connection-oriented
+-            // sockets as well in case it was an EOF.
+-            // Define a virtual function that returns the correct bit.
+-            if (!OsSocket::isFramed(mClientSocket->getIpProtocol()))
+-            {
+-                // On non-blocking connect failures, we need to get the first send message
+-                // in order to successfully trigger the protocol fallback mechanism
+-                if (!tcpOnErrWaitForSend)
+-                {
+-                   // Return all buffered messages with a transport error indication.
+-                   emptyBuffer(TRUE);
+-                   clientStopSelf();
+-                }
+-                else
+-                {
+-                   fds[1].revents &= ~(POLLERR | POLLHUP);  // clear error bit if waiting
+-                   waitingToReportErr = TRUE;
+-                }
+-            }
++	    if ( res <= 0 )
++	    {
++	      OsSysLog::add(FAC_SIP, PRI_DEBUG,
++			    "SipClient[%s]::run error wait status  "
++			    "tcpOnErrWaitForSend-%d waitingToReportErr-%d "
++			    "mbTcpOnErrWaitForSend-%d repeatedEOFs-%d "
++			    "protocol %d framed %d",
++			    mName.data(),
++			    tcpOnErrWaitForSend, waitingToReportErr,
++			    mbTcpOnErrWaitForSend, repeatedEOFs,
++			    mClientSocket->getIpProtocol(),
++			    OsSocket::isFramed(mClientSocket->getIpProtocol()));
++
++	      // If the socket is not framed (is connection-oriented),
++	      // we need to abort the connection and post a message
++	      // :TODO: This doesn't work right for framed connection-oriented
++	      // protocols (like SCTP), but OsSocket doesn't have an EOF-query
++	      // method -- we need to close all connection-oriented
++	      // sockets as well in case it was an EOF.
++	      // Define a virtual function that returns the correct bit.
++	      if (!OsSocket::isFramed(mClientSocket->getIpProtocol()))
++		{
++		  // On non-blocking connect failures, we need to get the first send message
++		  // in order to successfully trigger the protocol fallback mechanism
++		  if (!tcpOnErrWaitForSend)
++		    {
++		      // Return all buffered messages with a transport error indication.
++		      emptyBuffer(TRUE);
++		      clientStopSelf();
++		    }
++		  else
++		    {
++		      fds[1].revents &= ~(POLLERR | POLLHUP);  // clear error bit if waiting
++		      waitingToReportErr = TRUE;
++		    }
++		}
++	    }
+             // Delete the data read so far, which will not have been
+             // deleted by HttpMessage::read.
+             readBuffer.remove(0);
+-- 
+1.7.4.4
+
