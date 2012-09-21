@@ -1,0 +1,187 @@
+From 7c91586203214f586e94c53d043d888bf9b7fff1 Mon Sep 17 00:00:00 2001
+From: luciano <luciano@opsip.testhost.net>
+Date: Fri, 21 Sep 2012 15:56:31 +0200
+Subject: [PATCH] Added Personal Recorder permission
+
+---
+ .../etc/commserver/user-settings.properties        |    9 ++++++---
+ .../neoconf/etc/commserver/user-settings.xml       |    4 ++++
+ .../admin/commserver/imdb/Permissions.java         |    7 ++++++-
+ .../admin/dialplan/attendant/ValidUsersConfig.java |   10 +++++++++-
+ .../sipxconfig/permission/PermissionName.java      |    2 ++
+ sipXivr/meta/validusers.xsd.in                     |    9 +++++++++
+ 6 files changed, 36 insertions(+), 5 deletions(-)
+
+diff --git a/sipXconfig/neoconf/etc/commserver/user-settings.properties b/sipXconfig/neoconf/etc/commserver/user-settings.properties
+index 5793cd6..a08a433 100644
+--- a/sipXconfig/neoconf/etc/commserver/user-settings.properties
++++ b/sipXconfig/neoconf/etc/commserver/user-settings.properties
+@@ -48,6 +48,9 @@ permission.call-handling.TollFree.description=User can dial toll free numbers
+ permission.call-handling.Voicemail.label=Voice Mail
+ permission.call-handling.Voicemail.description=User has voicemail inbox
+ 
++permission.call-handling.PersonalRecorder.label=Peronal Recorder
++permission.call-handling.PersonalRecorder.description=User has personal recorder inbox
++
+ permission.call-handling.RecordSystemPrompts.label=Record System Prompts
+ permission.call-handling.RecordSystemPrompts.description=User can record system prompts
+ 
+@@ -62,7 +65,7 @@ caller-alias.description=
+ 
+ caller-alias.external-number.label=Caller ID
+ caller-alias.external-number.description=Externally visible user Caller ID. If it is not specified the gateway will create a Caller ID \
+- based on the caller's extension and additional gateway parameters.
++ based on the caller\'s extension and additional gateway parameters.
+ 
+ caller-alias.anonymous-caller-alias.label=Block Caller ID
+ caller-alias.anonymous-caller-alias.description=Block Caller ID for external calls for all calls made by this user.
+@@ -115,7 +118,7 @@ im.add-pa-to-group.label=Add MyBuddy to the IM group
+ im.add-pa-to-group.description=If checked, MyBuddy will be added as a member of the IM group.  MyBuddy can not be removed by a user.
+ 
+ im.advertise-sip-presence.label=Phone presence in IM status
+-im.advertise-sip-presence.description=If checked advertise the user's <em>busy</em> status in the XMPP status message.
++im.advertise-sip-presence.description=If checked advertise the user\'s <em>busy</em> status in the XMPP status message.
+ 
+ im.include-call-info.label=Call info in IM status
+ im.include-call-info.description=If checked include the caller info in the <em>busy</em> status of the XMPP status message.
+@@ -147,7 +150,7 @@ user-domain.domain.label=Domain
+ user-domain.domain.description=Specify user domain.
+ 
+ callfwd.timer.label=Initial delay
+-callfwd.timer.description=The interval (in seconds) that the user's phone is ringing before call forwarding is activated. \
++callfwd.timer.description=The interval (in seconds) that the user\'s phone is ringing before call forwarding is activated. \
+   You can configure default value for group here. Individual users can adjust it when setting up call forwarding. \
+   When empty, the <B>Default Serial Fork Expiration</B> value will be used as default
+ 
+diff --git a/sipXconfig/neoconf/etc/commserver/user-settings.xml b/sipXconfig/neoconf/etc/commserver/user-settings.xml
+index 73df726..ad79293 100644
+--- a/sipXconfig/neoconf/etc/commserver/user-settings.xml
++++ b/sipXconfig/neoconf/etc/commserver/user-settings.xml
+@@ -95,6 +95,10 @@
+         <type refid="enable-disable" />
+         <value>ENABLE</value>
+       </setting>
++      <setting name="PersonalRecorder">
++        <type refid="enable-disable" />
++        <value>ENABLE</value>
++      </setting>
+       <setting name="RecordSystemPrompts">
+         <type refid="enable-disable" />
+         <value>DISABLE</value>
+diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/admin/commserver/imdb/Permissions.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/admin/commserver/imdb/Permissions.java
+index 7ece977..09c30a5 100644
+--- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/admin/commserver/imdb/Permissions.java
++++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/admin/commserver/imdb/Permissions.java
+@@ -40,7 +40,7 @@ public class Permissions extends DataSetGenerator {
+             + "(SELECT count(*) from user_group where user_id = u.user_id) as groups, "
+             + "v.value as nineoodialing, sv.value as autoattendant, sp.value as international, "
+             + "si.value as local, sd.value as long_distance, sm.value as mobile, sr.value as record_prompts, "
+-            + "st.value as toll_free, svm.value as voicemail, se.value as exchange, sf.value as freeswitch "
++            + "st.value as toll_free, svm.value as voicemail, spr.value as personal_recorder, se.value as exchange, sf.value as freeswitch "
+             + "%s  "
+             + "FROM users u left join setting_value v on u.value_storage_id = v.value_storage_id "
+             + "AND v.path='permission/call-handling/900Dialing' "
+@@ -60,6 +60,8 @@ public class Permissions extends DataSetGenerator {
+             + "AND st.path='permission/call-handling/TollFree' "
+             + "left join setting_value svm on u.value_storage_id = svm.value_storage_id "
+             + "AND svm.path='permission/call-handling/Voicemail' "
++            + "left join setting_value spr on u.value_storage_id = spr.value_storage_id "
++            + "AND spr.path='permission/call-handling/PersonalRecorder' "
+             + "left join setting_value se on u.value_storage_id = se.value_storage_id "
+             + "AND se.path='permission/voicemail-server/ExchangeUMVoicemailServer' "
+             + "left join setting_value sf on u.value_storage_id = sf.value_storage_id "
+@@ -181,6 +183,9 @@ public class Permissions extends DataSetGenerator {
+                 addPermission(items, rs, "voicemail",
+                         getDefaultCallHandlingValue(userModel, PermissionName.VOICEMAIL),
+                         PermissionName.VOICEMAIL.getName(), uri);
++                addPermission(items, rs, "personal_recorder",
++                        getDefaultCallHandlingValue(userModel, PermissionName.PERSONAL_RECORDER),
++                        PermissionName.PERSONAL_RECORDER.getName(), uri);
+                 addPermission(items, rs, "record_prompts",
+                         getDefaultCallHandlingValue(userModel, PermissionName.RECORD_SYSTEM_PROMPTS),
+                         PermissionName.RECORD_SYSTEM_PROMPTS.getName(), uri);
+diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/admin/dialplan/attendant/ValidUsersConfig.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/admin/dialplan/attendant/ValidUsersConfig.java
+index dc00da0..56855f5 100644
+--- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/admin/dialplan/attendant/ValidUsersConfig.java
++++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/admin/dialplan/attendant/ValidUsersConfig.java
+@@ -60,6 +60,7 @@ public class ValidUsersConfig extends XmlFile {
+     private static final String ELEMENT_NAME_HASVOICEMAIL = "hasVoicemail";
+     private static final String ELEMENT_NAME_USERBUSYPROMPT = "userBusyPrompt";
+     private static final String ELEMENT_NAME_VOICEMAILTUI = "voicemailTui";
++    private static final String ELEMENT_NAME_HASPERSONALRECORDER = "hasPersonalRecorder";
+     private static final String ELEMENT_NAME_CANRECORDPROMPTS = "canRecordPrompts";
+     private static final String ELEMENT_NAME_CANTUICHANGEPIN = "canTuiChangePin";
+     private static final String ELEMENT_NAME_EMAIL = "email";
+@@ -74,7 +75,7 @@ public class ValidUsersConfig extends XmlFile {
+     private static final String ELEMENT_NAME_ACCOUNT = "account";
+     private static final String ELEMENT_NAME_PASSWD = "password";
+     private static final String QUERY = "SELECT u.user_id, u.user_name, u.first_name, u.last_name, "
+-            + "u.pintoken, u.sip_password, v.value as in_directory, vs.value as has_voicemail, "
++            + "u.pintoken, u.sip_password, v.value as in_directory, vs.value as has_voicemail, vpr.value as personal_recorder, "
+             + "vb.value as user_busy_prompt, vt.value as voicemail_tui, sr.value as record_prompts, "
+             + "vp.value as tui_change_pin, abe.email_address, abe.alternate_email_address, "
+             + "ag.value as active_greeting, em.value as external_mwi, "
+@@ -87,6 +88,8 @@ public class ValidUsersConfig extends XmlFile {
+             + "AND v.path='permission/call-handling/AutoAttendant' "
+             + "left join setting_value vs on u.value_storage_id = vs.value_storage_id "
+             + "AND vs.path='permission/call-handling/Voicemail' "
++            + "left join setting_value vpr on u.value_storage_id = vpr.value_storage_id "
++            + "AND vpr.path='permission/call-handling/PersonalRecorder' "
+             + "left join setting_value vb on u.value_storage_id = vb.value_storage_id "
+             + "AND vb.path='voicemail/mailbox/user-busy-prompt' "
+             + "left join setting_value vt on u.value_storage_id = vt.value_storage_id "
+@@ -215,6 +218,11 @@ public class ValidUsersConfig extends XmlFile {
+                         PermissionName.VOICEMAIL));
+                 userEl.addElement(ELEMENT_NAME_HASVOICEMAIL).setText(
+                         Boolean.toString(voicemail.equals(Permission.ENABLE)));
++                String personalRecorder = getValueFromResultSet(rs, "personal_recorder",
++                        getPermissionDefaultValue(userModel, Permission.CALL_PERMISSION_PATH,
++                        PermissionName.PERSONAL_RECORDER));
++                userEl.addElement(ELEMENT_NAME_HASPERSONALRECORDER).setText(
++                        Boolean.toString(personalRecorder.equals(Permission.ENABLE)));
+                 String userBusyPrompt = getValueFromResultSet(rs, "user_busy_prompt",
+                         settings.getSetting(MailboxPreferences.BUSY_PROMPT).getDefaultValue());
+                 if (userBusyPrompt != null) {
+diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/permission/PermissionName.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/permission/PermissionName.java
+index 804772a..0efd63a 100644
+--- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/permission/PermissionName.java
++++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/permission/PermissionName.java
+@@ -46,6 +46,8 @@ public enum PermissionName {
+ 
+     NO_ACCESS(Type.CALL, "NoAccess"),
+ 
++    PERSONAL_RECORDER(Type.CALL, "PersonalRecorder"),
++
+     /** Voicemail */
+     EXCHANGE_VOICEMAIL(Type.VOICEMAIL_SERVER, "ExchangeUMVoicemailServer"),
+ 
+diff --git a/sipXivr/meta/validusers.xsd.in b/sipXivr/meta/validusers.xsd.in
+index 0772aa3..f6df9d6 100644
+--- a/sipXivr/meta/validusers.xsd.in
++++ b/sipXivr/meta/validusers.xsd.in
+@@ -68,6 +68,14 @@
+       </annotation>
+    </element>
+ 
++   <element name="hasPersonalRecorder" type="boolean">
++      <annotation>
++         <documentation>
++            true if this user can record personal messages
++         </documentation>
++      </annotation>
++   </element>
++
+    <element name="userBusyPrompt" type="boolean">
+       <annotation>
+          <documentation>
+@@ -231,6 +239,7 @@
+             <element ref="tns:passtoken" maxOccurs="1" minOccurs="0"/>
+             <element ref="tns:inDirectory" maxOccurs="1" minOccurs="1"/>
+             <element ref="tns:hasVoicemail" maxOccurs="1" minOccurs="0"/>
++            <element ref="tns:hasPersonalRecorder" maxOccurs="1" minOccurs="0"/>
+             <element ref="tns:userBusyPrompt" maxOccurs="1" minOccurs="0"/>
+             <element ref="tns:voicemailTui" maxOccurs="1" minOccurs="0"/>
+             <element ref="tns:canRecordPrompts" maxOccurs="1" minOccurs="0"/>
+-- 
+1.7.4.4
+
