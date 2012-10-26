@@ -5,10 +5,11 @@ $mkiso_command = "usr/bin/mkisofs -v -U -J -R -T -m repoview -m boot.iso -b isol
 
 
 desc "initialize mock"
-task :init do
-     sh "mock -r fedora-14-x86_64 --init"
-     sh "mock -r fedora-14-x86_64 --install emacs-nox"
-     sh "mock -r fedora-14-x86_64 --install spin-kickstarts pungi"
+task :init [:distro="fedora-14"] do | distro |
+     distro = distro+"-x86_64"
+     sh "mock --configdir=mak/mock -r #{distro} --init"
+     sh "mock --configdir=mak/mock -r #{distro} --install emacs-nox"
+     sh "mock --configdir=mak/mock -r #{distro} --install spin-kickstarts pungi"
 end
 
 desc "create installer fs image"
