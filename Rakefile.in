@@ -29,6 +29,9 @@ def load_projects
   a.each() { | x |
     x.chomp!
   }
+  a = a.select { | x |
+    !x.start_with?("#")
+  }
   return a
 end
 
@@ -87,16 +90,8 @@ task :prereq do
   sh "sudo usermod -a -G mock $USER"
 end
 
-task :proxy_fixup do
-  if not File.exists?("#{$src_dir}/sipXproxy/src/SipXProxyCstaObserver.cpp")
-    sh "ln -s #{$our_dir}/resources/sipxproxy/SipXProxyCstaObserver.cpp /#{$src_dir}/sipXproxy/src/ "
-    sh "ln -s #{$our_dir}/resources/sipxproxy/SipXProxyCstaObserver.h /#{$src_dir}/sipXproxy/src/ "
-  end
-end
-
 desc "Inizializza il sistema per compilare localmente"
 task :build_env do
-    Rake::Task[:proxy_fixup].execute()
   if File.exists?("#{$build_dir}/config.status")
     Rake::Task[:prereq].invoke()
     sh "make {sipx,lib}.deps-list | grep -v sipx | xargs sudo yum install -y"
@@ -112,7 +107,6 @@ end
 
 task :create_mak do
   puts "add sip2ser stuff"
-  Rake::Task[:proxy_fixup].execute()
   p_list = load_projects
   f1 = IO.readlines("#{$our_dir}/mak/11-s2s.mk.in")
   f2 = File.new("#{$build_dir}/mak/11-s2s.mk","w")
@@ -135,7 +129,6 @@ end
 
 desc "Lancia il configure per attivare la modalita' di debug basta mettere come parametro la costante DEBUG"
 task :config, [ :jdb ] do |t, args|
-  Rake::Task[:proxy_fixup].execute()
   p_list = load_projects
   Rake::Task[:projects].execute({:action => "get" })
   if args[:jdb]=="DEBUG"
@@ -148,7 +141,6 @@ end
 
 desc "Gestisce l'integrazione dei progetti esterni"
 task :projects, [:action] do |t, args|
-  Rake::Task[:proxy_fixup].execute()
   p_list = load_projects
   if args[:action] == "list"
     puts p_list
@@ -172,7 +164,6 @@ end
 
 desc "Applica le patch staged"
 task :apply_staged  do 
-  Rake::Task[:proxy_fixup].execute()
   Dir.entries("#{$our_dir}/staged/").sort.each do | f |
     logger.info("Applico le patch staged")
     if not File.directory?(f) and f[-5..-1] == "patch"
