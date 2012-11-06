@@ -6,6 +6,8 @@
 @X Window System
 @GNOME Desktop Environment
 wireshark-gnome	
+getmail
+ssmtp
 telnet
 emacs-nox
 firefox
