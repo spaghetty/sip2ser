@@ -1,0 +1,38 @@
+From 1e7d8a8ee8a8c0593033c49b58cf5096c42f7e36 Mon Sep 17 00:00:00 2001
+From: Domenico Chierico <domenico.chierico@sip2ser.it>
+Date: Thu, 12 Jul 2012 12:40:40 +0200
+Subject: [PATCH] fix for \r\n control sequence
+
+---
+ sipXtackLib/src/net/SipClient.cpp |   15 +++++++++------
+ 1 files changed, 9 insertions(+), 6 deletions(-)
+
+diff --git a/sipXtackLib/src/net/SipClient.cpp b/sipXtackLib/src/net/SipClient.cpp
+index 55d05c0..715a775 100644
+--- a/sipXtackLib/src/net/SipClient.cpp
++++ b/sipXtackLib/src/net/SipClient.cpp
+@@ -670,12 +670,15 @@ int SipClient::run(void* runArg)
+ 
+          // Note that input was processed at this time.
+          touch();
+-
+-         if ((res == 2 &&
+-              readBuffer(0) == '\r' && readBuffer(1) == '\n') ||
+-             (res == 4 &&
+-              readBuffer(0) == '\r' && readBuffer(1) == '\n' &&
+-              readBuffer(2) == '\r' && readBuffer(3) == '\n'))
++	 int crlfCount = 0;
++	 for (int i = 0; i < res; i+=2) {
++	   if (readBuffer(i) == '\r' && readBuffer(i+1) == '\n')
++	     crlfCount+=2;
++	   else
++	     break;
++	 }
++
++         if (crlfCount == res)
+          {
+              repeatedEOFs = 0;
+              // The 'message' was a keepalive (CR-LF or CR-LF-CR-LF).
+-- 
+1.7.4.4
+
