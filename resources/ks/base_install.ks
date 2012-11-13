@@ -10,7 +10,7 @@
 #part iso --size=4998
 
 # Add the repos you wish to use to compose here.  At least one of them needs group data.
-repo --name=fedora --mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=fedora-14&arch=x86_64
+repo --name=fedora --baseurl="http://192.168.69.40/releases/14/Everything/x86_64/os/"
 #repo --name=fedora-source  --mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=fedora-source-14&arch=x86_64
 repo --name="Opsip" --baseurl="http://192.168.64.35/unstable_repo/Fedora_14/x86_64/" --noverifyssl
 repo --name="Opsip-source" --baseurl="http://192.168.64.35/unstable_repo/Fedora_14/source/" --noverifyssl
