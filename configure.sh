@@ -41,14 +41,17 @@ echo  "setting up some environments ...."
 
 LIBS=$sip2ser_dir/libs/*
 
-for f in $LIBS
-do
-  dest=$(basename $f)
-  if [[ ! -e $src_dir/$dest ]]; then
-      echo "Processing $f folder..."
-      ln -s $f $src_dir/$dest
-  fi
-done
+if [ "$(ls -A `dirname $LIBS`)" ]; then
+    for f in $LIBS
+    do
+	dest=$(basename $f)
+	echo $dest " -> " $f
+	if [[ ! -e $src_dir/$dest ]]; then
+	    echo "Processing $f folder..."
+            ln -s $f $src_dir/$dest
+	fi
+    done
+fi
 
 echo -ne "checking for  availability .....\t\t"
 
