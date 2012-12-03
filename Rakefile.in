@@ -136,7 +136,7 @@ task :config, [ :jdb ] do |t, args|
   else
     sh "#{$src_dir}/configure #{base_config_string}"
   end
-  Rake::Task[:create_mak].invoke()
+  #Rake::Task[:create_mak].invoke()
 end
 
 desc "Gestisce l'integrazione dei progetti esterni"
