@@ -20,4 +20,4 @@ refresh: wiki/Installazione_di_Opsip46.html
 	./html2latex wiki/Installazione_di_Opsip46.html
 
 wiki/Installazione_di_Opsip46.html:
-	wget --user spaghetty --password provolone123  http://track.sip2ser.net/projects/sip2ser/wiki/Installazione_di_Opsip46.txt -O wiki/Installazione_di_Opsip46.html
+	wget http://track.sip2ser.net/projects/sip2ser/wiki/Installazione_di_Opsip46.txt -O wiki/Installazione_di_Opsip46.html
