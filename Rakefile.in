@@ -147,7 +147,7 @@ task :projects, [:action] do |t, args|
   elsif args[:action] == "get"
     p_list.each { | x |
       # here we need a more sophisticate techniques to manage exact git revision checkout
-      if not File.directory? "#{$src_dir}/#{x}"
+      if not File.directory? "#{$src_dir}/#{x}" and not x.starts_with?("#")
         sh "git clone http://git.sip2ser.net/#{x.downcase} #{$src_dir}/#{x}"
       end
     }
