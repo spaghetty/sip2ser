@@ -1,0 +1,7 @@
+Work with html2tex:
+
+go into HTML folder and run 
+
+perl MakeFile.PL
+
+install missed package and then re run the script
