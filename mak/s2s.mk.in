@@ -1,0 +1,53 @@
+# Initial Version Copyright (C) 2010 eZuce, Inc., All Rights Reserved.
+# Licensed to the User under the LGPL license.
+# 
+
+#OPTIONS = @OPTIONS@ 
+
+s2s_REPO = http://git.sip2ser.net
+s2s_BRANCH = opsip-release4.6
+
+s2s = \
+	s2sOpsip
+
+
+help.s2s=Build all s2s components
+
+all = $(sipx) $(lib) $(s2s)
+
+.PHONY: s2s s2s.%
+
+s2s : s2s.build
+
+s2s.% : 
+	$(MAKE) $(foreach P,$(s2s),$(P))
+
+$(foreach T,$(s2s),$(T)) : % : %.build;
+$(foreach T,$(s2s),$(T)...) : %... : %.build...;
+$(foreach T,$(s2s),$(T).build) : %.build : %.autoreconf %.configure %.all-install ;
+
+help.s2s.all-install=Run 'make all install' in each target
+$(foreach T,$(s2s),$(T).all-install) : %.all-install : %.all %.install ;
+
+# TODO: Needs to support switching branches automatically
+$(foreach P,$(s2s),$(SRC)/$(P)) : $(SRC)/% : 
+	@echo "getting" $(s2s_REPO)/$(call lowercase,$*)
+	@echo $*.git "->" $@
+	git clone $(s2s_REPO)/$(call lowercase,$*) $*.git
+	mv $*.git $
+	git --git-dir=$@/.git --work-tree=$@ checkout $(s2s_BRANCH)
+
+
+# Targets for s2s. 
+$(foreach P,$(s2s),$(P).install) :; $(MAKE) -C $(PROJ) install
+$(foreach P,$(s2s),$(P).clean) :; $(MAKE) -C $(PROJ) clean
+$(foreach P,$(s2s),$(P).check) :; $(MAKE) -C $(PROJ) check
+
+
+# projects do not all have an "all" target, they probably should, until then, use
+# no-target default
+$(foreach C,all,$(foreach T,$(s2s),$(T).all)) :
+	$(MAKE) -C $(PROJ)
+
+
+
