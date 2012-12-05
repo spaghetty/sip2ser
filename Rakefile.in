@@ -14,6 +14,8 @@ logger = Logger.new($log_file)
 
 base_config_string="--cache-file=`pwd`/ac-cache-file --prefix=/opt/`pwd | gawk -F /  '{ print $NF  }'` SIPXPBXUSER=`whoami` SIPXECS_NAME=OpSip OPENFIRE_HOME=/opt/openfire/ --enable-mrtg --enable-agent --enable-rpm"
 
+iso_config_string="--enable-centos-iso ISO_DIR=./ RPM_DIST_DIR=./repo CENTOS_RSYNC_URL=rsync://mirrors.rit.edu"
+
 packages_base = "autoconf automake make libtool createrepo gcc-c++ \
  rpm-build ruby rubygem-treetop rubygem-polyglot rubygem-mail rubygem-net-scp \
  rubygem-zip rubygem-libxml rubygem-rmail rubygem-htmlentities-4.3.1 rubygem-rake \
@@ -133,8 +135,16 @@ task :config, [ :jdb ] do |t, args|
   Rake::Task[:projects].execute({:action => "get" })
   if args[:jdb]=="DEBUG"
     sh "#{$src_dir}/configure  JAVAC_DEBUG=on #{base_config_string}"
+    sh "rm -f 111-ISO"
+    sh "touch 111-BUILD"
+  elsif args[:jdb]=="ISO"
+    sh "#{$src_dir}/configure #{iso_config_string}"
+    sh "rm -f 111-BUILD"
+    sh "touch 111-ISO"
   else
     sh "#{$src_dir}/configure #{base_config_string}"
+    sh "rm -f 111-ISO"
+    sh "touch 111-BUILD"
   end
   #Rake::Task[:create_mak].invoke()
 end
