@@ -1,0 +1,20 @@
+%this is the main template for tecnical docs 
+
+\documentclass[11pt,a4paper,oneside,draft]{report}
+\usepackage[english,italian]{babel}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage[left=2cm,top=1cm,right=2cm]{geometry}
+\graphicspath{{img/}}
+\setlength{\parindent}{0px}
+\input{authoring.tex}
+
+\title{Opsip \\ The Unified Communication System}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\input{content.tex}
+\end{document}

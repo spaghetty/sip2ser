@@ -110,7 +110,7 @@ end
 task :create_mak do
   puts "add sip2ser stuff"
   p_list = load_projects
-  f1 = IO.readlines("#{$our_dir}/mak/11-s2s.mk.in")
+  f1 = IO.readlines("#{$our_dir}/mak/s2s.mk.in")
   f2 = File.new("#{$build_dir}/mak/11-s2s.mk","w")
   f1.each do | x |
     if x.include?("{% projects %}")
@@ -146,7 +146,7 @@ task :config, [ :jdb ] do |t, args|
     sh "rm -f 111-ISO"
     sh "touch 111-BUILD"
   end
-  #Rake::Task[:create_mak].invoke()
+  Rake::Task[:create_mak].invoke()
 end
 
 desc "Gestisce l'integrazione dei progetti esterni"

@@ -1,0 +1,65 @@
+\section{Installare Opsip da codice sorgente}
+
+Considerando un sistema Centos \textsuperscript{\textregistered} 6 correttamente installato e funzionante procediamo alla installazione del prodotto.
+
+Prima di procedere con ogni altro passo assicurarsi di aver effettuato le fasi di preinstallazione:
+
+\subsection{configurare correttamente l'utente}
+
+Per poter procedere \`e necessario che l'utente abbia i permessi per eseguire comandi privileggiati quindi:
+
+abilitare il gruppo wheel per gli utenti con permessi si superadmin 
+
+\begin{verbatim}
+root$ vm /etc/sudoers trovare la linea dove parla di wheel e decommentare
+\end{verbatim}
+
+aggiungere il gruppo wheel all'utente di amministrazione 
+
+\begin{verbatim}
+usermod -G wheel -a $USER
+\end{verbatim}
+
+fare logout e rinetrare in modo che abbia effetto la modifica della lista dei gruppi
+
+\subsection{installazione pacchetti necessari}
+
+I prima battuta fare un completo aggiornamento del sistema
+
+\begin{verbatim}
+sudo yum update
+\end{verbatim}
+
+Installare vari pacchetti:
+\begin{verbatim}
+sudo yum install emacs-nox 
+\end{verbatim}
+
+\subsection{attivare servizi}
+attivare sshd e named(bind)
+
+\begin{verbatim}
+$sudo yum install openssh-server bind
+$sudo chkconfig sshd on
+$sudo service sshd start
+$sudo chkconfig named on 
+$sudo service named start
+\end{verbatim}
+
+Dopo aver installato fedora nella release corretta si puo' procedere con il processo di installazione. Occorrera\` innanzitutto recuperare il codice sorgente dell'intero progetto effettuando i seguenti passi:
+
+\subsection{retrieve codice sorgente}
+
+Recuperare i sorgenti del progetto (questo task richiede circa 90 minuti) 
+
+\begin{verbatim}
+$git clone git://github.com/dhubler/sipxecs.git
+$cd sipxecs  
+$git clone http://git.sip2ser.net/sip2ser
+\end{verbatim}
+
+Utilizzare 
+$git submodule init 
+$git submodule update
+entrare nel tree di sipxecs e selezionare il branch release-4.6 [ git checkout release-4.6 ]
+entrare nel tree di sip2ser e selezionare il branch opsip-release4.6 [ git checkout opsip-release4.6 ]
