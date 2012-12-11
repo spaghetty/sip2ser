@@ -90,6 +90,52 @@ $sudo yum install epel-release
 
 Tale step creer\`a il file \emph{/etc/yum.repo.d/epel.repo}
 
+\subsection{preparazione dell'ammbiente di build e installazione}
+
+Per poter effettuare una compilazione ordinata verr\`a creata una directori nel tree di sipxecs''
+
+\begin{verbatim}
+$cd sipxecs
+$mkdir build
+\end{verbatim}
+
+Occorrer\`a creare la base directory per l'installazione:
+
+\begin{verbatim}
+$sudo mkdir /opt/build
+$sudo chown $uSER:$USER /opt/build
+\end{verbatim}
+
+E adesso possibile lanciare i comandi per la configurazione dell'environment:
+
+\begin{verbatim}
+$cd build (spostarsi nella directory di build nel tree di sipxecs)
+$../sip2ser/configure.sh 
+\end{verbatim}
+
+Adesso all'interno della directory build nel tree di sipxecs sara' presente un file ``Rakefile''. Si puo' procedere con l'inizializzazione della configurazione dell'ambiete di build:
+
+\begin{verbatim}
+$rake config (nel caso alcuni base package debbano essere installati occorre rilanciare il comando)
+\end{verbatim}
+
+Preparazione dell'ambiente di build:
+
+\begin{verbatim}
+$rake build_env  (attenzione ad immettere la password)
+\end{verbatim}
+
+
+\subsection{Fase di compilazione e installazione}
+
+%%%%%%%%%%TO BE COMPLETED
+%build di sipx [ make sipx ]
+%per il build dei progetti interno sip2ser occorre effettuare:
+%build di sipx [ make s2s ] ( build completo di tutti i progetti sip2ser )
+
+%NB: per eventuali rpm mancanti in centos6 verificarne l'esistenza in http://repo.openfusion.net/centos6-x86_64/
+%%%%%%%%%%%%%%
+
 \section{Fasi di postinstal}
 
 Per quanto riguarda la gestione dei servizi esterni come:
