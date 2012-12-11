@@ -55,6 +55,8 @@ Recuperare i sorgenti del progetto (questo task richiede circa 90 minuti)
 \begin{verbatim}
 $git clone git://github.com/dhubler/sipxecs.git
 $cd sipxecs  
+$git submodule init 
+$git submodule update
 $git clone http://git.sip2ser.net/sip2ser
 \end{verbatim}
 
@@ -67,6 +69,7 @@ Ad esempio per la versione 4.6 \`e necessario segiure i seguenti comandi:
 
 \begin{verbatim}
 $cd sipXecs
+
 $git checkout release-4.6
 $cd sip2ser
 $git checkout opsip-release4.6
@@ -79,6 +82,13 @@ $git submodule init
 $git submodule update
 \end{verbatim}
 
+Il passo successivo e' quello di intallare i repository aggiuntivi per Centos:
+
+\begin{verbatim}
+$sudo yum install epel-release
+\end{verbatim}
+
+Tale step creer\`a il file \emph{/etc/yum.repo.d/epel.repo}
 
 \section{Fasi di postinstal}
 
@@ -92,3 +102,4 @@ Per quanto riguarda la gestione dei servizi esterni come:
 
 bisogna controllare una volta attivati che non sia inserito il flag ``unmanaged'' che permette di far riferimento a servizi esterni.
 Per le note su come cambiare le configurazioni di questi servizi fare riferimento alla specifica sezione del manuale utente.
+

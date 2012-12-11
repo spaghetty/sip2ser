@@ -1,0 +1,20 @@
+\section{Generazione del CD di installazione}
+
+\begin{enumerate}
+\item Download della ISO di Centos (esenpio in /home/myuser/Downloads) : 
+\begin{verbatim}
+wget http://centos.fastbull.org/centos/6.3/isos/x86_64/CentOS-6.3-x86_64-minimal.iso
+\end{verbatim}
+
+\item spostarsi nella directory del tree di sipxecs e creare la cartella 
+
+\item Lanciare il configure per il supporto alla generazione del cd: 
+\begin{verbatim}
+../configure --enable-centos-iso ISO_DIR=/home/myuser/Downloads RPM_DIST_DIR=/home/myuser/sipxecs/repo CENTOS_RSYNC_URL=rsync://mirrors.rit.edu
+\end{verbatim}
+
+\item Lanciare la generazione del CD: 
+\begin{verbatim}
+make iso-64
+\end{verbatim}
+\end{enumerate}
