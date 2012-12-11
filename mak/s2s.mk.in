@@ -26,7 +26,10 @@ $(foreach T,$(s2s),$(T)) : % : %.build;
 $(foreach T,$(s2s),$(T)...) : %... : %.build...;
 $(foreach T,$(s2s),$(T).build) : %.build : %.autoreconf %.configure %.all-install ;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> parent of d961b23... added new stuff for cd generation
 help.s2s.all-install=Run 'make all install' in each target
 $(foreach T,$(s2s),$(T).all-install) : %.all-install : %.all %.install ;
 
@@ -34,8 +37,7 @@ $(foreach T,$(s2s),$(T).all-install) : %.all-install : %.all %.install ;
 # Define s2s SRPMS and tarball files. Cannot define RPM files however as one specfile may generate many rpms
 $(foreach P,$(s2s),$(eval $(P)_SRPM = $$(call lowercase,$(P))-$(PACKAGE_VERSION)-$$(PROJ_REVISION).src.rpm))
 $(foreach P,$(s2s),$(eval $(P)_TAR = $(P)/$$(call lowercase,$(P))-$(PACKAGE_VERSION).tar.gz))
-CREATEREPO_COMPS = $(SRC)/sip2ser/mak/mycomps.xml
-repo-comps : $(SRC)/sip2ser/mak/mycomps.xml
+
 $(foreach T,$(all),$(T).rpm) : %.rpm : %.autoreconf %.configure %.dist %.srpm %.rpm-by-mock
 
 # TODO: Needs to support switching branches automatically
@@ -43,7 +45,7 @@ $(foreach P,$(s2s),$(SRC)/$(P)) : $(SRC)/% :
 	@echo "getting" $(s2s_REPO)/$(call lowercase,$*)
 	@echo $*.git "->" $@
 	git clone $(s2s_REPO)/$(call lowercase,$*) $*.git
-	mv $*.git $@
+	mv $*.git $
 	git --git-dir=$@/.git --work-tree=$@ checkout $(s2s_BRANCH)
 
 

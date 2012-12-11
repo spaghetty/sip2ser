@@ -1,6 +1,0 @@
-SPLASH_FILE = @OEM_DIR@/splash.lss
-ISO_LABEL ?= ezuce
-VOLUME_LABEL ?= "ezuce @PACKAGE_VERSION@"
-APPLICATION_LABEL ?= "ezuce @PACKAGE_VERSION@"
-PUBLISHER_ID ?= dhubler@ezuce.com
-PREPARERER_ID ?= dhubler@ezuce.com
