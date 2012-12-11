@@ -1,0 +1,31 @@
+\section{Installare Opsip da CD}
+
+\begin{enumerate}
+\item Scegliere l'opzione Installare sipXecs
+
+\item Scegliere il network device per l'installazione (tipicamente eth0)
+
+\item Configurare la parte di rete: Disabilitare la parte IPV6 e configurare a mano la parte IPV4
+
+\item Assegnare IP, gateway e nome server
+
+\item Procedere con la normale installazione di CentOS 6 (dati amministrazione e partizionamento)
+\end{enumerate}
+
+Al primo accesso viene avviata la configurazione del sistema opsip in cui e' possibile:
+
+\begin{itemize}
+\item configurare i parametri di rete. Questa operazione permette di riconfigurare i parametri di rete nel caso in cui ci siano stati errori nella configurazione in fase di installazione (passo 2 della procedura). Tale sezione permette di effettuare la configurazione dei device di rete (assegnare nuovamente IP gateway e server name) e dei DNS (DNS primario secondiario e terziario, nome del dominio e dell'host).
+
+\item installare il server come primo server o facente parte di un cluster gia' esistente (nella configurazione base il server non e' in cluster, quindi scegliamo l'opzione ``y'' ossia ``first server'' )
+
+\item Configurare il SIP domain. Se si sta configurando un server come unico server dell'impianto (non facente parte di un cluster), si puo' utilizzare il valore ``localdomain''. (come indicato anche dalle indicazioni a video)
+
+\item Configurare il SIP realm name. Solitamnete lo stesso del SIP domain configurato al passo precedente.
+
+\item Configurare l'host name. Utilizzare localhost come suggerito da sistema se si tratta dell'unico server dell'impianto e per facilitare l'installazione.
+
+\item Configurare il dominio di rete.
+\end{itemize}
+
+A questo punto viene mostrato il dettaglio della cofigurazione risultante, con la possibilita' di cambiarla se qualcosa risultasse errato.

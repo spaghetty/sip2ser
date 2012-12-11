@@ -55,11 +55,23 @@ Recuperare i sorgenti del progetto (questo task richiede circa 90 minuti)
 \begin{verbatim}
 $git clone git://github.com/dhubler/sipxecs.git
 $cd sipxecs  
+$git submodule init 
+$git submodule update
 $git clone http://git.sip2ser.net/sip2ser
 \end{verbatim}
 
-Utilizzare 
-$git submodule init 
-$git submodule update
-entrare nel tree di sipxecs e selezionare il branch release-4.6 [ git checkout release-4.6 ]
-entrare nel tree di sip2ser e selezionare il branch opsip-release4.6 [ git checkout opsip-release4.6 ]
+Per installare la corretta versione del prodotto occorre spostarsi sui corrispondenti branch del progetto:
+
+\begin{verbatim}
+$git checkout release-4.6
+$cd sip2ser
+$git checkout opsip-release4.6
+\end{verbatim}
+
+Il passo successivo e' quello di intallare i repository aggiuntivi per Centos:
+
+\begin{verbatim}
+$sudo yum install epel-release
+\end{verbatim}
+
+Tale step creer\`a il file \emph{/etc/yum.repo.d/epel.repo}
