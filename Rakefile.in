@@ -17,11 +17,8 @@ base_config_string="--cache-file=`pwd`/ac-cache-file --prefix=/opt/`pwd | gawk -
 iso_config_string="--enable-centos-iso ISO_DIR=./ RPM_DIST_DIR=./repo CENTOS_RSYNC_URL=rsync://mirrors.rit.edu"
 
 packages_base = "autoconf automake make libtool createrepo gcc-c++ \
- rpm-build ruby rubygem-treetop rubygem-polyglot rubygem-mail rubygem-net-scp \
- rubygem-zip rubygem-libxml rubygem-rmail rubygem-htmlentities-4.3.1 rubygem-rake \
- libxml2 libxml2-devel js git wget  mock thttpd \
- python-psycopg2 python-twisted-web python-lxml python-httplib2 sipx-openfire freeswitch-ruby"
-
+ rpm-build ruby libxml2 libxml2-devel js git wget  mock thttpd \
+ "
 
 gem_extra = ""
 
@@ -36,48 +33,6 @@ def load_projects
   }
   return a
 end
-
-# packages_mock = "git
-# mock 
-# thttpd"
-
-# # NON VENGONO USATI
-# packages_lev1 = "ant-commons-logging
-# ant-junit
-# ant-nodeps
-# ant-trax
-# apr-devel
-# automake
-# cppunit-devel
-# doxygen
-# findutils
-# gcc-c++
-# httpd-devel
-# jakarta-commons-beanutils
-# jakarta-commons-collections
-# java-devel
-# js
-# net-snmp-devel
-# nsis
-# openssl-devel
-# pcre-devel
-# python
-# ruby
-# ruby-devel
-# rubygem-rake
-# rubygems
-# shadow-utils
-# stunnel
-# unixODBC-devel
-# xalan-j2
-# xerces-c-devel
-# zip
-# patch
-# patchutils
-# freeswitch-ruby" # ESL
-
-# import "tests/tests.rake"
-
 
 task :default => :config
 

@@ -45,10 +45,9 @@ if [ "$(ls -A `dirname $LIBS`)" ]; then
     for f in $LIBS
     do
 	dest=$(basename $f)
-	echo $dest " -> " $f
 	if [[ ! -e $src_dir/$dest ]]; then
 	    echo "Processing $f folder..."
-            ln -s $f $src_dir/$dest
+	    ln -s $f $src_dir/$dest
 	fi
     done
 fi
@@ -89,3 +88,18 @@ else
 	echo "autoreconf missing: remember to run prereq task and then rerun autoreconfig -if"
     fi
 fi
+
+GIT_DIR=$src_dir/.git
+GUILT_DIR=$GIT_DIR/patches
+[ ! -d "$GUILT_DIR" ] && ln -s "$sip2ser_dir/patches" "$GUILT_DIR"
+mkdir -p "$GUILT_DIR/$branch"
+touch "$GUILT_DIR/$branch/series"
+touch "$GUILT_DIR/$branch/status"
+
+mkdir -p "$GIT_DIR/hooks/guilt"
+cat > "$GIT_DIR/hooks/guilt/delete" <<EOF
+#!/bin/sh
+# Usage: <script> <patch being removed>
+
+echo "Removing patch '\$1'..."
+EOF
