@@ -1,0 +1,279 @@
+#!/usr/bin/env ruby
+
+require 'find'
+require 'optparse'
+require 'fileutils'
+
+$DEST_LANG=""
+$SEARCHPATH=["sipXconfig"]
+
+class LocalizationFile 
+  attr_reader :fname, :original_path, :final_path
+  def self.is_valid(name) 
+    return (/WEB-INF.+\/.+/.match(name) or /sipxpbx.+\/.+/.match(name))
+  end
+
+  def self.createLF(path)
+    return nil if not is_valid(path)
+    c = LocalizationFile.new(path)
+  end
+
+  def save_defined(map) 
+    @defined = map
+  end
+
+  def initialize(path)
+    @fname = File.basename(path)
+    @original_path = File.dirname(path)
+    @final_path = nil
+    x = /(WEB-INF.+)/.match(@original_path) # .+ is better but gives some errors
+    dest_path=nil
+    if x == nil:
+        x = /(sipxpbx.+)/.match(@original_path) # like above
+     if x == nil:
+         abort("error build final path for #{path} with #{@original_path}")
+     else
+       dest_path = x[1]
+     end
+    else
+      dest_path = File.join("sipxpbx",x[1])
+    end
+    @final_path = File.join("sipXlang-"+$DEST_LANG,dest_path,File.basename(@fname,".properties")+"_"+$DEST_LANG+".properties")
+  end
+  
+  def is_complete()
+    return (@final_path)
+  end
+
+  def exists?()
+    return File.exists?(@final_path)
+  end
+
+  def scan_keys(fname=nil)
+    defined={}
+    key = nil
+    continuation=nil
+    if not fname
+      fname = File.join(@original_path,@fname)
+    end
+    File.open(fname, "r") do | file |
+      while (line = file.gets)
+        if not line.start_with? "#"
+          if continuation
+            if key
+              defined[key] += line
+              continuation=(line=~/\\\s*$/)
+            else
+              continuation=nil
+            end
+          else
+            if line.index("=")
+              key, value = line.split("=",2)
+              defined[key] = value
+              continuation=(line=~/\\\s*$/)
+            else
+              continuation=nil
+            end
+          end
+        end
+      end
+    end
+    return defined
+  end
+
+  def check_for_keys(result)
+    keys = scan_keys(@final_path)
+    if @defined!=nil
+      @defined.each { | k,v | 
+        if not keys.has_key?(k)
+          result.add_key(k, v.chomp, @final_path)
+        end
+      }
+    else
+      puts "no such key defined for #{@final_path}"
+    end
+
+  end
+
+  def add_all_keys(result)
+    if @defined!=nil
+      @defined.each { | k,v |
+        result.add_key(k, v.chomp, @final_path)
+      }
+    end
+  end
+end
+
+class Results
+
+  def self.scan_keys(fname)
+    r = Results.new(nil)
+    key = nil
+    totvalue = ""
+    destfile = nil
+    File.open(fname, "r") do | file |
+      while (line = file.gets)
+        if not line.start_with? "#"
+          if not line.index("=")
+            if not line.index("#;")
+              if key
+                totvalue += line
+              end
+            else
+              value, destfile = line.split("#;",2)
+              totvalue += value
+            end
+          else
+            if not key
+              key, value = line.split("=", 2)
+            else 
+              value = line
+            end
+            if not line.index("#;")
+              totvalue += value
+            else
+              value, destfile = value.split("#;",2)
+              totvalue += value
+            end
+          end
+        end
+        if key and destfile
+          r.add_key(key, totvalue, destfile)
+          key = nil
+          totvalue = ""
+          destfile = nil
+        end
+      end
+    end
+    return r
+  end
+  
+  def initialize(fname)
+    @support_map = {}
+    @dest_file = fname
+  end
+
+  def add_key(key, value, dest_file)
+    if not @support_map.has_key?(dest_file)
+      @support_map[dest_file] = {}
+    end
+    @support_map[dest_file][key] = value
+  end
+
+  def writeOut()
+    fout = open(@dest_file, "w")
+    @support_map.each { | f, v |
+      v.each { | k, t|
+        fout.write("#{k}=#{t} #; #{f}\n")
+      }
+    }
+    fout.close()
+  end
+  
+  def show()
+    @support_map.each { | f, v |
+      puts "============================================================================="
+      puts "keys for file: #{f}"
+      puts "-----------------------------------------------------------------------------"
+      v.each { | k, t | 
+        puts "key ----> #{k} <-------------"
+        puts "#{t}"
+        puts "..................................................."
+      }
+      puts "============================================================================="
+    }
+  end
+
+  def apply()
+    @support_map.each { | f, v |
+      tmp = f.lstrip.rstrip
+      FileUtils.mkpath(File.dirname tmp) unless File.directory?( File.dirname tmp )
+      dest_file = open(tmp, "a+")
+      v.each { | k, t |
+        dest_file.write("#{k}=#{t}\n")
+      }
+      dest_file.close
+    }
+  end
+end
+
+# everythink starts here 
+if __FILE__==$0
+  options = {}
+  source_file = nil
+  optparse = OptionParser.new do |opts|
+    opts.banner = "Usage: example.rb [-s] -l language [input_file]"
+    
+    opts.on("-l", "--language [LANGUAGE]", "target language") do |l|
+      if l =~ /^[[:alpha:]]{2}$/
+        options[:language] = l
+      else
+        raise OptionParser::InvalidOption, "Language _#{l}_ isn't valid, use just 2 char value"
+      end
+    end
+    opts.on("-s", "--simulate", "just simulate the addition no actual write ") do |s|
+      options[:simulate] = s
+    end
+  end
+  begin
+    optparse.parse!
+  rescue *[OptionParser::InvalidOption, OptionParser::MissingArgument] => e
+    puts e
+    puts optparse
+  end
+  if ARGV.length > 1
+    puts "Too mutch file specified"
+    puts optparse
+  else
+    if ARGV.length>0 and not File.exists?(ARGV[0])
+      puts "No such file #{ARGV[0]}. Can't be considered as input"
+      puts optparse
+    else
+      source_file = ARGV[0]
+    end
+  end
+  $DEST_LANG=options[:language]
+  begin
+    if source_file == nil #scan files to match missing keys
+      if not options[:language]
+        raise OptionParser::MissingArgument, "If you want to scan a language for differences with official keys you must specify language option"
+      end
+      r = Results.new("missing.properties")
+      for d in $SEARCHPATH do
+        Find.find(d) do |x|
+          if x.end_with? ".properties"
+            valid_file = LocalizationFile.createLF(x)
+            if valid_file
+              valid_file.save_defined(valid_file.scan_keys())
+              if valid_file.is_complete
+                if valid_file.exists?
+                  valid_file.check_for_keys(r)
+                else
+                  puts "missed file #{File.join(valid_file.original_path, valid_file.fname)} as #{valid_file.final_path}"
+                  valid_file.add_all_keys(r)
+                end
+              end
+            end
+          end
+          
+        end
+      end
+      r.writeOut()
+    else  # scan source file to import translated keys
+      if options[:language]
+        raise OptionParser::InvalidOption, "If you want apply you missing keys to specific translation you can't specify language option"
+      end
+      res = Results.scan_keys(source_file)
+      puts options
+      if options[:simulate]
+        res.show()
+      else
+        res.apply()
+        # puts "actual writing to translation project file isn't implementend at the moment"
+      end
+    end
+  rescue *[OptionParser::InvalidOption, OptionParser::MissingArgument] => e
+    puts e
+    puts optparse
+  end
+end
