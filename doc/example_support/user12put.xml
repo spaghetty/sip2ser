@@ -1,0 +1,14 @@
+<contact-information>
+  <homeAddress/>
+  <officeAddress/>
+  <branchAddress>
+    <street>Brunetti 8</street>
+  </branchAddress>
+  <imId></imId>
+  <useBranchAddress>false</useBranchAddress>
+  <branchName>BranchtTest</branchName>
+  <salutation>None</salutation>
+  <avatar>https://opsip6.s2slab.net/sipxconfig/rest/avatar/200</avatar>
+  <firstName>TEST</firstName>
+  <lastName>Prova</lastName>
+</contact-information>

@@ -1,0 +1,5 @@
+<call-sequence>
+  <rings/>
+  <expiration>30</expiration>
+  <withVoicemail>true</withVoicemail>
+</call-sequence>
