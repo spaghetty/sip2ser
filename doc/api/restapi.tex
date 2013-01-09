@@ -12,10 +12,10 @@ L'accesso remoto ai servizi di OpSip si struttura in quattro macrogruppi:
 \begin{tabular}{l |l}
 contesto & punto di accesso \\
 \hline
-servizi di amministrazione & \texttt{https://host.example.com/sipxconfig/rest} \\
-servizi utente & \texttt{https://host.example.com/sipxconfig/rest/my} \\
-servizi di chiamata & \texttt{https://host.example.com:6666/callcontroller/} \\
-servizi CDR & \texttt{https://host.example.com:6666/cdr/} \\
+servizi di amministrazione & \texttt{http://host.example.com/sipxconfig/rest} \\
+servizi utente & \texttt{http://host.example.com/sipxconfig/rest/my} \\
+servizi di chiamata & \texttt{http://host.example.com:6666/callcontroller/} \\
+servizi CDR & \texttt{http://host.example.com:6666/cdr/} \\
 \end{tabular}
 
 \medskip
@@ -32,10 +32,101 @@ Il portotipo dell'url da chiamare \'e indicato di seguito:
 
 \texttt{https://<username>:<passwd>@<host>/sipxconfig/rest/}
 
-<\bigskip
+\medskip
+
+I servizi di amministrazione possono essere raggruppati per ambito di pertinenza come segue:
+
+\medskip
+
+\subsubsection{Gestione Auto-attendant}
+
+\bigskip
+
+\begin{tabular}[c]{p{5cm} | c || p{5cm} || p{5cm}}
+Function Name & Parameters & Http Method & Notes \\
+\hline \hline
+\texttt{/auto-attendant} & & GET & Elenca tutti gli autorisponditori settati in Opsip \\
+\hline 
+\texttt{/auto-attendant/ operator/special} & & PUT\textbar  DELETE  & PUT Imposta l'attendant specificato come special attendant da usare, DELETE Ripulisce il valore del parametro dell'attendant specificato come special attendant da usare \\
+\hline
+\texttt{/auto-attendant/ operator/specialmode} & & GET\textbar PUT\textbar  DELETE  & GET Restituisce il valore del flag specialmode per autoattendant, PUT Imposta il valore del flag specialmode per autoattendant a true, DELETE Imposta il valore del flag specialmode per autoattendant a false \\
+\hline
+\end{tabular}
+
+\medskip
+
+\subsubsection{Gestione Telefoni e Rubriche}
+
+\bigskip
+
+\begin{tabular}[c]{p{5cm} | c || p{5cm} || p{5cm}}
+Function Name & Parameters & Http Method & Notes \\
+\hline \hline
+\texttt{/phone} & & POST & Consente di creare un telefono utilizzando un file xml per definire SerialNumber model e description \\
+\hline 
+\texttt{/phone/{serialNumber}/ profile/{profile-file}} & & GET  & Restituisce il profilo di un dato telefono presente in Opsip sulla base del suo serial number \\
+\hline
+\texttt{/phonebook/} & name & GET & Restutiuisce i contatti presenti in una specifica rubrica telefonica \\
+\hline
+\texttt{/phonebook} & & GET & Restituisce l'elenco di tutte le rubriche telefoniche in Opsip presenti nella sezione phonebooks \\
+\hline
+\end{tabular}
+
+\medskip
+
+\subsubsection{Gestione Permessi}
+
+\bigskip
+
+\begin{tabular}[c]{p{5cm} | c || p{5cm} || p{5cm}}
+Function Name & Parameters & Http Method & Notes \\
+\hline \hline
+\texttt{/permission} & & GET  & Restituisce l'elenco di tutte le permission definite per i dialing plan \\ 
+\hline 
+\texttt{/permission/} & name & GET\textbar PUT\textbar DELETE & GET Restituisce i dettagli di una specifica permission, PUT modifica o aggiunge un profilo, DELETE elimina un singolo profilo \\
+\hline
+\texttt{/user-group-permission} & & GET\textbar PUT & Mostra o modifica lo stato delle permission per tutti i gruppi di utenti \\
+\hline
+\texttt{/user-group-permission/} & id  & GET\textbar PUT & Mostra o modifica lo stato delle permission per uno spedicifco gruppo utenti \\
+\hline
+\texttt{/user-permission} &  & GET\textbar PUT & Restituisce o modifica l'elenco di le permission di ogni utente \\
+\hline
+\texttt{/user-permission/} & id  & GET\textbar PUT & Restituisce o modifica l'elenco di le permission di uno specifico utente \\
+\hline
+\end{tabular}
+
+
+\medskip
+
+\subsubsection{Altri servizi}
+
+\bigskip
+
+\begin{tabular}[c]{p{5cm} | c || p{5cm} || p{5cm}}
+Function Name & Parameters & Http Method & Notes \\
+\hline \hline
+\texttt{/avatar/} & user & GET & Restituisce l'avatar dell'utente specificato \\
+\hline 
+\texttt{/branch} &  & GET  & Restituisce  l'elenco dei branch creati per una suddivisione di utenti gateway e server (utile in caso di dislocazione degli apparati o degli utenti) \\
+\hline
+\texttt{/branch/} & id  & GET\textbar PUT\textbar DELETE & Restituisce modifica aggiunge o elimina un branch specifico \\
+\hline
+\texttt{/user-group} & & GET & Restituisce l'elenco dei gruppi di utenti \\
+\hline
+\texttt{/user-group/} & id & GET\textbar PUT\textbar DELETE & Restituisce modifica aggiunge o elimina i dettagli di uno specifico gruppo di utenti \\
+\hline
+\texttt{/user} &  & GET & Restituisce i dettagli degli utenti di sistema. Pin e Password non sono mostrate \\
+\hline
+\texttt{/user/} & id  & GET\textbar PUT\textbar DELETE & Restituisce modifica aggiunfe o elimina i dettagli di uno specifico utente di sistema. Pin e Password non sono mostrate \\
+\hline
+\end{tabular}
+
+
+\bigskip
 
 Come esempio d'uso vediamo la chiamata alla funzione ``phonebook''\footnote{come tool di test useremo \texttt{curl} che supporta tutti i metodi http(http://curl.haxx.se/)}:
 \bigskip
+
 
 \begin{lstlisting}
 % >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/phonebook"
@@ -45,39 +136,6 @@ Come esempio d'uso vediamo la chiamata alla funzione ``phonebook''\footnote{come
        </phonebooks>
 \end{lstlisting}
 
-%OpenACD
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-agent-group
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-agent-group/{id}
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-skill
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-skill/{id}
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-skill-group
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-skill-group/{id}
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-client
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-client/{id}
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-queue-group
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-queue-group/{id}
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-release-code
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-release-code/{id}
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-queue
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-queue/{id}
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-agent
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-agent/{id}
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-line
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-setting
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-line/{id}
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-dial-string
-% >> curl --digest -k -X GET "https://admin:123@host/sipxconfig/rest/openacd-dial-string/{id}
-
-\bigskip
-
-\begin{tabular}[c]{l | c || l || p{5cm}}
-Function Name & Parameters & Http Method & Notes \\
-\hline \hline
-\texttt{/phonebook} & & GET & Ritorna una lista (XML) con tutte le rubriche telefoniche definite nel sistema \\
-\hline 
-\texttt{/phonebook} & {name} & GET  & Ritorna una lista (CSV) degli elementi della lista \\
-\hline
-\end{tabular}
 
 \section{Servizi Utente}
 
@@ -85,10 +143,10 @@ Questa parte specifica di API si rivolge invece alle configurazioni specifiche d
 Il meccanismo e sempre il medesimo e nella richiesta la particella ``my'' aiuta a raggruppare visivamente queste funzionalita'.
 \bigskip
 
-\begin{tabular}[c]{ l | c || l || p{5cm}}
+\begin{tabular}[c]{ p{5cm} | c || l || p{5cm}}
 Function Name & Parameters & Http Method & Notes \\
 \hline \hline
-\texttt{/my/call/} & {to} & PUT/GET & Iniza una chiamata dall'untete che si autentica verso il numero specificato nel {to}.\\ \hline
+\texttt{/my/call/} & {to} & PUT & Iniza una chiamata dall'untete che si autentica verso il numero specificato nel {to}.\\ \hline
 \texttt{/my/voicemail/pin/} & {pin} & PUT & Cambia il personal PIN (sia quello della voice mail che quello del portale utente).\\ \hline
 \texttt{/my/conferences} & & GET & restituisce l'elenco delle stanze di conferenza associate allo specifico utente. \\ \hline
 \texttt{/my/conference/\emph{name}/change} & & PUT & Cambia lo stato di una conferenza. \\ \hline
@@ -96,21 +154,22 @@ Function Name & Parameters & Http Method & Notes \\
 \texttt{/my/search/phonebook/query=} & {search-elem} & GET & Rtrieve delle info relative a uno specifico contatto nella rubrica dell'utente \\ \hline
 \texttt{/my/phonebook} & & GET & Rtrieve dell'intera rubrica dell'utente \\ \hline
 \texttt{/my/pagedphonebook} & {start},{end} & GET & Retrieve dei contatti dell'utente dalla \emph{start} row  alla \emph{end} row  \\ \hline
-\texttt{/my/phonebook/entry/} & {entry-id} & GET not working& Rtrieve delle info relative a uno specifico contatto nella rubrica dell'utente con una specifica entry id\\ \hline
-\texttt{/my/phonebook/showContactsOnPhone/"} & {value} & PUT not wotrking & Modifica il flag per consentire la visualizzazione dei contatti su telefono \\ \hline
-\texttt{/my/voicemail/operator/} & {operator} & GET working with patch& Effetua la modifica dell'operatore (es.: una estensione) associato alla casella vocale \\ \hline
-\texttt{/my/phonebook/googleImport} & & not working &  \\ \hline
-\texttt{/my/forward} & & & Recupera i dettagli relativi al Call forwarding dell'utente \\ \hline
+\texttt{/my/phonebook/entry/} & {entry-id} & GET\textbar PUT\textbar POST\textbar DELETE & ?? \\ \hline
+\texttt{/my/phonebook/ showContactsOnPhone/} & {value} & PUT & Modifica il flag per consentire la visualizzazione dei contatti su telefono \\ \hline
+\texttt{/my/voicemail/operator} & & GET & Recupera il varore dell'operatore configurato per il personal autoattendant \\ \hline
+\texttt{/my/voicemail/operator/} & {operator} & PUT & Effetua la modifica dell'operatore (es.: una estensione) associato all' autoattendant \\ \hline
+\texttt{/my/phonebook/googleImport} & & POST & Importa i contatti da un account google \\ \hline
+\texttt{/my/forward} & & GET\textbar PUT & Recupera e imposta i dettagli relativi al Call forwarding dell'utente \\ \hline
 \texttt{/my/feed/voicemail/{folder}} & & not working & \\ \hline
-\texttt{/my/contact-information} & & & Recupera le informazioin dell'utente \\ \hline
-\texttt{/my/time} & & & Recupera data e ora del server host \\ \hline
-\texttt{/my/mailbox/{user}/preferences/activegreeting/} & {greeting} & & \\ \hline
+\texttt{/my/contact-information} & & GET\textbar PUT & Recupera e imposta le informazioin dell'utente \\ \hline
+\texttt{/my/time} & & GET & Recupera data e ora del server host \\ \hline
+\texttt{/my/mailbox/{user}/ preferences/activegreeting/} & greeting & PUT & Imposta il tipo di messaggio per la voicemail \\ \hline
 \texttt{/my/conferences} & & & elenca tutte le conferenze associate all'utente \\ \hline
 \texttt{/my/conference/{confName}/{command}} & & & esegue un comando per la conferenza dell'utente\\ \hline
-\texttt{/my/activecdrs} & & & \\ \hline
-\texttt{/my/logindetails} & & & \\ \hline
-\texttt{/my/redirect} & &not working & \\ \hline
-\texttt{/my/conferencedetails/{confName}} & & & \\ \hline
+\texttt{/my/activecdrs} & & GET & Mostra i dettagli sulle chiamate attive dell'utente \\ \hline
+\texttt{/my/logindetails} & & GET & Mostra i dettagli delle login dell'utente: UserName, imId .. \\ \hline
+\texttt{/my/redirect/} & url & GET\textbar PUT\textbar POST\textbar DELETE & Effettua redirect su un'altra url per callcontroller, cdr,  mailbox o media (utilizzare il metodo opportuno a seconda della url di destinazione) \\ \hline
+\texttt{/my/conferencedetails/} & confName & GET & Ritorna tutti i parametri della conferenza attiva \\ \hline
 \end{tabular}
 
 \bigskip
@@ -118,6 +177,7 @@ Alcuni esempi d'uso sono:
 \bigskip
 
 \begin{lstlisting}
+
 >>curl --digest -k -X GET "https://<us>:<pw>@<host>:8443/sipxconfig/rest/my/conferences"
 <<<conferences>
   <conference>
@@ -152,72 +212,6 @@ questo imposter\`a il pin utente a ``123''
 >> curl --digest -k -X PUT ``https://<us>:<pw>@<host>:8443/sipxconfig/rest/my/conference/ppp/change'' --data-binary ``<conference><name>ppp</name><enabled>true</enabled></conference>
 \end{lstlisting}
 
-
-\section{Servizi Autorisponditore}
-
-Questa parte specifica di API si rivolge invece alle configurazioni specifiche dell'auto risponditore di un utente.
-Il meccanismo e sempre il medesimo e nella richiesta la particella ``auto-attendant'' aiuta a raggruppare visivamente queste funzionalita'.
-\bigskip
-
-\begin{tabular}[c]{l | c || l || p{5cm}}
-Function Name & Parameters & Http Method & Notes \\
-\hline \hline
-\texttt{/auto-attendant} & & GET & Elenca tutti gli autorisponditori definiti in Opsip nella sezione Auto Attendants \\ \hline
-\texttt{/auto-attendant/{attendant}/special} & & PUT\textbar DELETE & PUT Imposta l'attendant specificato come special attendant da utilizzare, DELETE Rimuove l'attendant specificato come special attendant da utilizzare. \\ \hline
-\texttt{/auto-attendant/specialmode} & & GET\textbar PUT\textbar DELETE & GET Restituisce il valore del flag specialmode per autoattendant, PUT Imposta il valore del flag specialmode per autoattendant a true, DELETE Imposta il valore del flag specialmode per autoattendant a false \\ \hline
-\end{tabular}
-
-
-\section{Telefono e Rubrica}
-
-Questa parte specifica di API si rivolge invece alle configurazioni specifiche di telefoni e rubriche.
-Il meccanismo e sempre il medesimo e nella richiesta le particelle ``phone'' e ``phonebook'' aiutano a raggruppare visivamente queste funzionalita'.
-\bigskip
-
-\begin{tabular}[c]{l | c || l || p{5cm}}
-Function Name & Parameters & Http Method & Notes \\
-\hline \hline
-\texttt{/phone} & & & \\ \hline
-\texttt{/phone/{serialNumber}/profile/{name}} & & & \\ \hline
-\texttt{/phonebook} & & & \\ \hline
-\texttt{/phonebook/{name}} & & & \\ \hline\
-\end{tabular}
-
-\section{Permissions}
-
-Questa parte specifica di API si rivolge invece alle configurazioni specifiche dei permessi utente.
-Il meccanismo e sempre il medesimo e nella richiesta la particella ``permissions'' aiuta a raggruppare visivamente queste funzionalita'.
-\bigskip
-
-\begin{tabular}[c]{l | c || l || p{5cm}}
-Function Name & Parameters & Http Method & Notes \\
-\hline \hline
-\texttt{/permission} & & & \\ \hline
-\texttt{/permission/{name}} & & & \\ \hline
-\texttt{/user-group-permission} & & & \\ \hline
-\texttt{/user-group-permission/{id}} & & & \\ \hline
-\texttt{/user-permission} & & & \\ \hline
-\texttt{/user-permission/{id}} & & & \\ \hline
-\end{tabular}
-
-\section{Altre}
-
-Questa parte di API attiene ad altri vari tipi di servizi utili per un utilizzo ``remoto'' dei servizi telefonici di opsip.
-\bigskip
-
-\begin{tabular}[c]{l | c || l || p{5cm}}
-Function Name & Parameters & Http Method & Notes \\
-\hline \hline
-\texttt{/avatar/{user}} & & & \\ \hline
-\texttt{/branch} & & & \\ \hline
-\texttt{/branch/{id}} & & & \\ \hline
-\texttt{/user-group} & & & \\ \hline
-\texttt{/user-group/{id}} & & & \\ \hline
-\texttt{/user} & & & \\ \hline
-\texttt{/user/{id}} & & & \\ \hline
-\end{tabular}
-
-
 \subsection{Gestione Conference}
 
 Questa parte di API \'e una sottosezione della parte inerente ai ``Servizi Utente'' ed \`e relativa al controllo/gestione delle conference 
@@ -247,7 +241,7 @@ Function Name & Parameters & Http Method & Notes \\
 \end{tabular}
 
 
-\subsection{sipXrest servizi callcontroller e CDR }
+\section{sipXrest servizi callcontroller e CDR }
 SipXrest \`e un contenitore di servizi dedicati al controllo delle chiamate. Infatti, dato il crescente numero dei servizi e di richieste di integrazione di servizi sip all'interno di prodotti di terze parti, \`e nata l'esigenza di fornire pi\`u web services in grado, esternamente al sistema stesso, di garantire controllo sulle chiamate e sul loro monitoring.
 
 All'interno del progetto sipXrest ciascun plugin rappresenta un servizio specifico. 
@@ -255,18 +249,21 @@ All'interno del progetto sipXrest ciascun plugin rappresenta un servizio specifi
 I servizi esistenti nella release corrente sono i seguenti:
 
 
-\begin{tabular}[c]{l | p{5cm} || l || p{5cm}}
+\begin{tabular}[c]{p{6cm}| p{4cm} || l || p{5cm}}
 Function Name & Parameters & Http Method & Notes \\
 \hline \hline
-\texttt{/callcontroller/\{callingParty\}/\{calledParty\}} & agent & GET & consente di estrarre lo scambio di messaggi SIP di una chiamata in essere tra ``callingParty'' e ``calledParty''. \\ \hline
-\texttt{/callcontroller/\{callingParty\}/\{calledParty\}} & agent,sipMethod,action,target,timeout,subject,isForwardingAllowed,resultCacheTime & POST & consenti di effettuare una chiamata tra ``callingParty'' e ``calledParty''. \\ \hline
+\texttt{/callcontroller/ \{callingParty\}/\{calledParty\}} & agent & GET & consente di estrarre lo scambio di messaggi SIP di una chiamata in essere tra ``callingParty'' e ``calledParty''. \\ \hline
+\texttt{/callcontroller/ \{callingParty\}/\{calledParty\}} & agent,sipMethod,action, target,timeout,subject, isForwardingAllowed,resultCacheTime & POST & consenti di effettuare una chiamata tra ``callingParty'' e ``calledParty''. \\ \hline
 \texttt{/cdr/{user}} & limit,fromdate & GET & estrae i log delle chiamate relativi ad un utente specifico. Occorre specificare il numero massimo di record da estrarre e la data di inizio dei record. \\ \hline
 \end{tabular}
 
+\bigskip
 
 Il servizio callcontroller offre la possibilit\`a di avere una terza parte in grado di iniziare una chiamata fra due utenti e di intrvenire in chiamate chiamate gi\`' in essere per poter effettuare trasferte.
 
 Nella seguente tabella sono elencati i dettagli dei singoli parametri del servizio callcontroller.
+
+\bigskip
 
 \begin{tabular}[c]{l || c || p{5cm}}
 Parameter Name & Allowed Values & Notes \\
