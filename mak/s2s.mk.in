@@ -8,7 +8,8 @@ s2s_REPO = http://git.sip2ser.net
 s2s_BRANCH = opsip-release4.6
 
 s2s = \
-	s2sOpsip
+	s2sOpsip \
+	s2sFaxSpool
 
 
 help.s2s=Build all s2s components
