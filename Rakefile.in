@@ -14,7 +14,7 @@ logger = Logger.new($log_file)
 
 base_config_string="--cache-file=`pwd`/ac-cache-file --prefix=/opt/`pwd | gawk -F /  '{ print $NF  }'` SIPXPBXUSER=`whoami` SIPXECS_NAME=OpSip OPENFIRE_HOME=/opt/openfire/ --enable-mrtg --enable-agent --enable-rpm"
 
-iso_config_string="--enable-centos-iso ISO_DIR=./ RPM_DIST_DIR=./repo CENTOS_RSYNC_URL=rsync://mirrors.rit.edu"
+iso_config_string="--enable-centos-iso ISO_DIR=./ RPM_DIST_DIR=./repo CENTOS_RSYNC_URL=rsync://mirrors.rit.edu OEM_DIR=./iso-custom/"
 
 packages_base = "autoconf automake make libtool createrepo gcc-c++ \
  rpm-build ruby libxml2 libxml2-devel js git wget  mock thttpd \
