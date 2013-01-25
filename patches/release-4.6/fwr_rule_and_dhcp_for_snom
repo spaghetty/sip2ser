@@ -143,15 +143,15 @@ index 8ae8bbd..ce258c9 100644
  ntp: [ ntp1, ntp2 ]
  dns: [ dns1, dns2 ]
 diff --git a/sipXconfig/web/context/WEB-INF/sipXconfig-web.properties b/sipXconfig/web/context/WEB-INF/sipXconfig-web.properties
-index 3c997e5..70ef392 100644
+index 862e883..d432a7f 100644
 --- a/sipXconfig/web/context/WEB-INF/sipXconfig-web.properties
 +++ b/sipXconfig/web/context/WEB-INF/sipXconfig-web.properties
-@@ -371,6 +371,7 @@ address.parkUdp = Park SIP/UDP
+@@ -372,6 +372,7 @@ address.parkUdp = Park SIP/UDP
  address.parkRtp = Park RTP
  address.smtp=SMTP
- address.apacheHttp = HTTP (Port 80)
+ address.apacheHttp = HTTP
 +address.apacheHttpStatic = HTTP_STATIC (Port 8090)
- address.apacheHttps = HTTPS (Port 443)
+ address.apacheHttps = HTTPS
  address.sipxsqaQueue = Network Queue Pub/Sub
  address.sipxsqaControl = Network Queue Control
 diff --git a/sipXsupervisor/etc/dhcpd.erb b/sipXsupervisor/etc/dhcpd.erb
