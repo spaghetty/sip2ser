@@ -8,7 +8,8 @@ s2s_REPO = http://git.sip2ser.net
 s2s_BRANCH = opsip-release4.6
 
 s2s = \
-	s2sOpsip
+	s2sOpsip \
+	s2sFaxSpool
 
 
 help.s2s=Build all s2s components
@@ -35,7 +36,7 @@ $(foreach T,$(s2s),$(T).all-install) : %.all-install : %.all %.install ;
 $(foreach P,$(s2s),$(eval $(P)_SRPM = $$(call lowercase,$(P))-$(PACKAGE_VERSION)-$$(PROJ_REVISION).src.rpm))
 $(foreach P,$(s2s),$(eval $(P)_TAR = $(P)/$$(call lowercase,$(P))-$(PACKAGE_VERSION).tar.gz))
 
-$(foreach T,$(all),$(T).rpm) : %.rpm : %.autoreconf %.configure %.dist %.srpm %.rpm-by-mock
+$(foreach T,$(all),$(T).rpm) : %.rpm : %.autoreconf %.configure %.dist %.srpm
 
 # TODO: Needs to support switching branches automatically
 $(foreach P,$(s2s),$(SRC)/$(P)) : $(SRC)/% : 

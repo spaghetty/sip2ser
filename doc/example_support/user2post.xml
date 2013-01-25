@@ -1,0 +1,12 @@
+<phonebook>
+  <entry>
+    <number>4444</number>
+    <contact-information>
+      <homeAddress/>
+      <officeAddress/>
+      <imId>4444</imId>
+      <emailAddress>mammaliturchi@sip2ser.it</emailAddress>
+      <avatar/>
+    </contact-information>
+  </entry>
+</phonebook>

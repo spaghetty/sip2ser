@@ -1,0 +1,9 @@
+  <group id="24">
+    <name>external</name>
+    <permissions>
+      <setting>
+        <name>900Dialing</name>
+        <value>ENABLE</value>
+      </setting>
+    </permissions>
+  </group>
