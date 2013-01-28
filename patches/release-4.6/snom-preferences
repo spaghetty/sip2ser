@@ -1,0 +1,39 @@
+diff --git a/sipXsnom/etc/snom/line.xml b/sipXsnom/etc/snom/line.xml
+index f07dc48..51ac747 100644
+--- a/sipXsnom/etc/snom/line.xml
++++ b/sipXsnom/etc/snom/line.xml
+@@ -247,7 +247,7 @@
+     </setting>
+     <setting name="user_remove_all_bindings" advanced="yes">
+       <type refid="on-off" />
+-      <value>off</value>
++      <value>on</value>
+     </setting>
+     <setting name="user_subscription_expiry" advanced="yes">
+       <type>
+diff --git a/sipXsnom/etc/snom/phone.xml b/sipXsnom/etc/snom/phone.xml
+index d965fc4..b547b9e 100644
+--- a/sipXsnom/etc/snom/phone.xml
++++ b/sipXsnom/etc/snom/phone.xml
+@@ -302,7 +302,7 @@
+     </setting>
+     <setting name="guess_number" advanced="yes">
+       <type refid="on-off" />
+-      <value>on</value>
++      <value>off</value>
+     </setting>
+     <setting name="guess_start_length" advanced="yes">
+       <type>
+diff --git a/sipXsnom/etc/snom/snom.vm b/sipXsnom/etc/snom/snom.vm
+index b380d4c..071cedd 100644
+--- a/sipXsnom/etc/snom/snom.vm
++++ b/sipXsnom/etc/snom/snom.vm
+@@ -41,7 +41,7 @@ perm="R"#end
+ 	<tbook e="2">
+ #foreach ($entry in $phoneBook)
+ #set ($i = $velocityCount - 1)
+-#set ($fullName = "$!{entry.FirstName} $!{entry.LastName}")
++#set ($fullName = "$!{entry.LastName} $!{entry.FirstName}")
+ #set ($fullName = $fullName.trim())
+ 		<item context="active" type="none" index="${i}">
+ 			<name>$esc.xml($!fullName)</name>

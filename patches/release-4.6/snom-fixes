@@ -40,7 +40,7 @@ index a2fd9bf..d965fc4 100644
        <type>
          <string />
 diff --git a/sipXsnom/etc/snom/snom.vm b/sipXsnom/etc/snom/snom.vm
-index ee44341..2141327 100644
+index ee44341..9c1b316 100644
 --- a/sipXsnom/etc/snom/snom.vm
 +++ b/sipXsnom/etc/snom/snom.vm
 @@ -18,6 +18,7 @@ perm="R"#end
@@ -51,16 +51,16 @@ index ee44341..2141327 100644
  		<dkey_retrieve perm="R">speed 101</dkey_retrieve>
  
  		<!-- speeddial list -->
-@@ -40,7 +41,7 @@ perm="R"#end
- 	<tbook e="2">
- #foreach ($entry in $phoneBook)
- #set ($i = $velocityCount - 1)
--#set ($fullName = "$!{entry.FirstName} $!{entry.LastName}")
-+#set ($fullName = "$!{entry.LastName} $!{entry.FirstName}")
- #set ($fullName = $fullName.trim())
- 		<item context="active" type="none" index="${i}">
- 			<name>$esc.xml($!fullName)</name>
-@@ -57,9 +58,25 @@ perm="R"#end
+@@ -30,7 +31,7 @@ perm="R"#end
+ #set ($i = $velocityCount)
+ #foreach ($group in $line.Values)
+ #foreach ($setting in $group.Values)
+-		<${setting.ProfileName} idx="${i}" #perm( $setting )>$!{setting.Value}</${setting.ProfileName}>
++		<${setting.name} idx="${i}" #perm( $setting )>$!{setting.Value}</${setting.name}>
+ #end
+ #end
+ #end
+@@ -57,10 +58,72 @@ perm="R"#end
  #set ($context = $key.getSetting('context').Value)
  #set ($type = $key.getSetting('type').Value)
  #set ($number = $key.getSetting('number').Value)
@@ -87,3 +87,50 @@ index ee44341..2141327 100644
  		<fkey idx="${i}" context="$context" perm="R">$!fkeyValue</fkey>
  #end
  	</functionKeys>
++# Retrieving tftp server to provision web-language and language
++#set ($ip = $phone.PhoneContext.PhoneDefaults.TftpServer)
++
++        <web-languages>
++  	        <language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_CS.xml" name="Cestina"/>
++  		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_DA.xml" name="Dansk"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_DE.xml" name="Deutsch"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_EN.xml" name="English"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_ES.xml" name="Espanol"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_FR.xml" name="Francais"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_HE.xml" name="Hebrew"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_HU.xml" name="Hungarian"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_IT.xml" name="Italiano"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_NL.xml" name="Nederlands"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_NO.xml" name="Norsk"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_PT.xml" name="Portugues"/>
++ 		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_RU.xml" name="Russian"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_FI.xml" name="Suomi"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_SV.xml" name="Svenska"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_TR.xml" name="Turkce"/>
++        </web-languages>
++        <!-- Snom Language -->
++        <gui-languages>
++  	        <language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_CA.xml" name="Catalan"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_CS.xml" name="Cestina"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_DA.xml" name="Dansk"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_DE.xml" name="Deutsch"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_EN.xml" name="English"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_UK.xml" name="English(UK)"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_ES.xml" name="Espanol"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_ET.xml" name="Estonian"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_FR.xml" name="Francais"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_HE.xml" name="Hebrew"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_HU.xml" name="Hungarian"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_IT.xml" name="Italiano"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_NL.xml" name="Nederlands"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_NO.xml" name="Norsk"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_PL.xml" name="Polski"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_PT.xml" name="Portugues"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_RU.xml" name="Russian"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_SK.xml" name="Slovencina"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_FI.xml" name="Suomi"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_SV.xml" name="Svenska"/>
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_TR.xml" name="Turkce"/>
++        </gui-languages>
++
+ </settings>
