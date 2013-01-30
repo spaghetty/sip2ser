@@ -1,5 +1,5 @@
 diff --git a/sipXsnom/etc/snom/line.xml b/sipXsnom/etc/snom/line.xml
-index 422bc81..f07dc48 100644
+index 5b0555b..51ac747 100644
 --- a/sipXsnom/etc/snom/line.xml
 +++ b/sipXsnom/etc/snom/line.xml
 @@ -63,6 +63,7 @@
@@ -25,7 +25,7 @@ index 134d797..df9dd1f 100644
  Action_URLs.description=An Action URL triggers external URL in response to various events. \
  	For instance, on an incoming call, the "Incoming Call" URL is triggered.
 diff --git a/sipXsnom/etc/snom/phone.xml b/sipXsnom/etc/snom/phone.xml
-index a2fd9bf..d965fc4 100644
+index 4d81374..b547b9e 100644
 --- a/sipXsnom/etc/snom/phone.xml
 +++ b/sipXsnom/etc/snom/phone.xml
 @@ -1387,6 +1387,10 @@
@@ -40,7 +40,7 @@ index a2fd9bf..d965fc4 100644
        <type>
          <string />
 diff --git a/sipXsnom/etc/snom/snom.vm b/sipXsnom/etc/snom/snom.vm
-index ee44341..7feefeb 100644
+index 96eb5c2..7feefeb 100644
 --- a/sipXsnom/etc/snom/snom.vm
 +++ b/sipXsnom/etc/snom/snom.vm
 @@ -18,6 +18,7 @@ perm="R"#end
@@ -60,6 +60,15 @@ index ee44341..7feefeb 100644
  #end
  #end
  #end
+@@ -40,7 +41,7 @@ perm="R"#end
+ 	<tbook e="2">
+ #foreach ($entry in $phoneBook)
+ #set ($i = $velocityCount - 1)
+-#set ($fullName = "$!{entry.LastName} $!{entry.FirstName}")
++#set ($fullName = "$!{entry.FirstName} $!{entry.LastName}")
+ #set ($fullName = $fullName.trim())
+ 		<item context="active" type="none" index="${i}">
+ 			<name>$esc.xml($!fullName)</name>
 @@ -57,10 +58,72 @@ perm="R"#end
  #set ($context = $key.getSetting('context').Value)
  #set ($type = $key.getSetting('type').Value)
