@@ -1,79 +1,72 @@
 # Generated from net-scp-1.0.4.gem by gem2rpm -*- rpm-spec -*-
-%global gemname net-scp
-
-%global gemdir %(ruby -rubygems -e 'puts Gem::dir' 2>/dev/null)
-%global geminstdir %{gemdir}/gems/%{gemname}-%{version}
-%global rubyabi 1.8
+%define rbname net-scp
+%define version 1.0.4
+%define release 1
 
 Summary: A pure Ruby implementation of the SCP client protocol
-Name: rubygem-%{gemname}
-Version: 1.0.4
-Release: 1%{?dist}
-Group: Development/Languages
-License: GPLv2+ or Ruby
+Name: rubygems-%{rbname}
+
+Version: %{version}
+Release: %{release}
+Group: Development/Ruby
+License: Distributable
 URL: http://net-ssh.rubyforge.org/scp
-Source0: http://rubygems.org/gems/%{gemname}-%{version}.gem
-Requires: ruby(abi) = %{rubyabi}
-Requires: ruby(rubygems) >= 1.2
+Source0: %{rbname}-%{version}.gem
+# Make sure the spec template is included in the SRPM
+Source1: rubygems-%{rbname}.spec.in
+BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Requires: ruby 
-Requires: rubygem(net-ssh) >= 1.99.1
-BuildRequires: ruby(abi) = %{rubyabi}
-BuildRequires: ruby(rubygems) >= 1.2
+Requires: rubygems >= 1.3.7
+Requires: rubygem-net-ssh >= 1.99.1
 BuildRequires: ruby 
+BuildRequires: rubygems >= 1.3.7
 BuildArch: noarch
-Provides: rubygem(%{gemname}) = %{version}
+Provides: ruby(Net-scp) = %{version}
+
+%define gemdir /usr/lib/ruby/gems/1.8
+%define gembuilddir %{buildroot}%{gemdir}
 
 %description
 A pure Ruby implementation of the SCP client protocol
 
 
-%package doc
-Summary: Documentation for %{name}
-Group: Documentation
-Requires: %{name} = %{version}-%{release}
-BuildArch: noarch
-
-%description doc
-Documentation for %{name}
-
-
 %prep
-%setup -q -c -T
-mkdir -p .%{gemdir}
-gem install --local --install-dir .%{gemdir} \
-            --force %{SOURCE0}
+%setup -T -c
 
 %build
 
 %install
-mkdir -p %{buildroot}%{gemdir}
-cp -a .%{gemdir}/* \
-        %{buildroot}%{gemdir}/
+%{__rm} -rf %{buildroot}
+mkdir -p %{gembuilddir}
+gem install --local --install-dir %{gembuilddir} --force %{SOURCE0}
 
+%clean
+%{__rm} -rf %{buildroot}
 
 %files
-%dir %{geminstdir}
-%{geminstdir}/lib
-%{gemdir}/cache/%{gemname}-%{version}.gem
-%{gemdir}/specifications/%{gemname}-%{version}.gemspec
+%defattr(-, root, root)
+%doc %{gemdir}/gems/net-scp-1.0.4/CHANGELOG.rdoc
+%doc %{gemdir}/gems/net-scp-1.0.4/lib/net/scp/download.rb
+%doc %{gemdir}/gems/net-scp-1.0.4/lib/net/scp/errors.rb
+%doc %{gemdir}/gems/net-scp-1.0.4/lib/net/scp/upload.rb
+%doc %{gemdir}/gems/net-scp-1.0.4/lib/net/scp/version.rb
+%doc %{gemdir}/gems/net-scp-1.0.4/lib/net/scp.rb
+%doc %{gemdir}/gems/net-scp-1.0.4/lib/uri/open-scp.rb
+%doc %{gemdir}/gems/net-scp-1.0.4/lib/uri/scp.rb
+%{gemdir}/gems/net-scp-1.0.4/Rakefile
+%doc %{gemdir}/gems/net-scp-1.0.4/README.rdoc
+%{gemdir}/gems/net-scp-1.0.4/setup.rb
+%{gemdir}/gems/net-scp-1.0.4/test/common.rb
+%{gemdir}/gems/net-scp-1.0.4/test/test_all.rb
+%{gemdir}/gems/net-scp-1.0.4/test/test_download.rb
+%{gemdir}/gems/net-scp-1.0.4/test/test_scp.rb
+%{gemdir}/gems/net-scp-1.0.4/test/test_upload.rb
+%{gemdir}/gems/net-scp-1.0.4/Manifest
+%{gemdir}/gems/net-scp-1.0.4/net-scp.gemspec
 
-%files doc
-%doc %{gemdir}/doc/%{gemname}-%{version}
-%doc %{geminstdir}/CHANGELOG.rdoc
-%doc %{geminstdir}/lib/net/scp/download.rb
-%doc %{geminstdir}/lib/net/scp/errors.rb
-%doc %{geminstdir}/lib/net/scp/upload.rb
-%doc %{geminstdir}/lib/net/scp/version.rb
-%doc %{geminstdir}/lib/net/scp.rb
-%doc %{geminstdir}/lib/uri/open-scp.rb
-%doc %{geminstdir}/lib/uri/scp.rb
-%doc %{geminstdir}/README.rdoc
-%doc %{geminstdir}/Manifest
-%doc %{geminstdir}/Rakefile
-%doc %{geminstdir}/net-scp.gemspec
-%doc %{geminstdir}/setup.rb
-%doc %{geminstdir}/test/*
+
+%doc %{gemdir}/doc/net-scp-1.0.4
+%{gemdir}/cache/net-scp-1.0.4.gem
+%{gemdir}/specifications/net-scp-1.0.4.gemspec
 
 %changelog
-* Sun Apr 22 2012 luciano - 1.0.4-1
-- Initial package

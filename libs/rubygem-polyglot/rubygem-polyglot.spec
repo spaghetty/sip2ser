@@ -1,26 +1,30 @@
-# Generated from polyglot-0.3.3.gem by gem2rpm -*- rpm-spec -*-
-%global gemname polyglot
 
-%global gemdir %(ruby -rubygems -e 'puts Gem::dir' 2>/dev/null)
-%global geminstdir %{gemdir}/gems/%{gemname}-%{version}
-%global rubyabi 1.8
+# Generated from polyglot-0.3.3.gem by gem2rpm -*- rpm-spec -*-
+%define rbname polyglot
+%define version 0.3.3
+%define release 1
 
 Summary: Augment 'require' to load non-Ruby file types
-Name: rubygem-%{gemname}
-Version: 0.3.3
-Release: 1%{?dist}
-Group: Development/Languages
-License: MIT
+Name: rubygems-%{rbname}
+
+Version: %{version}
+Release: %{release}
+Group: Development/Ruby
+License: Distributable
 URL: http://github.com/cjheath/polyglot
-Source0: http://rubygems.org/gems/%{gemname}-%{version}.gem
-Requires: ruby(abi) = %{rubyabi}
-Requires: ruby(rubygems) 
+Source0: %{rbname}-%{version}.gem
+# Make sure the spec template is included in the SRPM
+Source1: rubygems-%{rbname}.spec.in
+BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Requires: ruby 
-BuildRequires: ruby(abi) = %{rubyabi}
-BuildRequires: ruby(rubygems) 
+Requires: rubygems >= 1.3.7
 BuildRequires: ruby 
+BuildRequires: rubygems >= 1.3.7
 BuildArch: noarch
-Provides: rubygem(%{gemname}) = %{version}
+Provides: ruby(Polyglot) = %{version}
+
+%define gemdir /usr/lib/ruby/gems/1.8
+%define gembuilddir %{buildroot}%{gemdir}
 
 %description
 The Polyglot library allows a Ruby module to register a loader
@@ -28,43 +32,31 @@ for the file type associated with a filename extension, and it
 augments 'require' to find and load matching files.
 
 
-%package doc
-Summary: Documentation for %{name}
-Group: Documentation
-Requires: %{name} = %{version}-%{release}
-BuildArch: noarch
-
-%description doc
-Documentation for %{name}
-
-
 %prep
-%setup -q -c -T
-mkdir -p .%{gemdir}
-gem install --local --install-dir .%{gemdir} \
-            --force %{SOURCE0}
+%setup -T -c
 
 %build
 
 %install
-mkdir -p %{buildroot}%{gemdir}
-cp -a .%{gemdir}/* \
-        %{buildroot}%{gemdir}/
+%{__rm} -rf %{buildroot}
+mkdir -p %{gembuilddir}
+gem install --local --install-dir %{gembuilddir} --force %{SOURCE0}
 
+%clean
+%{__rm} -rf %{buildroot}
 
 %files
-%dir %{geminstdir}
-%{geminstdir}/lib
-%{gemdir}/cache/%{gemname}-%{version}.gem
-%{gemdir}/specifications/%{gemname}-%{version}.gemspec
+%defattr(-, root, root)
+%{gemdir}/gems/polyglot-0.3.3/History.txt
+%{gemdir}/gems/polyglot-0.3.3/License.txt
+%doc %{gemdir}/gems/polyglot-0.3.3/README.txt
+%{gemdir}/gems/polyglot-0.3.3/Rakefile
+%{gemdir}/gems/polyglot-0.3.3/lib/polyglot.rb
+%{gemdir}/gems/polyglot-0.3.3/lib/polyglot/version.rb
 
-%files doc
-%doc %{gemdir}/doc/%{gemname}-%{version}
-%doc %{geminstdir}/README.txt
-%doc %{geminstdir}/License.txt
-%doc %{geminstdir}/History.txt
-%doc %{geminstdir}/Rakefile
+
+%doc %{gemdir}/doc/polyglot-0.3.3
+%{gemdir}/cache/polyglot-0.3.3.gem
+%{gemdir}/specifications/polyglot-0.3.3.gemspec
 
 %changelog
-* Tue Mar 06 2012 admin - 0.3.3-1
-- Initial package
