@@ -1,3 +1,9 @@
+diff --git a/sipXhomer b/sipXhomer
+--- a/sipXhomer
++++ b/sipXhomer
+@@ -1 +1 @@
+-Subproject commit 6d05b1ee85b50d0f76de5fa54e5e5f5b25f33886
++Subproject commit 6d05b1ee85b50d0f76de5fa54e5e5f5b25f33886-dirty
 diff --git a/sipXsnom/etc/snom/line.xml b/sipXsnom/etc/snom/line.xml
 index 5b0555b..51ac747 100644
 --- a/sipXsnom/etc/snom/line.xml
@@ -143,6 +149,148 @@ index 96eb5c2..7feefeb 100644
 +        </gui-languages>
 +
  </settings>
+diff --git a/sipXsnom/etc/snom/upload.properties b/sipXsnom/etc/snom/upload.properties
+new file mode 100644
+index 0000000..e69de29
+diff --git a/sipXsnom/etc/snom/upload.xml b/sipXsnom/etc/snom/upload.xml
+new file mode 100644
+index 0000000..b5f8380
+--- /dev/null
++++ b/sipXsnom/etc/snom/upload.xml
+@@ -0,0 +1,33 @@
++<?xml version="1.0"?>
++<!DOCTYPE model PUBLIC "-//SIPFoundry//sipXconfig//Model specification 2.0//EN"
++  "http://www.sipfoundry.org/sipXconfig/dtd/setting_2_0.dtd">
++<model>
++  <type id="zip">
++    <file>
++      <contentType>application/zip</contentType>
++    </file>
++  </type>
++  <type id="binary">
++    <file>
++      <contentType>application/binary</contentType>
++    </file>
++  </type>
++  <group name="localization">
++    <setting name="language">
++      <type>
++	<file>
++	  <contentType>application/xml</contentType>
++	  <!-- <moveTo>../../configserver/phone/profile/docroot/snomlang/</moveTo> -->
++	</file>
++      </type>
++    </setting>
++    <setting name="version">
++      <type>
++        <enum>
++    	  <option><value>7.3.30</value></option>
++        </enum>
++      </type>
++      <value>7.3.30</value>
++    </setting>  
++  </group>
++</model>
+diff --git a/sipXsnom/src/common.am b/sipXsnom/src/common.am
+index 5a02d02..9bcdd2a 100644
+--- a/sipXsnom/src/common.am
++++ b/sipXsnom/src/common.am
+@@ -3,6 +3,7 @@ snom_PKGS = \
+ 	commons-lang \
+ 	commons-io \
+ 	commons-collections \
++        commons-logging \
+ 	org.springframework.beans \
+ 	sipxcommons \
+ 	sipxconfig-neoconf \
+diff --git a/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/LangUploadListener.java b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/LangUploadListener.java
+new file mode 100644
+index 0000000..b9245e2
+--- /dev/null
++++ b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/LangUploadListener.java
+@@ -0,0 +1,30 @@
++package org.sipfoundry.sipxconfig.phone.snom;
++
++import org.apache.commons.lang.ArrayUtils;
++import org.apache.commons.lang.StringUtils;
++import org.apache.commons.logging.Log;
++import org.apache.commons.logging.LogFactory;
++import org.sipfoundry.sipxconfig.common.event.DaoEventListener;
++import org.sipfoundry.sipxconfig.device.DeviceVersion;
++import org.sipfoundry.sipxconfig.phone.Phone;
++import org.sipfoundry.sipxconfig.phone.PhoneContext;
++import org.sipfoundry.sipxconfig.setting.Group;
++
++
++public class LangUploadListener implements DaoEventListener {
++    private static final Log LOG = LogFactory.getLog(LangUploadListener.class);
++    private static final String GROUP_LANG_VERSION = "group.version/localization.version";
++    private PhoneContext m_phoneContext;
++
++    public void setPhoneContext(PhoneContext phoneContext) {
++        m_phoneContext = phoneContext;
++    }
++
++    @Override
++    public void onDelete(Object entity) {
++    }
++
++    @Override
++    public void onSave(Object entity) {
++    }
++}
+diff --git a/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomUpload.java b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomUpload.java
+new file mode 100644
+index 0000000..5f5584b
+--- /dev/null
++++ b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomUpload.java
+@@ -0,0 +1,21 @@
++package org.sipfoundry.sipxconfig.phone.snom;
++
++import org.sipfoundry.sipxconfig.upload.Upload;
++
++public class SnomUpload extends Upload {
++    private static final String SNOMLANG_DIR = "/snomlang/";
++    private static final String VERSION = "localization/version";
++
++    @Override
++    public void deploy() {
++        super.setDestinationDirectory(getDestinationDirectory() + SNOMLANG_DIR + getSettingValue(VERSION));
++        super.deploy();
++    }
++
++    @Override
++    public void undeploy() {
++        super.setDestinationDirectory(getDestinationDirectory() + SNOMLANG_DIR + getSettingValue(VERSION));
++        super.undeploy();
++    }
++
++}
+\ No newline at end of file
+diff --git a/sipXsnom/src/sipxplugin.beans.xml b/sipXsnom/src/sipxplugin.beans.xml
+index a308106..d36b4af 100644
+--- a/sipXsnom/src/sipxplugin.beans.xml
++++ b/sipXsnom/src/sipxplugin.beans.xml
+@@ -70,5 +70,19 @@
+ 
+   <bean id="snomM3Phone" class="org.sipfoundry.sipxconfig.phone.snom.SnomM3Phone" scope="prototype" parent="abstractPhone">
+   </bean>
++  <bean id="snomLanguage" class="org.sipfoundry.sipxconfig.upload.UploadSpecification">
++    <property name="beanId" value="snomUpload" />
++    <property name="modelFilePath" value="snom/upload.xml" />
++    <property name="label" value="Language File For Snom Phone" />
++  </bean>
++  <bean id="snomUpload" class="org.sipfoundry.sipxconfig.phone.snom.SnomUpload"
++    scope="prototype" parent="upload">
++    <property name="destinationDirectory">
++      <value>${sysdir.phone}/profile/docroot/</value>
++    </property>
++  </bean>
++ <bean id="langUploadListener" class="org.sipfoundry.sipxconfig.phone.snom.LangUploadListener">
++    <property name="phoneContext" ref="phoneContext" />
++  </bean>
+ 
+ </beans>
 diff --git a/sipXsnom/test/org/sipfoundry/sipxconfig/phone/snom/expected-snom-320.xml b/sipXsnom/test/org/sipfoundry/sipxconfig/phone/snom/expected-snom-320.xml
 index a9d3070..fc5c696 100644
 --- a/sipXsnom/test/org/sipfoundry/sipxconfig/phone/snom/expected-snom-320.xml
