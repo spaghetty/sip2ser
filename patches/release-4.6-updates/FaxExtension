@@ -1,0 +1,17 @@
+diff --git a/sipXconfig/web/context/WEB-INF/user_portal/EditMyInformation.html b/sipXconfig/web/context/WEB-INF/user_portal/EditMyInformation.html
+index 0da34ab..293a843 100644
+--- a/sipXconfig/web/context/WEB-INF/user_portal/EditMyInformation.html
++++ b/sipXconfig/web/context/WEB-INF/user_portal/EditMyInformation.html
+@@ -41,11 +41,7 @@
+ 	      </span>
+ 	    </table>
+ 	  </fieldset>
+-	  <span jwcid="@If" condition="ognl:voicemailEnabled">
+-		<tr jwcid="faxServicePanel@common/FaxServicePanel" mailboxPreferences="ognl:mailboxPreferences" user="ognl:loadedUser"/>
+-	  </span>
+-	  <ul jwcid="@common/FormActions" listener="listener:save" callback="ognl:callback"/>
+-  </form>
++	</form>
+ </div>
+ 
+ <div jwcid="conferencesTab@Block">

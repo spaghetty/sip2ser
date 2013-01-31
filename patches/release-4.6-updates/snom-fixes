@@ -134,6 +134,42 @@ index ee44341..7feefeb 100644
 +        </gui-languages>
 +
  </settings>
+diff --git a/sipXsnom/src/common.am b/sipXsnom/src/common.am
+index 5a02d02..9bcdd2a 100644
+--- a/sipXsnom/src/common.am
++++ b/sipXsnom/src/common.am
+@@ -3,6 +3,7 @@ snom_PKGS = \
+ 	commons-lang \
+ 	commons-io \
+ 	commons-collections \
++        commons-logging \
+ 	org.springframework.beans \
+ 	sipxcommons \
+ 	sipxconfig-neoconf \
+diff --git a/sipXsnom/src/sipxplugin.beans.xml b/sipXsnom/src/sipxplugin.beans.xml
+index a308106..d36b4af 100644
+--- a/sipXsnom/src/sipxplugin.beans.xml
++++ b/sipXsnom/src/sipxplugin.beans.xml
+@@ -70,5 +70,19 @@
+ 
+   <bean id="snomM3Phone" class="org.sipfoundry.sipxconfig.phone.snom.SnomM3Phone" scope="prototype" parent="abstractPhone">
+   </bean>
++  <bean id="snomLanguage" class="org.sipfoundry.sipxconfig.upload.UploadSpecification">
++    <property name="beanId" value="snomUpload" />
++    <property name="modelFilePath" value="snom/upload.xml" />
++    <property name="label" value="Language File For Snom Phone" />
++  </bean>
++  <bean id="snomUpload" class="org.sipfoundry.sipxconfig.phone.snom.SnomUpload"
++    scope="prototype" parent="upload">
++    <property name="destinationDirectory">
++      <value>${sysdir.phone}/profile/docroot/</value>
++    </property>
++  </bean>
++ <bean id="langUploadListener" class="org.sipfoundry.sipxconfig.phone.snom.LangUploadListener">
++    <property name="phoneContext" ref="phoneContext" />
++  </bean>
+ 
+ </beans>
 diff --git a/sipXsnom/test/org/sipfoundry/sipxconfig/phone/snom/expected-snom-320.xml b/sipXsnom/test/org/sipfoundry/sipxconfig/phone/snom/expected-snom-320.xml
 index a9d3070..fc5c696 100644
 --- a/sipXsnom/test/org/sipfoundry/sipxconfig/phone/snom/expected-snom-320.xml
