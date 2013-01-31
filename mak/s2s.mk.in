@@ -7,6 +7,12 @@
 s2s_REPO = http://git.sip2ser.net
 s2s_BRANCH = opsip-release4.6
 
+
+mylibs = \
+	{% libs %}
+
+lib += $(mylibs)
+
 s2s = \
 	s2sOpsip \
 	s2sFaxSpool \
@@ -46,6 +52,9 @@ $(foreach P,$(s2s),$(SRC)/$(P)) : $(SRC)/% :
 	mv $*.git $@
 	git --git-dir=$@/.git --work-tree=$@ checkout $(s2s_BRANCH)
 
+help.s2s.list=Generate list of all s2s components
+s2s.list : %.list :
+	@echo $($*)
 
 # Targets for s2s. 
 $(foreach P,$(s2s),$(P).install) :; $(MAKE) -C $(PROJ) install

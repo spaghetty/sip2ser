@@ -4,7 +4,7 @@
 %define release 1
 
 Summary: Mail provides a nice Ruby DSL for making, sending and reading emails.
-Name: rubygems-%{rbname}
+Name: rubygem-%{rbname}
 
 Version: %{version}
 Release: %{release}
@@ -13,7 +13,7 @@ License: Distributable
 URL: http://github.com/mikel/mail
 Source0: %{rbname}-%{version}.gem
 # Make sure the spec template is included in the SRPM
-Source1: rubygems-%{rbname}.spec.in
+#Source1: rubygems-%{rbname}.spec.in
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Requires: ruby 
 Requires: rubygems
