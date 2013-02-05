@@ -26,9 +26,8 @@ PREPARERER_ID ?= luciano.berardi@sip2ser.it
 
 # $(foreach B,32 64,$(eval help.iso-$(B) = Build sipXecs $(B)-bit only ISO from base CentOS ISO found in @ISO_DIR@))
 s2s-iso-% : iso-% \
-	s2s-iso-disc-%;
-#\
-#	iso-s2s-packages-% \
+	s2s-iso-disc-% \
+	s2s-iso-packages-%;
 #	iso-update-repo-% \
 #	iso-s2s-update-files-% \
 #	iso-s2s-assemble-% \
@@ -40,16 +39,16 @@ s2s-iso-disc-% :
 	@echo "STICA" $(ISO)
 	test -d cd || mkdir cd
 	! test -d cd.tmp || rm -rf cd.tmp
-	sudo mount -o loop $(wildcard @ISO_DIR@/$(ISO)) cd
+	sudo mount -o loop $(wildcard .//$(ISO)) cd
 	@echo "copying contents of disc..."
 	cp -ar cd cd.tmp
 	sudo umount cd
 	chmod a+rw -R cd.tmp
 	@echo "STICAZZI"$@
-	mv cd.tmp s2s-iso
+	mv cd.tmp $@
 
-iso-s2s-packages-% : 
-	rsync -av $(realpath @RPM_DIST_DIR@)/CentOS_6/$(ARCH)/ $(ISO_DISC)/Packages/
+s2s-iso-packages-% : 
+	rsync -av $(realpath ./repo)/CentOS_6/$(ARCH)/ $(ISO_DISC)/Packages/
 
 #iso-clean-download-% :
 #	! test -d $(ISO_PACKAGES_OS) || rm -rf $(ISO_PACKAGES_OS)
