@@ -14,7 +14,7 @@ logger = Logger.new($log_file)
 
 base_config_string="--cache-file=`pwd`/ac-cache-file --prefix=/opt/`pwd | gawk -F /  '{ print $NF  }'` SIPXPBXUSER=`whoami` SIPXECS_NAME=OpSip OPENFIRE_HOME=/opt/openfire/ --enable-mrtg --enable-agent --enable-rpm"
 
-iso_config_string="--enable-centos-iso ISO_DIR=./ RPM_DIST_DIR=./repo CENTOS_RSYNC_URL=rsync://mirrors.rit.edu OEM_DIR=./iso-custom/"
+iso_config_string="--enable-centos-iso ISO_DIR=./ RPM_DIST_DIR=./repo CENTOS_RSYNC_URL=rsync://mirrors.rit.edu OEM_DIR=/home/admin/sipxecs/sip2ser/mak/iso/"
 
 packages_base = "autoconf automake make libtool createrepo gcc-c++ \
  rpm-build ruby libxml2 libxml2-devel js git wget  mock thttpd \
@@ -64,6 +64,16 @@ task :build_env do
 end
 
 
+task :create_mak_iso do
+  puts "sip2ser iso"
+  f1 = IO.readlines("#{$our_dir}/mak/iso.mk.in")
+  f2 = File.new("#{$build_dir}/mak/12-iso.mk","w")
+  f1.each do | x |
+    f2.puts(x.chomp)
+  end
+  f2.close()
+end
+
 task :create_mak do
   puts "add sip2ser stuff"
   p_list = load_projects
@@ -84,7 +94,9 @@ task :create_mak do
     end
   end
   f2.close()
+  Rake::Task[:create_mak_iso].invoke()
 end
+
 
 desc "Lancia il configure per attivare la modalita' di debug basta mettere come parametro la costante DEBUG"
 task :config, [ :jdb ] do |t, args|
