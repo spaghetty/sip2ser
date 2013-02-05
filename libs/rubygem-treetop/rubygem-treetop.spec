@@ -17,16 +17,16 @@ Source0: %{rbname}-%{version}.gem
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Requires: ruby 
 Requires: rubygems >= 1.3.7
-Requires: rubygems-polyglot 
+Requires: rubygem-polyglot 
 #Requires: rubygems-jeweler 
 Requires: rubygem-activesupport 
-Requires: rubygems-i18n => 0.5.0
-Requires: rubygems-i18n >= 0.6
+Requires: rubygem-i18n => 0.5.0
+Requires: rubygem-i18n >= 0.6
 #Requires: rubygems-rr => 1.0
 #Requires: rubygems-rr < 2
 Requires: rubygem-rspec
 Requires: rubygem-rake 
-Requires: rubygems-polyglot >= 0.3.1
+Requires: rubygem-polyglot >= 0.3.1
 BuildRequires: ruby 
 BuildRequires: rubygems >= 1.3.7
 BuildArch: noarch

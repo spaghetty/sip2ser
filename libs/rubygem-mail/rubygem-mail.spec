@@ -19,9 +19,9 @@ Requires: ruby
 Requires: rubygems
 Requires: rubygem-mime-types => 1.16
 Requires: rubygem-mime-types < 2
-Requires: rubygems-treetop => 1.4.8
-Requires: rubygems-treetop < 1.5
-Requires: rubygems-i18n >= 0.4.0
+Requires: rubygem-treetop => 1.4.8
+Requires: rubygem-treetop < 1.5
+Requires: rubygem-i18n >= 0.4.0
 BuildRequires: ruby 
 BuildRequires: rubygems
 BuildArch: noarch
