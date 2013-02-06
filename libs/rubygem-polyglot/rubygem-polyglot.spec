@@ -5,7 +5,7 @@
 %define release 1
 
 Summary: Augment 'require' to load non-Ruby file types
-Name: rubygems-%{rbname}
+Name: rubygem-%{rbname}
 
 Version: %{version}
 Release: %{release}
@@ -14,7 +14,7 @@ License: Distributable
 URL: http://github.com/cjheath/polyglot
 Source0: %{rbname}-%{version}.gem
 # Make sure the spec template is included in the SRPM
-Source1: rubygems-%{rbname}.spec.in
+#Source1: rubygems-%{rbname}.spec.in
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Requires: ruby 
 Requires: rubygems >= 1.3.7

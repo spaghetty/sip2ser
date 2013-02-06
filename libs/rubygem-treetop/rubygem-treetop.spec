@@ -4,7 +4,7 @@
 %define release 1
 
 Summary: A Ruby-based text parsing and interpretation DSL
-Name: rubygems-%{rbname}
+Name: rubygem-%{rbname}
 
 Version: %{version}
 Release: %{release}
@@ -13,20 +13,20 @@ License: Distributable
 URL: https://github.com/cjheath/treetop
 Source0: %{rbname}-%{version}.gem
 # Make sure the spec template is included in the SRPM
-Source1: rubygems-%{rbname}.spec.in
+#Source1: rubygems-%{rbname}.spec.in
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Requires: ruby 
 Requires: rubygems >= 1.3.7
-Requires: rubygems-polyglot 
+Requires: rubygem-polyglot 
 #Requires: rubygems-jeweler 
 Requires: rubygem-activesupport 
-Requires: rubygems-i18n => 0.5.0
-Requires: rubygems-i18n >= 0.6
+Requires: rubygem-i18n => 0.5.0
+Requires: rubygem-i18n >= 0.6
 #Requires: rubygems-rr => 1.0
 #Requires: rubygems-rr < 2
 Requires: rubygem-rspec
 Requires: rubygem-rake 
-Requires: rubygems-polyglot >= 0.3.1
+Requires: rubygem-polyglot >= 0.3.1
 BuildRequires: ruby 
 BuildRequires: rubygems >= 1.3.7
 BuildArch: noarch
