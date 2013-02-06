@@ -1,5 +1,5 @@
 diff --git a/sipXsnom/etc/snom/line.xml b/sipXsnom/etc/snom/line.xml
-index 422bc81..f07dc48 100644
+index 5b0555b..51ac747 100644
 --- a/sipXsnom/etc/snom/line.xml
 +++ b/sipXsnom/etc/snom/line.xml
 @@ -63,6 +63,7 @@
@@ -25,7 +25,7 @@ index 134d797..df9dd1f 100644
  Action_URLs.description=An Action URL triggers external URL in response to various events. \
  	For instance, on an incoming call, the "Incoming Call" URL is triggered.
 diff --git a/sipXsnom/etc/snom/phone.xml b/sipXsnom/etc/snom/phone.xml
-index a2fd9bf..d965fc4 100644
+index 4d81374..b547b9e 100644
 --- a/sipXsnom/etc/snom/phone.xml
 +++ b/sipXsnom/etc/snom/phone.xml
 @@ -1387,6 +1387,10 @@
@@ -40,7 +40,7 @@ index a2fd9bf..d965fc4 100644
        <type>
          <string />
 diff --git a/sipXsnom/etc/snom/snom.vm b/sipXsnom/etc/snom/snom.vm
-index ee44341..7feefeb 100644
+index 96eb5c2..989650c 100644
 --- a/sipXsnom/etc/snom/snom.vm
 +++ b/sipXsnom/etc/snom/snom.vm
 @@ -18,6 +18,7 @@ perm="R"#end
@@ -60,7 +60,7 @@ index ee44341..7feefeb 100644
  #end
  #end
  #end
-@@ -57,10 +58,72 @@ perm="R"#end
+@@ -57,10 +58,42 @@ perm="R"#end
  #set ($context = $key.getSetting('context').Value)
  #set ($type = $key.getSetting('type').Value)
  #set ($number = $key.getSetting('number').Value)
@@ -89,51 +89,77 @@ index ee44341..7feefeb 100644
  	</functionKeys>
 +	<!-- Retrieving tftp server to provision web-language and language -->
 +#set ($ip = $phone.PhoneContext.PhoneDefaults.TftpServer)
-+
++     
 +        <web-languages>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_CS.xml" name="Cestina"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_DA.xml" name="Dansk"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_DE.xml" name="Deutsch"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_EN.xml" name="English"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_ES.xml" name="Espanol"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_FR.xml" name="Francais"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_HE.xml" name="Hebrew"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_HU.xml" name="Hungarian"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_IT.xml" name="Italiano"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_NL.xml" name="Nederlands"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_NO.xml" name="Norsk"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_PT.xml" name="Portugues"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_RU.xml" name="Russian"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_FI.xml" name="Suomi"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_SV.xml" name="Svenska"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/web_lang_TR.xml" name="Turkce"/>
-+        </web-languages>
++#foreach ($file in $webLang)
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/$file.Version/$file.FileName" name="${file.LangCode}"/>
++#end
++	</web-languages>
++
 +        <!-- Snom Language -->
 +        <gui-languages>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_CA.xml" name="Catalan"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_CS.xml" name="Cestina"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_DA.xml" name="Dansk"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_DE.xml" name="Deutsch"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_EN.xml" name="English"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_UK.xml" name="English(UK)"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_ES.xml" name="Espanol"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_ET.xml" name="Estonian"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_FR.xml" name="Francais"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_HE.xml" name="Hebrew"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_HU.xml" name="Hungarian"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_IT.xml" name="Italiano"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_NL.xml" name="Nederlands"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_NO.xml" name="Norsk"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_PL.xml" name="Polski"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_PT.xml" name="Portugues"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_RU.xml" name="Russian"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_SK.xml" name="Slovencina"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_FI.xml" name="Suomi"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_SV.xml" name="Svenska"/>
-+		<language url="http://$ip:8090/phone/profile/docroot/snomlang/gui_lang_TR.xml" name="Turkce"/>
++#foreach ($file in $guiLang)
++		<language url="http://$ip:8090/phone/profile/docroot/snomlang/$file.Version/$file.FileName" name="${file.LangCode}"/>
++#end
 +        </gui-languages>
 +
  </settings>
+diff --git a/sipXsnom/etc/snom/upload.xml b/sipXsnom/etc/snom/upload.xml
+new file mode 100644
+index 0000000..8544699
+--- /dev/null
++++ b/sipXsnom/etc/snom/upload.xml
+@@ -0,0 +1,50 @@
++<?xml version="1.0"?>
++<!DOCTYPE model PUBLIC "-//SIPFoundry//sipXconfig//Model specification 2.0//EN"
++  "http://www.sipfoundry.org/sipXconfig/dtd/setting_2_0.dtd">
++<model>
++  <type id="zip">
++    <file>
++      <contentType>application/zip</contentType>
++    </file>
++  </type>
++  <type id="binary">
++    <file>
++      <contentType>application/binary</contentType>
++    </file>
++  </type>
++  <group name="localization">
++    <setting name="file">
++      <type>
++        <file>
++          <contentType>application/xml</contentType>
++        </file>
++      </type>
++    </setting>
++    <setting name="context">
++      <type>
++	<enum> 
++	  <option><value>Web</value></option>
++	  <option><value>Gui</value></option>
++	</enum>
++      </type>
++      <value>Web</value>
++    </setting>
++    <setting name="language">
++      <type>
++        <enum>
++          <option><value>Italian</value></option>
++        </enum>
++      </type>
++      <value>Italian</value>
++    </setting>  
++
++    <setting name="version">
++      <type>
++        <enum>
++          <option><value>7.3.30</value></option>
++        </enum>
++      </type>
++      <value>7.3.30</value>
++    </setting>  
++  </group>
++</model>
 diff --git a/sipXsnom/src/common.am b/sipXsnom/src/common.am
 index 5a02d02..9bcdd2a 100644
 --- a/sipXsnom/src/common.am
@@ -146,11 +172,261 @@ index 5a02d02..9bcdd2a 100644
  	org.springframework.beans \
  	sipxcommons \
  	sipxconfig-neoconf \
+diff --git a/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/LangUploadListener.java b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/LangUploadListener.java
+new file mode 100644
+index 0000000..403d2fc
+--- /dev/null
++++ b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/LangUploadListener.java
+@@ -0,0 +1,30 @@
++package org.sipfoundry.sipxconfig.phone.snom;
++
++import org.apache.commons.lang.ArrayUtils;
++import org.apache.commons.lang.StringUtils;
++import org.apache.commons.logging.Log;
++import org.apache.commons.logging.LogFactory;
++import org.sipfoundry.sipxconfig.common.event.DaoEventListener;
++import org.sipfoundry.sipxconfig.device.DeviceVersion;
++import org.sipfoundry.sipxconfig.phone.Phone;
++import org.sipfoundry.sipxconfig.phone.PhoneContext;
++import org.sipfoundry.sipxconfig.setting.Group;
++
++
++public class LangUploadListener implements DaoEventListener {
++    private static final Log LOG = LogFactory.getLog(LangUploadListener.class);
++    private static final String GROUP_LANG_VERSION = "group.version/localization.version";
++    private PhoneContext m_phoneContext;
++
++    public void setPhoneContext(PhoneContext phoneContext) {
++        m_phoneContext = phoneContext;
++    }
++
++    @Override
++	public void onDelete(Object entity) {
++    }
++
++    @Override
++	public void onSave(Object entity) {
++    }
++}
+\ No newline at end of file
+diff --git a/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomLanguageFile.java b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomLanguageFile.java
+new file mode 100644
+index 0000000..770a73a
+--- /dev/null
++++ b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomLanguageFile.java
+@@ -0,0 +1,43 @@
++package org.sipfoundry.sipxconfig.phone.snom;
++
++public class SnomLanguageFile {
++    private String m_type;
++    private String m_fileName;
++    private String m_langCode;
++    private String m_version;
++
++    public SnomLanguageFile( String type, String file, String lang, String version) {
++	m_type = type;
++	m_fileName = file;
++	m_langCode = lang;
++	m_version = version;
++    }
++
++    public void setType(String type) {
++	m_type = type;
++    }
++    public String getType() {
++	return m_type;
++    }
++
++    public void setFileName(String file) {
++	m_fileName = file;
++    }
++    public String getFileName() {
++	return m_fileName;
++    }
++
++    public void setLangCode(String lang) {
++	m_langCode = lang;
++    }
++    public String getLangCode() {
++	return m_langCode;
++    }
++    
++    public void setVersion(String version) {
++	m_version = version;
++    }
++    public String getVersion() {
++	return m_version;
++    }
++}
+\ No newline at end of file
+diff --git a/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomPhone.java b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomPhone.java
+index cf69458..8b13a38 100644
+--- a/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomPhone.java
++++ b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomPhone.java
+@@ -13,6 +13,7 @@ import java.util.Collection;
+ import java.util.Iterator;
+ import java.util.List;
+ 
++import org.sipfoundry.sipxconfig.upload.UploadManager;
+ import org.sipfoundry.sipxconfig.device.ProfileContext;
+ import org.sipfoundry.sipxconfig.phone.Line;
+ import org.sipfoundry.sipxconfig.phone.LineInfo;
+@@ -27,6 +28,7 @@ public class SnomPhone extends Phone {
+     public static final String BEAN_ID = "snom";
+ 
+     private SpeedDialManager m_speedDialManager;
++    private UploadManager m_uploadManager;
+ 
+     public SnomPhone() {
+     }
+@@ -36,6 +38,10 @@ public class SnomPhone extends Phone {
+         m_speedDialManager = speedDialManager;
+     }
+ 
++    public void setUploadManager(UploadManager uploadManager) {
++        m_uploadManager = uploadManager;
++    }
++
+     @Override
+     public void initialize() {
+         SnomDefaults defaults = new SnomDefaults(getPhoneContext().getPhoneDefaults(), this);
+@@ -57,7 +63,8 @@ public class SnomPhone extends Phone {
+     protected ProfileContext<SnomPhone> createContext() {
+         SpeedDial speedDial = getPhoneContext().getSpeedDial(this);
+         Collection<PhonebookEntry> phoneBook = getPhoneContext().getPhonebookEntries(this);
+-        return new SnomProfileContext(this, speedDial, phoneBook, getModel().getProfileTemplate());
++        return new SnomProfileContext(this, speedDial, phoneBook, getModel().getProfileTemplate(),
++		   m_uploadManager);
+     }
+ 
+     @Override
+diff --git a/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomProfileContext.java b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomProfileContext.java
+index dacb592..13bad1a 100644
+--- a/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomProfileContext.java
++++ b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomProfileContext.java
+@@ -12,11 +12,15 @@ package org.sipfoundry.sipxconfig.phone.snom;
+ import java.util.Collection;
+ import java.util.Collections;
+ import java.util.List;
++import java.util.ArrayList;
+ import java.util.Map;
+ 
++import org.sipfoundry.sipxconfig.upload.UploadManager;
++import org.sipfoundry.sipxconfig.upload.Upload;
+ import org.apache.commons.collections.CollectionUtils;
+ import org.apache.commons.collections.Predicate;
+ import org.apache.commons.lang.ArrayUtils;
++import org.apache.commons.lang.StringUtils;
+ import org.apache.velocity.tools.generic.EscapeTool;
+ import org.sipfoundry.sipxconfig.device.ProfileContext;
+ import org.sipfoundry.sipxconfig.phonebook.PhonebookEntry;
+@@ -30,12 +34,14 @@ public class SnomProfileContext extends ProfileContext<SnomPhone> {
+ 
+     private final SpeedDial m_speedDial;
+     private final Collection<PhonebookEntry> m_phoneBook;
++    private UploadManager m_uploadManager;
+ 
+     public SnomProfileContext(SnomPhone device, SpeedDial speedDial, Collection<PhonebookEntry> phoneBook,
+-            String profileTemplate) {
++	   String profileTemplate, UploadManager uploadManager) {
+         super(device, profileTemplate);
+         m_speedDial = speedDial;
+         m_phoneBook = trim(phoneBook);
++	m_uploadManager = uploadManager;
+     }
+ 
+     @Override
+@@ -43,6 +49,8 @@ public class SnomProfileContext extends ProfileContext<SnomPhone> {
+         Map<String, Object> context = super.getContext();
+         context.put("speedDial", getNumbers());
+         context.put("phoneBook", m_phoneBook);
++	context.put("webLang", getWebLangFiles());
++	context.put("guiLang", getGuiLangFiles());
+         context.put("esc", new EscapeTool());
+         return context;
+     }
+@@ -82,4 +90,40 @@ public class SnomProfileContext extends ProfileContext<SnomPhone> {
+         }
+         return numbers;
+     }
++
++    /**
++     * Create SNOM localization file url
++     *
++     */
++    SnomLanguageFile[] getWebLangFiles() {
++	List<SnomLanguageFile> files = new ArrayList<SnomLanguageFile>();
++	if( m_uploadManager != null) {
++	    for (Upload upload : m_uploadManager.getUpload()) {
++		if ( upload.isDeployed() && StringUtils.equals(upload.getSpecificationId(), "snomLanguage") &&
++		     StringUtils.equals(upload.getSettingValue("localization/context"),"Web")) {
++		    files.add(new SnomLanguageFile(upload.getSettingValue("localization/context"),
++						   upload.getSettingValue("localization/file"),
++						   upload.getSettingValue("localization/language"),
++						   upload.getSettingValue("localization/version")));
++		}
++	    }
++	}
++	return (SnomLanguageFile[])files.toArray(new SnomLanguageFile[files.size()]);
++    }
++
++    SnomLanguageFile[] getGuiLangFiles() {
++	List<SnomLanguageFile> files = new ArrayList<SnomLanguageFile>();
++	if( m_uploadManager != null) {
++	    for (Upload upload : m_uploadManager.getUpload()) {
++		if ( upload.isDeployed() && StringUtils.equals(upload.getSpecificationId(), "snomLanguage") &&
++		     StringUtils.equals(upload.getSettingValue("localization/context"),"Gui")) {
++		    files.add(new SnomLanguageFile(upload.getSettingValue("localization/context"),
++						   upload.getSettingValue("localization/file"),
++						   upload.getSettingValue("localization/language"),
++						   upload.getSettingValue("localization/version")));
++		}
++	    }
++	}
++	return (SnomLanguageFile[])files.toArray(new SnomLanguageFile[files.size()]);
++    }
+ }
+diff --git a/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomUpload.java b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomUpload.java
+new file mode 100644
+index 0000000..0d863e4
+--- /dev/null
++++ b/sipXsnom/src/org/sipfoundry/sipxconfig/phone/snom/SnomUpload.java
+@@ -0,0 +1,21 @@
++package org.sipfoundry.sipxconfig.phone.snom;
++
++import org.sipfoundry.sipxconfig.upload.Upload;
++
++public class SnomUpload extends Upload {
++    private static final String SNOMLANG_DIR = "/snomlang/";
++    private static final String VERSION = "localization/version";
++
++    @Override
++	public void deploy() {
++        super.setDestinationDirectory(getDestinationDirectory() + SNOMLANG_DIR + getSettingValue(VERSION));
++        super.deploy();
++    }
++
++    @Override
++	public void undeploy() {
++        super.setDestinationDirectory(getDestinationDirectory() + SNOMLANG_DIR + getSettingValue(VERSION));
++        super.undeploy();
++    }
++
++}
+\ No newline at end of file
 diff --git a/sipXsnom/src/sipxplugin.beans.xml b/sipXsnom/src/sipxplugin.beans.xml
-index a308106..d36b4af 100644
+index a308106..4ca34ea 100644
 --- a/sipXsnom/src/sipxplugin.beans.xml
 +++ b/sipXsnom/src/sipxplugin.beans.xml
-@@ -70,5 +70,19 @@
+@@ -49,6 +49,7 @@
+   </bean>
+   <bean id="snom" class="org.sipfoundry.sipxconfig.phone.snom.SnomPhone" scope="prototype" parent="abstractPhone">
+     <property name="speedDialManager" ref="speedDialManager" />
++    <property name="uploadManager" ref="uploadManager" />
+   </bean>
+ 
+    <bean id="snomM3Model" abstract="true" parent="abstractPhoneModel">
+@@ -70,5 +71,19 @@
  
    <bean id="snomM3Phone" class="org.sipfoundry.sipxconfig.phone.snom.SnomM3Phone" scope="prototype" parent="abstractPhone">
    </bean>
@@ -170,6 +446,45 @@ index a308106..d36b4af 100644
 +  </bean>
  
  </beans>
+diff --git a/sipXsnom/test/org/sipfoundry/sipxconfig/phone/snom/SnomTest.java b/sipXsnom/test/org/sipfoundry/sipxconfig/phone/snom/SnomTest.java
+index a79861e..4c8152b 100644
+--- a/sipXsnom/test/org/sipfoundry/sipxconfig/phone/snom/SnomTest.java
++++ b/sipXsnom/test/org/sipfoundry/sipxconfig/phone/snom/SnomTest.java
+@@ -226,7 +226,7 @@ public class SnomTest extends TestCase {
+     public void testSnomContextEmpty() {
+         SnomPhone phone = new SnomPhone();
+ 
+-        SnomProfileContext sc = new SnomProfileContext(phone, null, m_emptyPhonebook, null);
++        SnomProfileContext sc = new SnomProfileContext(phone, null, m_emptyPhonebook, null, null);
+         String[] numbers = (String[]) sc.getContext().get("speedDial");
+ 
+         assertEquals(0, numbers.length);
+@@ -238,14 +238,14 @@ public class SnomTest extends TestCase {
+ 
+         SnomPhone phone = new SnomPhone();
+ 
+-        SnomProfileContext sc = new SnomProfileContext(phone, smallSd, m_emptyPhonebook, null);
++        SnomProfileContext sc = new SnomProfileContext(phone, smallSd, m_emptyPhonebook, null, null);
+         String[] numbers = (String[]) sc.getContext().get("speedDial");
+         assertEquals(5, numbers.length);
+         for (int i = 0; i < numbers.length; i++) {
+             assertEquals(Integer.toString(i), numbers[i]);
+         }
+ 
+-        sc = new SnomProfileContext(phone, largeSd, m_emptyPhonebook, null);
++        sc = new SnomProfileContext(phone, largeSd, m_emptyPhonebook, null, null);
+         numbers = (String[]) sc.getContext().get("speedDial");
+         assertEquals(33, numbers.length);
+         for (int i = 0; i < numbers.length; i++) {
+@@ -260,7 +260,7 @@ public class SnomTest extends TestCase {
+         }
+         SnomPhone phone = new SnomPhone();
+ 
+-        SnomProfileContext sc = new SnomProfileContext(phone, null, phonebook, null);
++        SnomProfileContext sc = new SnomProfileContext(phone, null, phonebook, null, null);
+         Collection< ? > trimmed = (Collection< ? >) sc.getContext().get("phoneBook");
+         assertEquals(100, trimmed.size());
+     }
 diff --git a/sipXsnom/test/org/sipfoundry/sipxconfig/phone/snom/expected-snom-320.xml b/sipXsnom/test/org/sipfoundry/sipxconfig/phone/snom/expected-snom-320.xml
 index a9d3070..fc5c696 100644
 --- a/sipXsnom/test/org/sipfoundry/sipxconfig/phone/snom/expected-snom-320.xml
