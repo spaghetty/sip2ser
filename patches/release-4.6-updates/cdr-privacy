@@ -1,0 +1,127 @@
+diff --git a/sipXconfig/etc/sipxpbx/sipxcallresolver/sipxcallresolver.properties b/sipXconfig/etc/sipxpbx/sipxcallresolver/sipxcallresolver.properties
+index 6f22106..59ed721 100644
+--- a/sipXconfig/etc/sipxpbx/sipxcallresolver/sipxcallresolver.properties
++++ b/sipXconfig/etc/sipxpbx/sipxcallresolver/sipxcallresolver.properties
+@@ -34,4 +34,6 @@ callresolver.SIP_CALLRESOLVER_CSE_QUEUE_SIZE.label=CSE Queue size
+ callresolver.SIP_CALLRESOLVER_CDR_QUEUE_SIZE.label=CDR Queue size
+ callresolver.SIP_CALLRESOLVER_MAX_CALL_LEN.label=Maximum call length
+ callresolver.SIP_CALLRESOLVER_MAX_RINGING_CALL_LEN.label=Maximum Ringing call length
+-callresolver.SIP_CALLRESOLVER_MIN_CLEANUP_INTERVAL.label=Minimum cleanup interval
+\ No newline at end of file
++callresolver.SIP_CALLRESOLVER_MIN_CLEANUP_INTERVAL.label=Minimum cleanup interval
++callresolver.SIP_CALLRESOLVER_PRIVACY.label=Privacy Extension
++callresolver.SIP_CALLRESOLVER_PRIVACY.description=When enabled hides last digits of phone numbers into cdrs to enhance privacy 
+\ No newline at end of file
+diff --git a/sipXconfig/etc/sipxpbx/sipxcallresolver/sipxcallresolver.xml b/sipXconfig/etc/sipxpbx/sipxcallresolver/sipxcallresolver.xml
+index 65016ce..0313544 100644
+--- a/sipXconfig/etc/sipxpbx/sipxcallresolver/sipxcallresolver.xml
++++ b/sipXconfig/etc/sipxpbx/sipxcallresolver/sipxcallresolver.xml
+@@ -116,5 +116,9 @@
+       </type>
+       <value />
+     </setting>
++    <setting name="SIP_CALLRESOLVER_PRIVACY" advanced="yes">
++      <type refid="enablestate" />
++      <value>DISABLE</value>
++    </setting>
+   </group>
+ </model>
+diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/Cdr.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/Cdr.java
+index 957aa67..31e3772 100644
+--- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/Cdr.java
++++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/Cdr.java
+@@ -103,6 +103,14 @@ public class Cdr implements Serializable {
+         m_callee = SipUri.extractUser(calleeAor);
+     }
+ 
++    public void setMaskedCalleeAor(String calleeAor) {
++        m_calleeAor = calleeAor;
++        m_callee = SipUri.extractUser(calleeAor);
++	if(m_callee.length() > 5) {
++	    m_callee = m_callee.substring(0, m_callee.length()-3)+"***";
++	}
++    }
++
+     public void setCalleeContact(String calleeContact) {
+         m_calleeContact = calleeContact;
+         m_recipient = SipUri.extractUser(calleeContact);
+@@ -129,6 +137,14 @@ public class Cdr implements Serializable {
+         m_caller = SipUri.extractFullUser(callerAor);
+     }
+ 
++    public void setMaskedCallerAor(String callerAor) {
++        m_callerAor = callerAor;
++        m_caller = SipUri.extractUser(callerAor);
++	if(m_caller.length() > 5) {
++	    m_caller = m_caller.substring(0, m_caller.length()-3)+"***";
++	}
++    }
++
+     public void setCallerContact(String callerContact) {
+         m_callerContact = callerContact;
+         m_originator = SipUri.extractFullUser(callerContact);
+diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrManagerImpl.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrManagerImpl.java
+index 60432eb..a37f539 100644
+--- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrManagerImpl.java
++++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrManagerImpl.java
+@@ -123,7 +123,10 @@ public class CdrManagerImpl extends JdbcDaoSupport implements CdrManager, Featur
+ 
+     public List<Cdr> getCdrs(Date from, Date to, CdrSearch search, User user, int limit, int offset) {
+         CdrsStatementCreator psc = new SelectAll(from, to, search, user, m_tz, limit, offset);
+-        CdrsResultReader resultReader = new CdrsResultReader(m_tz);
++	boolean privacy = false;
++	if ( user==null )
++	    privacy = getSettings().getPrivacyStatus();
++        CdrsResultReader resultReader = new CdrsResultReader(m_tz, privacy);
+         getJdbcTemplate().query(psc, resultReader);
+         return resultReader.getResults();
+     }
+@@ -365,9 +368,16 @@ public class CdrManagerImpl extends JdbcDaoSupport implements CdrManager, Featur
+         private List<Cdr> m_cdrs = new ArrayList<Cdr>();
+ 
+         private Calendar m_calendar;
++	private boolean m_privacy;
++
++        public CdrsResultReader(TimeZone tz, boolean privacy) {
++            m_calendar = Calendar.getInstance(tz);
++	    m_privacy = privacy;
++        }
+ 
+         public CdrsResultReader(TimeZone tz) {
+             m_calendar = Calendar.getInstance(tz);
++	    m_privacy = false;
+         }
+ 
+         public List<Cdr> getResults() {
+@@ -376,8 +386,14 @@ public class CdrManagerImpl extends JdbcDaoSupport implements CdrManager, Featur
+ 
+         public void processRow(ResultSet rs) throws SQLException {
+             Cdr cdr = new Cdr();
+-            cdr.setCalleeAor(rs.getString(CALLEE_AOR));
+-            cdr.setCallerAor(rs.getString(CALLER_AOR));
++	    if (!m_privacy) {
++		cdr.setCalleeAor(rs.getString(CALLEE_AOR));
++		cdr.setCallerAor(rs.getString(CALLER_AOR));
++	    }
++	    else {
++		cdr.setMaskedCalleeAor(rs.getString(CALLEE_AOR));
++		cdr.setMaskedCallerAor(rs.getString(CALLER_AOR));
++	    }
+             cdr.setCallId(rs.getString(CALL_ID));
+             cdr.setReference(rs.getString(CALL_REFERENCE));
+             cdr.setCallerInternal(rs.getBoolean(CALLER_INTERNAL));
+diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSettings.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSettings.java
+index d8940db..733263a 100644
+--- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSettings.java
++++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSettings.java
+@@ -30,6 +30,10 @@ public class CdrSettings extends PersistableSettings implements DeployConfigOnEd
+         return (Integer) getSettingTypedValue("callresolver/SIP_CALLRESOLVER_AGENT_PORT");
+     }
+ 
++    public boolean getPrivacyStatus() {
++	return (Boolean) getSettingTypedValue("callresolver/SIP_CALLRESOLVER_PRIVACY");
++    }
++
+     @Override
+     protected Setting loadSettings() {
+         return getModelFilesContext().loadModelFile("sipxcallresolver/sipxcallresolver.xml");
