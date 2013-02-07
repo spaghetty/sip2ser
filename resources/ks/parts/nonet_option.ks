@@ -1,5 +1,7 @@
 text
 install
+cdrom
+reboot
 lang en_US.UTF-8
 keyboard us
 timezone --utc Europe/Rome
@@ -9,12 +11,11 @@ authconfig  --useshadow  --passalgo=sha512
 
 bootloader --location=mbr --driveorder=sda --timeout=3
 
-firewall --disabled
-selinux --disabled
+#firewall --disabled
+#selinux --disabled
 
 user --name="admin" --groups="wheel,wireshark" --password="sip2ser" --plaintext
 
-firstboot --enable
+#firstboot --enable
 
-halt
-
+#halt

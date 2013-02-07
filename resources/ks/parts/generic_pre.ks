@@ -13,16 +13,14 @@ def my_setup_screen():
     from snack import SnackScreen, CheckboxTree, Grid, Label, Entry, Button, GridForm
     
     pkglist = [
-        ("Personal Recorder", "s2srecorder"),
         ("Fax Spool", "s2sfaxspool"),
-        ("Cti Link", "s2sctilink"),
         ("Cdr Extractor", "s2scdrextractor"),
-        ("IVR", "s2sivr")
+        ("Languages Support", "sipxlang-*")
         ]
     screen = SnackScreen()
 
     form = GridForm(screen, 'Select package set', 1, 4)
-    g = CheckboxTree(5)
+    g = CheckboxTree(3)
     for e in pkglist:
         g.append(e[0], e[1])
     form.add(g, 0, 1)

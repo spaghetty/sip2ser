@@ -21,7 +21,7 @@ S2S_ISOLINUX_FILES = \
 	$(S2S_SPLASH_FILE) \
 	$(S2S_SPLASH_MENU)
 
-#s2s-iso-64 : iso-64 
+#iso-64 
 s2s-iso-64 : s2s-iso-disc-64 \
 	s2s-iso-packages-64 \
 	iso-update-repo-64 \
@@ -30,10 +30,9 @@ s2s-iso-64 : s2s-iso-disc-64 \
 
 # need to make a copy of entire disc so we can modify
 s2s-iso-disc-64 :
-	@echo "STICA" 
 	test -d cd || mkdir cd
 	! test -d cd.tmp || rm -rf cd.tmp
-	sudo mount -o loop $(wildcard .//$(ISO)) cd
+	sudo mount -o loop $(wildcard $(ISO)) cd
 	@echo "copying contents of disc..."
 	cp -ar cd cd.tmp
 	sudo umount cd
@@ -42,11 +41,16 @@ s2s-iso-disc-64 :
 	mv cd.tmp $(ISO_DISC)
 
 s2s-iso-download-64 : mak/*-s2s-iso.mk
+	rsync -av \
+	$(realpath ./repo)/CentOS_6/$(ARCH)/$(ISO_S2S_EXTRAS) $(ISO_DISC)/Packages/
 	rsync -av --delete \
-	$(addprefix rsync://mirror.i3d.net/pub/centos/6/os/$(ARCH)/Packages/, $(ISO_ADD_BASE)) \
+	$(addprefix rsync://mirrors.rit.edu/centos/6/os/$(ARCH)/Packages/, $(ISO_ADD_BASE)) \
 	$(ISO_PACKAGES_S2S)/
 	rsync -av --delete \
-	$(addprefix rsync://mirror.i3d.net/pub/centos/6/updates/$(ARCH)/Packages/, $(ISO_ADD_UPDATES)) \
+	$(addprefix rsync://mirrors.rit.edu/centos/6/updates/$(ARCH)/Packages/, $(ISO_ADD_UPDATES)) \
+	$(ISO_PACKAGES_S2S)/
+	rsync -av --delete \
+	$(addprefix rsync://mirrors.rit.edu/epel/6/$(ARCH)/, $(ISO_ADD_S2S_EPEL)) \
 	$(ISO_PACKAGES_S2S)/
 
 # add modifications to disc to make it operate
@@ -58,21 +62,29 @@ s2s-iso-update-files-64 :
 	for f in $(S2S_ISOLINUX_FILES); do \
 	  cp -rf $$f $(ISO_DISC)/isolinux/`basename $$f`; \
 	done
+	for f in $(S2S_KS); do \
+	  rm $$f ; \
+	done
 
 
-#s2s-iso-packages-64 : s2s-iso-download-64
-s2s-iso-packages-64 :
+s2s-iso-packages-64 : s2s-iso-download-64
 	rsync -av $(ARCH)-s2s-Packages/  $(ISO_DISC)/Packages/
 
+ISO_S2S_EXTRAS = \
+	sipxlang*
+
 ISO_ADD_BASE = \
-	wireshark-gnome \
-	emacs-nox \
-	dhcp
+	wireshark-gnome-*$(ARCH)* \
+	emacs-nox-*$(ARCH)* \
+	dhcp-*$(ARCH)* \
+	firefox-*$(ARCH)*
+
+ISO_ADD_S2S_EPEL = \
+	openpgm-5*$(ARCH)* \
 
 ISO_ADD_UPDATES = \
-	telnet \
-	firefox
-
+	sudo*$(ARCH)* \
+	telnet-*$(ARCH)* \
 
 S2S_KS = \
 	$(S2S_ISO_SRC)/embedded_install_opsip.ks \
