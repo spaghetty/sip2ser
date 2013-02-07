@@ -66,8 +66,8 @@ end
 
 task :create_mak_iso do
   puts "sip2ser iso"
-  f1 = IO.readlines("#{$our_dir}/mak/iso.mk.in")
-  f2 = File.new("#{$build_dir}/mak/12-iso.mk","w")
+  f1 = IO.readlines("#{$our_dir}/mak/s2s-iso.mk.in")
+  f2 = File.new("#{$build_dir}/mak/12-s2s-iso.mk","w")
   f1.each do | x |
     f2.puts(x.chomp)
   end
