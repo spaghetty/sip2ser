@@ -15,14 +15,14 @@ def my_setup_screen():
     pkglist = [
         ("Fax Spool", "s2sfaxspool"),
         ("Cdr Extractor", "s2scdrextractor"),
-        ("Languages Support", "sipxlang-*")
+        ("Languages Support", "sipxlang-it", "sipxlang-de")
         ]
     screen = SnackScreen()
 
     form = GridForm(screen, 'Select package set', 1, 4)
     g = CheckboxTree(3)
     for e in pkglist:
-        g.append(e[0], e[1])
+        g.append(e[0], e[1:])
     form.add(g, 0, 1)
     form.add(Button('OK'), 0, 2)
 
@@ -37,8 +37,9 @@ r = my_setup_screen()
 set_tty(3)
 
 f = open("/tmp/extra_pkg","w")
-for i in r:
-    f.write(i+"\n")
+for l in r:
+    for i in l:
+    	f.write(i+"\n")
 f.close()
 
 %end
