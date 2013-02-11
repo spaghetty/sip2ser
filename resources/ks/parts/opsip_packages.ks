@@ -17,8 +17,6 @@ telnet
 emacs-nox
 dhcp
 wireshark-gnome
-firefox
-tigervnc-server
 
 %include /tmp/extra_pkg
 

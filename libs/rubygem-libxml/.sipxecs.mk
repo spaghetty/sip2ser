@@ -1,4 +1,4 @@
-rubygem-libxml_SRPM = rubygem-libxml-ruby-2.5.0-1$(RPM_DIST).src.rpm
+rubygem-libxml_SRPM = rubygem-libxml-ruby-2.5.0-1.src.rpm
 rubygem-libxml_SPEC = $(SRC)/$(PROJ)/rubygem-libxml.spec
 rubygem-libxml_SOURCES = $(SRC)/$(PROJ)/libxml-ruby-2.5.0.gem
 

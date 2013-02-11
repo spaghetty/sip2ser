@@ -4,7 +4,7 @@
 %define release 1
 
 Summary: Ruby Bindings for LibXML2
-Name: rubygems-%{rbname}
+Name: rubygem-%{rbname}
 
 Version: %{version}
 Release: %{release}
@@ -13,12 +13,17 @@ License: Distributable
 URL: http://xml4r.github.com/libxml-ruby
 Source0: %{rbname}-%{version}.gem
 # Make sure the spec template is included in the SRPM
-Source1: rubygems-%{rbname}.spec.in
+#Source1: ruby-gems-%{rbname}.spec.in
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Requires: ruby >= 1.8.6
 Requires: rubygems >= 1.3.7
-#Requires: rubygems-hanna_guado 
+Requires: rubygems-hanna_guado 
 BuildRequires: ruby >= 1.8.6
+BuildRequires: ruby-devel
+BuildRequires: zlib
+BuildRequires: zlib-devel
+BuildRequires: libxml2
+BuildRequires: libxml2-devel
 BuildRequires: rubygems >= 1.3.7
 BuildArch: x86_64
 Provides: ruby(Libxml-ruby) = %{version}
@@ -263,6 +268,7 @@ gem install --local --install-dir %{gembuilddir} --force %{SOURCE0}
 %{gemdir}/gems/libxml-ruby-2.5.0/test/tc_xpointer.rb
 %{gemdir}/gems/libxml-ruby-2.5.0/test/test_helper.rb
 %{gemdir}/gems/libxml-ruby-2.5.0/test/test_suite.rb
+
 %{gemdir}/gems/libxml-ruby-2.5.0/ext/libxml/Makefile
 %{gemdir}/gems/libxml-ruby-2.5.0/ext/libxml/libxml.o
 %{gemdir}/gems/libxml-ruby-2.5.0/ext/libxml/libxml_ruby.so
@@ -304,8 +310,6 @@ gem install --local --install-dir %{gembuilddir} --force %{SOURCE0}
 %{gemdir}/gems/libxml-ruby-2.5.0/ext/libxml/ruby_xml_xpath_object.o
 %{gemdir}/gems/libxml-ruby-2.5.0/ext/libxml/ruby_xml_xpointer.o
 %{gemdir}/gems/libxml-ruby-2.5.0/lib/libxml_ruby.so
-
-
 
 
 %doc %{gemdir}/doc/libxml-ruby-2.5.0

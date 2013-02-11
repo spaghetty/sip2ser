@@ -14,7 +14,7 @@ APPLICATION_LABEL ?= "s2s @PACKAGE_VERSION@"
 PUBLISHER_ID ?= luciano.berardi@sip2ser.it
 PREPARERER_ID ?= luciano.berardi@sip2ser.it
 ISO_PACKAGES_S2S=$(ARCH)-s2s-Packages
-S2S_ISO_SRC ?= /home/admin/sipxecs/sip2ser/resources/ks
+S2S_ISO_SRC ?= ~/sipxecs/sip2ser/resources/ks
 ISO ?= $(ISO_LABEL)-$(PACKAGE_VERSION)-$(ISO_REV)-$(ARCH).iso
 ISO_COMPS ?= comps-iso.xml
 
@@ -29,7 +29,6 @@ s2s-iso-64 : iso-64 \
 	s2s-iso-update-repo-64 \
 	s2s-iso-update-files-64 \
 	iso-assemble-%;
-
 
 # need to make a copy of entire disc so we can modify
 s2s-iso-disc-64 :
@@ -54,7 +53,7 @@ s2s-iso-update-repo-64 :
 
 s2s-iso-download-64 : mak/*-s2s-iso.mk
 	rsync -av \
-	$(realpath ./repo)/CentOS_6/$(ARCH)/$(ISO_S2S_EXTRAS) $(ISO_DISC)/Packages/
+	$(realpath ./repo)/CentOS_6/$(ARCH)/ $(ISO_DISC)/Packages/
 	rsync -av --delete \
 	$(addprefix rsync://mirrors.rit.edu/centos/6/os/$(ARCH)/Packages/, $(ISO_ADD_BASE)) \
 	$(ISO_PACKAGES_S2S)/
@@ -66,10 +65,11 @@ s2s-iso-download-64 : mak/*-s2s-iso.mk
 	$(ISO_PACKAGES_S2S)/
 	test -d tmp.dep || mkdir tmp.dep
 	for f in $(ISO_ADD_BASE) $(ISO_ADD_UPDATES) $(ISO_ADD_S2S_EPEL); do \
-	  sudo yum --downloadonly --downloaddir=tmp.dep -y install $$f; \
+	  sudo yumdownloader --archlist=x86_64,noarch --resolve --destdir=tmp.dep `repoquery --requires --recursive --resolve --archlist=x86_64,noarch $$f` ; \
+	  echo "Dependencies of $$f downloaded"; \
 	done
 	cp -rf tmp.dep/* $(ISO_PACKAGES_S2S);
-	! test -d tmp.dep || rm -rf tmp.dep
+#	! test -d tmp.dep || rm -rf tmp.dep
 
 # add modifications to disc to make it operate
 s2s-iso-update-files-64 :
@@ -87,24 +87,56 @@ s2s-iso-update-files-64 :
 
 s2s-iso-packages-64 : s2s-iso-download-64
 	rsync -av $(ARCH)-s2s-Packages/  $(ISO_DISC)/Packages/
+	find $(ISO_DISC)/Packages \
+	   | grep $(foreach REGEX,$(RM_LIST),-e '.*/$(REGEX)') \
+	   | xargs rm
+
+RM_LIST = \
+	glibc-2.12-1.80.el6_3.5.x86_64.* \
+	*i686.rpm
 
 ISO_S2S_EXTRAS = \
-	sipxlang*
-#	s2sfaxspool* \
-#	s2scdrextractor*
+	sipxlang* \
+	freeswitch-ruby* \
+	s2sopsip* \
+	s2sfaxspool* \
+	s2scdrextractor*
 
 ISO_ADD_BASE = \
+	emacs-nox* \
+	usermode-gtk* \
+	postgresql-8* \
+	postgresql-server* \
 	wireshark-gnome* \
-	emacs-nox-* \
-	dhcp-* \
-	firefox-*
+	startup-notification* \
+	dhcp* \
+	python-psycopg2* \
+	python-libs* \
+	rubygem-rake* \
+	ghostscript-* \
+	xdg-utils* \
+	libgsf-* \
+	librsvg2-* \
+	ORBit2-2* \
+	GConf2* \
+	xorg-x11-font-utils* \
+	ImageMagick* 
 
 ISO_ADD_S2S_EPEL = \
-	openpgm-5* \
+	getmail* \
+	zeromq-* \
+	ruby-sqlite3* \
+	rubygem-mime-types* \
+	rubygem-rspec* \
+	rubygem-json* \
+	rubygem-mocha* \
+	rubygem-activesupport* \
+	ssmtp*
 
 ISO_ADD_UPDATES = \
 	sudo* \
-	telnet-* \
+	dhclient-* \
+	telnet-*
 
 S2S_KS = \
 	$(S2S_ISO_SRC)/embedded_install_opsip.ks \
