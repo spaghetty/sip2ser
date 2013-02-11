@@ -1,0 +1,45 @@
+diff --git a/sipXconfig/web/context/WEB-INF/user_portal/UserPortalNavigation.html b/sipXconfig/web/context/WEB-INF/user_portal/UserPortalNavigation.html
+index f007537..d0d38d7 100644
+--- a/sipXconfig/web/context/WEB-INF/user_portal/UserPortalNavigation.html
++++ b/sipXconfig/web/context/WEB-INF/user_portal/UserPortalNavigation.html
+@@ -4,7 +4,7 @@
+ 			<div class="roundedMainSectionBoxTopLeft"></div><div class="roundedMainSectionBoxTopRight"></div>
+ 			<div class="roundedMainSectionBoxInside">
+ 				<a class="heading" jwcid="@PageLink" id="menu.inbox" page="vm/ManageVoicemail">
+-				<span key="menu.voicemail">Voicemail</span>
++				<span key="menu.voicemail">Inbox</span>
+ 				</a>
+ 			</div>
+ 		</li>
+diff --git a/sipXconfig/web/context/WEB-INF/user_portal/UserPortalNavigation.properties b/sipXconfig/web/context/WEB-INF/user_portal/UserPortalNavigation.properties
+index ac1809c..bf76e1c 100644
+--- a/sipXconfig/web/context/WEB-INF/user_portal/UserPortalNavigation.properties
++++ b/sipXconfig/web/context/WEB-INF/user_portal/UserPortalNavigation.properties
+@@ -1,8 +1,8 @@
+ #Created by JInto - www.guh-software.de
+ #Thu Oct 05 17:46:56 CEST 2006
+ menu.about=About
+-menu.voicemail=Voicemail
+-menu.inbox=Inbox
++menu.voicemail=Inbox
++menu.inbox=Voicemail
+ menu.distributionLists=Distribution Lists
+ menu.callForwarding=Call Forwarding
+ menu.changePin=Change PIN
+diff --git a/sipXconfig/web/context/WEB-INF/vm/ManageVoicemail.properties b/sipXconfig/web/context/WEB-INF/vm/ManageVoicemail.properties
+index 1191d53..5fa9c4d 100644
+--- a/sipXconfig/web/context/WEB-INF/vm/ManageVoicemail.properties
++++ b/sipXconfig/web/context/WEB-INF/vm/ManageVoicemail.properties
+@@ -1,10 +1,10 @@
+-title=Voicemail
++title=Inbox
+ subject=Subject
+ from=From
+ timestamp=Date
+ duration=Duration
+ play=Play
+-tab.inbox=Inbox
++tab.inbox=Voicemail
+ tab.conference=Conference
+ tab.deleted=Trash
+ tab.saved=Saved
