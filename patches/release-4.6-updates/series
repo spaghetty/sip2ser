@@ -1,5 +1,6 @@
 fwr_rule_and_dhcp_for_snom
 GatewayTable
 FaxExtension
+UserPortalFixLabel
 snom-fixes
 snom-preferences
