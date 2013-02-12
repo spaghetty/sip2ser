@@ -16,7 +16,7 @@ ssmtp
 telnet
 emacs-nox
 dhcp
-wireshark-gnome
+#wireshark-gnome
 
 %include /tmp/extra_pkg
 
