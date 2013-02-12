@@ -43,7 +43,7 @@ index 65016ce..0aa62fa 100644
    </group>
  </model>
 diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/Cdr.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/Cdr.java
-index 957aa67..faad33e 100644
+index 957aa67..90805b6 100644
 --- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/Cdr.java
 +++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/Cdr.java
 @@ -103,6 +103,28 @@ public class Cdr implements Serializable {
@@ -60,7 +60,7 @@ index 957aa67..faad33e 100644
 +                String[] exclude = excluded.split(" ");
 +                boolean isExcluded = false;
 +                for(String prefix:  exclude) {
-+                    if(m_callee.startsWith(prefix)) {
++                    if(prefix!="" && m_callee.startsWith(prefix)) {
 +                       isExcluded = true;
 +                       break;
 +                    }
@@ -89,7 +89,7 @@ index 957aa67..faad33e 100644
 +                String[] exclude = excluded.split(" ");
 +                boolean isExcluded = false;
 +                for(String prefix:  exclude) {
-+                    if(m_caller.startsWith(prefix)) {
++                    if(prefix!="" && m_caller.startsWith(prefix)) {
 +                       isExcluded = true;
 +                       break;
 +                    }
