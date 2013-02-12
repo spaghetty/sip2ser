@@ -3,4 +3,5 @@ GatewayTable
 FaxExtension
 UserPortalFixLabel
 snom-fixes
+cdr-privacy
 snom-preferences
