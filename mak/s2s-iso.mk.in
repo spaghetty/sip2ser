@@ -98,7 +98,8 @@ s2s-iso-packages-64 : s2s-iso-download-64
 
 S2S_ADD_PACK = \
 	freeswitch-ruby* \
-	sipxlang-*
+	sipxlang-* \
+	s2scdrextractor-devel*
 
 ISO_ADD_BASE = \
 	emacs-nox* \
@@ -107,18 +108,18 @@ ISO_ADD_BASE = \
 	python-libs* \
 	rubygem-rake* \
 	ghostscript-* \
+	ImageMagick* \
+	librsvg2-* \
+	postgresql-server* \
+	xorg-x11-font-utils* \
+	libgsf-* \
 	xdg-utils* \
-	ImageMagick* 
+	GConf2* \
+	ORBit2-2*
 #	usermode-gtk* \
-#	libgsf-* \
-#	librsvg2-* \
-#	ORBit2-2* \
-#	GConf2* \
-#	postgresql-8* \
-#	postgresql-server* \
+#	postgresql-8* 
 #	wireshark-gnome* \
 #	startup-notification* \
-#	xorg-x11-font-utils* \
 
 ISO_ADD_S2S_EPEL = \
 	getmail* \
