@@ -4,4 +4,6 @@ FaxExtension
 UserPortalFixLabel
 snom-fixes
 cdr-privacy
+CdrFilter
+CallDestPlugin
 snom-preferences
