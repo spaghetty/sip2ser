@@ -29,14 +29,15 @@ chkconfig udisks on
 
 #creazione archivio
 
+
 #... Setup initial setup script to run one time (after initial reboot only)
 cat >> /root/.bashrc <<EOF
 
-/usr/bin/sipxecs-setup
+/usr/bin/opsip-setup-system
 # restore /root/.bashrc and /etc/issue to original states upon successful
 # setup.
 if [ \$? == 0 ]; then
-  sed -i '/^\/usr\/bin\/sipxecs-setup\$/,//d' /root/.bashrc
+  sed -i '/^\/usr\/bin\/opsip-setup-system\$/,//d' /root/.bashrc
   sed -i '/^====/,//d' /etc/issue
 fi
 EOF
@@ -47,21 +48,31 @@ EOF
 cat >> /etc/issue <<EOF
 
 ==========================
-Welcome to sip2ser OpSip.
+Welcome to sip2ser Opsip.
 
-After logging in as admin you will automatically be taken through a setup
+After logging in as root you will automatically be taken through a setup
 procedure.
 
 EOF
 
-cat > /etc/yum.repos.d/sipxecs.repo <<EOF
-[sipXecs]
-name=sipXecs for CentOS - \$basearch
-baseurl=http://download.sipfoundry.org/pub/sipXecs/4.6.0/CentOS_6/\$basearch
+cat > /etc/yum.repos.d/opsip4.6.repo <<EOF
+[Opsip]
+name=Opsip for CentOS - \$basearch
+baseurl=http://82.85.187.44/repo/CentOS_6/\$basearch
 enabled=1
 gpgcheck=0
 
 EOF
+
+cat > /etc/yum.repos.d/opsip4.6_unstable.repo <<EOF
+[Opsip]
+name=Opsip for CentOS - \$basearch
+baseurl=http://82.85.187.44/unstable_repo/CentOS_6/\$basearch
+enabled=1
+gpgcheck=0
+
+EOF
+
 
 #... Boot kernel in quiet mode
 sed -i 's/ro root/ro quiet root/g' /boot/grub/grub.conf
@@ -72,3 +83,4 @@ chkconfig netfs off
 chkconfig nfslock off
 
 eject
+
