@@ -1,0 +1,39 @@
+diff --git a/sipXsnom/etc/snom/line.xml b/sipXsnom/etc/snom/line.xml
+index 51ac747..0445697 100644
+--- a/sipXsnom/etc/snom/line.xml
++++ b/sipXsnom/etc/snom/line.xml
+@@ -233,7 +233,7 @@
+     </setting>
+     <setting name="user_presence_subscription" advanced="yes">
+       <type refid="on-off" />
+-      <value>off</value>
++      <value>on</value>
+     </setting>
+     <setting name="user_presence_buddy_list_uri" advanced="yes">
+       <type>
+diff --git a/sipXsnom/etc/snom/phone.xml b/sipXsnom/etc/snom/phone.xml
+index b547b9e..b5db319 100644
+--- a/sipXsnom/etc/snom/phone.xml
++++ b/sipXsnom/etc/snom/phone.xml
+@@ -298,7 +298,7 @@
+     <setting name="use_backlight">
+       <profileName>use_backlight$</profileName>
+       <type refid="on-off" />
+-      <value>on</value>
++      <value>off</value>
+     </setting>
+     <setting name="guess_number" advanced="yes">
+       <type refid="on-off" />
+diff --git a/sipXsnom/etc/snom/snom.vm b/sipXsnom/etc/snom/snom.vm
+index 7feefeb..5a11481 100644
+--- a/sipXsnom/etc/snom/snom.vm
++++ b/sipXsnom/etc/snom/snom.vm
+@@ -41,7 +41,7 @@ perm="R"#end
+ 	<tbook e="2">
+ #foreach ($entry in $phoneBook)
+ #set ($i = $velocityCount - 1)
+-#set ($fullName = "$!{entry.FirstName} $!{entry.LastName}")
++#set ($fullName = "$!{entry.LastName} $!{entry.FirstName}")
+ #set ($fullName = $fullName.trim())
+ 		<item context="active" type="none" index="${i}">
+ 			<name>$esc.xml($!fullName)</name>

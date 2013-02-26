@@ -1,0 +1,38 @@
+diff --git a/sipXconfig/web/src/org/sipfoundry/sipxconfig/components/FaxServicePanel.java b/sipXconfig/web/src/org/sipfoundry/sipxconfig/components/FaxServicePanel.java
+index c72b2de..e93b133 100644
+--- a/sipXconfig/web/src/org/sipfoundry/sipxconfig/components/FaxServicePanel.java
++++ b/sipXconfig/web/src/org/sipfoundry/sipxconfig/components/FaxServicePanel.java
+@@ -20,12 +20,14 @@ import org.apache.commons.lang.StringUtils;
+ import org.apache.tapestry.BaseComponent;
+ import org.apache.tapestry.annotations.ComponentClass;
+ import org.apache.tapestry.annotations.InjectObject;
++import org.apache.tapestry.annotations.InjectState;
+ import org.apache.tapestry.annotations.Parameter;
+ import org.apache.tapestry.event.PageBeginRenderListener;
+ import org.apache.tapestry.event.PageEvent;
+ import org.sipfoundry.sipxconfig.common.CoreContext;
+ import org.sipfoundry.sipxconfig.common.User;
+ import org.sipfoundry.sipxconfig.common.UserException;
++import org.sipfoundry.sipxconfig.site.UserSession;
+ import org.sipfoundry.sipxconfig.vm.MailboxPreferences;
+ 
+ @ComponentClass(allowBody = false)
+@@ -51,6 +53,9 @@ public abstract class FaxServicePanel extends BaseComponent implements PageBegin
+     @InjectObject(value = "spring:coreContext")
+     public abstract CoreContext getCoreContext();
+ 
++    @InjectState(value = "userSession")
++    public abstract UserSession getUserSession();
++
+     @Override
+     public void pageBeginRender(PageEvent event) {
+         if (!TapestryUtils.isValid(this)) {
+@@ -80,6 +85,7 @@ public abstract class FaxServicePanel extends BaseComponent implements PageBegin
+ 
+     public boolean isFaxDisabled() {
+         return StringUtils.isEmpty(getMailboxPreferences().getEmailAddress())
+-                && StringUtils.isEmpty(getMailboxPreferences().getAlternateEmailAddress());
++                && StringUtils.isEmpty(getMailboxPreferences().getAlternateEmailAddress())
++	        || !getUserSession().isAdmin();
+     }
+ }

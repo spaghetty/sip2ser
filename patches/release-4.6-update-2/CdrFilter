@@ -1,0 +1,73 @@
+diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrManagerImpl.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrManagerImpl.java
+index ca9651f..86ecd72 100644
+--- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrManagerImpl.java
++++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrManagerImpl.java
+@@ -305,6 +305,7 @@ public class CdrManagerImpl extends JdbcDaoSupport implements CdrManager, Featur
+                 Set<String> names = user.getAliases();
+                 names.add(user.getName());
+                 m_forUser.setTerm(names.toArray(new String[0]));
++                m_forUser.setUser(user);
+             }
+         }
+ 
+diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
+index 44032c3..539582c 100644
+--- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
++++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrSearch.java
+@@ -16,6 +16,7 @@ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
+ 
++import org.sipfoundry.sipxconfig.common.User;
+ import org.sipfoundry.sipxconfig.dialplan.CallTag;
+ 
+ public class CdrSearch {
+@@ -49,6 +50,7 @@ public class CdrSearch {
+     };
+     private String m_order;
+     private boolean m_ascending = true;
++    private User m_user;
+ 
+     public void setMode(Mode mode) {
+         if (mode == null) {
+@@ -74,6 +76,10 @@ public class CdrSearch {
+         return m_term;
+     }
+ 
++    public void setUser(User u) {
++        m_user = u;
++    }
++
+     public void setOrder(String order, boolean ascending) {
+         m_order = order;
+         m_ascending = ascending;
+@@ -90,17 +96,23 @@ public class CdrSearch {
+     private void appendCallerSql(StringBuilder sql) {
+         sql.append(OPEN_PARANTHESIS);
+         appendSearchTermSql(sql, CdrManagerImpl.CALLER_AOR);
+-        sql.append(AND);
+-        sql.append(CdrManagerImpl.CALLER_INTERNAL);
+-        sql.append("=true)");
++        if(m_user!=null && !m_user.isAdmin()) {
++            sql.append(AND);
++            sql.append(CdrManagerImpl.CALLER_INTERNAL);
++            sql.append("=true)");
++        } else {
++            sql.append(CLOSED_PARENTHESIS);
++        }
+     }
+ 
+     private void appendCalleeSql(StringBuilder sql) {
+         sql.append(OPEN_PARANTHESIS);
+         appendSearchTermSql(sql, CdrManagerImpl.CALLEE_AOR);
+-        sql.append(AND);
+-        appendCalleeInternalRouteSql(sql);
+-        sql.append(CLOSED_PARANTHESIS);
++        if(m_user!=null && !m_user.isAdmin()) {
++            sql.append(AND);
++            appendCalleeInternalRouteSql(sql);
++        }
++        sql.append(CLOSED_PARENTHESIS);
+     }
+ 
+     private void appendCalleeInternalRouteSql(StringBuilder sql) {
