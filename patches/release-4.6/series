@@ -8,3 +8,5 @@ CdrFilter
 CallDestPlugin
 snom-preferences
 setup-noNet-installation
+CdrImprovement
+cdrRendering

@@ -1,0 +1,327 @@
+diff --git a/sipXcdr/bin/sipxcdr.in b/sipXcdr/bin/sipxcdr.in
+index f829f18..ae487c3 100644
+--- a/sipXcdr/bin/sipxcdr.in
++++ b/sipXcdr/bin/sipxcdr.in
+@@ -137,8 +137,8 @@ EOF
+ # special patch that upgrades DB version to the latest version - only use once
+ VersionPatch="upgrade_version"
+ 
+-UpgradePatches7=""
+-UpgradePatches6="cdrremote $VersionPatch"
++UpgradePatches7="gateway $VersionPatch"
++UpgradePatches6="cdrremote $UpgradePatches7"
+ UpgradePatches5="transaction $UpgradePatches6"
+ UpgradePatches4="reference contact calldirection transaction $UpgradePatches5"
+ UpgradePatches3="index_on_time $UpgradePatches4"
+diff --git a/sipXcdr/etc/Makefile.am b/sipXcdr/etc/Makefile.am
+index 500523a..229ddb9 100644
+--- a/sipXcdr/etc/Makefile.am
++++ b/sipXcdr/etc/Makefile.am
+@@ -10,7 +10,8 @@ dist_sql_DATA = \
+ 	database/contact.sql \
+ 	database/calldirection.sql \
+ 	database/cdrremote.sql \
+-	database/transaction.sql
++	database/transaction.sql \
++	database/gateway.sql
+ 
+ cfinputsdir = @SIPX_CFINPUTS@/plugin.d
+ dist_cfinputs_DATA = \
+diff --git a/sipXcdr/etc/database/gateway.sql b/sipXcdr/etc/database/gateway.sql
+new file mode 100644
+index 0000000..10af7e5
+--- /dev/null
++++ b/sipXcdr/etc/database/gateway.sql
+@@ -0,0 +1,2 @@
++alter table cdrs add column called_number text ;
++alter table cdrs add column gateway int ;
+diff --git a/sipXcdr/lib/cdr.rb b/sipXcdr/lib/cdr.rb
+index 197f8f7..0519d09 100644
+--- a/sipXcdr/lib/cdr.rb
++++ b/sipXcdr/lib/cdr.rb
+@@ -153,6 +153,7 @@ class CallLegs
+   private
+   def get_leg(cse)
+     id = CallLeg.leg_id(cse)
++    puts cse.request_uri,"->", id
+     @legs[id] ||= CallLeg.new(id, @log)
+   end
+ end
+@@ -207,7 +208,10 @@ class Cdr
+     @failure_status = nil
+     @failure_reason = nil
+     @call_direction = nil
+-    
++    @called_number = nil
++    @gateway = nil
++    @contact_info = {}
++   
+     @got_original = false
+     @log = log
+     @legs = CallLegs.new(@log)
+@@ -223,7 +227,8 @@ class Cdr
+   FIELDS = [:call_id, :from_tag, :to_tag, :caller_aor, :callee_aor, 
+   :start_time, :connect_time, :end_time,    
+   :termination, :failure_status, :failure_reason, 
+-  :call_direction, :reference, :caller_contact, :callee_contact, :caller_internal, :callee_route]
++  :call_direction, :reference, :caller_contact, :callee_contact, :caller_internal, :callee_route,
++  :called_number, :gateway ]
+   
+   attr_accessor(*FIELDS)
+   
+@@ -301,8 +306,14 @@ class Cdr
+     original = !cse.to_tag
+     @caller_internal = cse.caller_internal 
+     @via_count = cse.via_count if (!@via_count || cse.via_count < @via_count) 
+-    @branch_id = cse.branch_id if (!@branch_id || cse.via_count <= @via_count) 
++    @branch_id = cse.branch_id if (!@branch_id || cse.via_count <= @via_count)
+     # bailout if we already have original request and this one is not
++
++    if cse.request_uri.include? "sipxecs-lineid"
++      called_number = Utils.contact_without_params(cse.request_uri)
++      gateway = Integer(/.*sipxecs-lineid=(\d+).*/.match(cse.request_uri)[1])
++      @contact_info[cse.branch_id] = [called_number, gateway]
++    end
+     return if(@got_original && !original)
+     
+     # continue if we are original or if we are older 
+@@ -323,6 +334,10 @@ class Cdr
+   end
+   
+   def accept_call_setup(cse)
++    if @contact_info.has_key? cse.branch_id
++      @called_number = @contact_info[cse.branch_id][0]
++      @gateway = @contact_info[cse.branch_id][1]
++    end
+     if !@start_time
+         # probably a case where we've missed the request.  Setup necessary
+         # info as if a request was seen.
+@@ -370,7 +385,7 @@ class Cdr
+     end
+     @failure_reason = leg.failure_reason
+     @failure_status = leg.failure_status
+-    @callee_contact = leg.callee_contact  
++    @callee_contact = leg.callee_contact
+   end
+   
+   # Map termination codes to human-readable strings
+diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/Cdr.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/Cdr.java
+index 90805b6..2d7aae6 100644
+--- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/Cdr.java
++++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/Cdr.java
+@@ -82,6 +82,10 @@ public class Cdr implements Serializable {
+     private boolean m_callerInternal;
+     private String m_calleeRoute;
+ 
++    private String m_calledNumberAor;
++    private String m_calledNumber;
++    private int m_trunkId;
++
+     public String getCalleeAor() {
+         return m_calleeAor;
+     }
+@@ -95,7 +99,10 @@ public class Cdr implements Serializable {
+     }
+ 
+     public String getRecipient() {
+-        return m_recipient;
++        if(m_calledNumber!=null)
++            return m_calledNumber;
++        else
++            return m_recipient;
+     }
+ 
+     public void setCalleeAor(String calleeAor) {
+@@ -335,5 +342,20 @@ public class Cdr implements Serializable {
+         return callType;
+     }
+ 
++    public String getCalledNumber() {
++        return m_calledNumber;
++    }
++    
++    public void setCalledNumber(String calledNumber) {
++        m_calledNumberAor = calledNumber;
++        m_calledNumber = SipUri.extractUser(calledNumber);
++    }
+ 
++    public int getGateway() {
++        return m_trunkId;
++    }
++    
++    public void setGateway(int id) {
++        m_trunkId = id;
++    }
+ }
+diff --git a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrManagerImpl.java b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrManagerImpl.java
+index 2bab612..f49aaf6 100644
+--- a/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrManagerImpl.java
++++ b/sipXconfig/neoconf/src/org/sipfoundry/sipxconfig/cdr/CdrManagerImpl.java
+@@ -90,6 +90,8 @@ public class CdrManagerImpl extends JdbcDaoSupport implements CdrManager, Featur
+     static final String CALLEE_ROUTE = "callee_route";
+     static final String CALLEE_CONTACT = "callee_contact";
+     static final String CALLER_CONTACT = "caller_contact";
++    static final String CALLED_NUMBER = "called_number";
++    static final String GATEWAY = "gateway";
+ 
+     private int m_csvLimit;
+     private int m_jsonLimit;
+@@ -423,6 +425,8 @@ public class CdrManagerImpl extends JdbcDaoSupport implements CdrManager, Featur
+             cdr.setFailureStatus(rs.getInt(FAILURE_STATUS));
+             String termination = rs.getString(TERMINATION);
+             cdr.setTermination(Termination.fromString(termination));
++            cdr.setCalledNumber(rs.getString(CALLED_NUMBER));
++            cdr.setGateway(rs.getInt(GATEWAY));
+             m_cdrs.add(cdr);
+         }
+     }
+diff --git a/sipXproxy/src/CallStateEventBuilder.cpp b/sipXproxy/src/CallStateEventBuilder.cpp
+index 622b491..c1b1d48 100755
+--- a/sipXproxy/src/CallStateEventBuilder.cpp
++++ b/sipXproxy/src/CallStateEventBuilder.cpp
+@@ -178,6 +178,7 @@ void CallStateEventBuilder::observerEvent(int sequenceNumber, ///< for ObserverR
+  */
+ void CallStateEventBuilder::callRequestEvent(int sequenceNumber,
+                                              const OsTime& timestamp,      ///< obtain using getCurTime(OsTime)
++                                             const UtlString& requestUri,
+                                              const UtlString& contact,
+                                              const UtlString& references,
+                                              const UtlString& branch_id,
+diff --git a/sipXproxy/src/CallStateEventBuilder.h b/sipXproxy/src/CallStateEventBuilder.h
+index 3d6a441..d928940 100755
+--- a/sipXproxy/src/CallStateEventBuilder.h
++++ b/sipXproxy/src/CallStateEventBuilder.h
+@@ -79,6 +79,7 @@ class CallStateEventBuilder
+     */
+    virtual void callRequestEvent(int sequenceNumber,
+                                  const OsTime& timestamp,      ///< obtain using getCurTime(OsTime)
++                                 const UtlString& requestUri,
+                                  const UtlString& contact,
+                                  const UtlString& references,
+                                  const UtlString& branch_id,
+diff --git a/sipXproxy/src/CallStateEventBuilder_DB.cpp b/sipXproxy/src/CallStateEventBuilder_DB.cpp
+index 3f02466..0ddc23c 100755
+--- a/sipXproxy/src/CallStateEventBuilder_DB.cpp
++++ b/sipXproxy/src/CallStateEventBuilder_DB.cpp
+@@ -139,13 +139,14 @@ void CallStateEventBuilder_DB::observerEvent(int sequenceNumber, ///< for Observ
+  *   - completeCallEvent
+  */
+ void CallStateEventBuilder_DB::callRequestEvent(int sequenceNumber,
+-                                                 const OsTime& timestamp,      ///< obtain using getCurTime(OsTime)
+-                                                 const UtlString& contact,
+-                                                 const UtlString& references,
+-                                                 const UtlString& branch_id,
+-                                                 int              via_count,
+-                                                 const bool callerInternal
+-                                                 )
++                                                const OsTime& timestamp,      ///< obtain using getCurTime(OsTime)
++                                                const UtlString& requestUri,
++                                                const UtlString& contact,
++                                                const UtlString& references,
++                                                const UtlString& branch_id,
++                                                int              via_count,
++                                                const bool callerInternal
++                                                )
+ {
+    if (builderStateIsOk(CallRequestEvent))
+    {
+@@ -170,6 +171,10 @@ void CallStateEventBuilder_DB::callRequestEvent(int sequenceNumber,
+       replaceSingleQuotes(branch_id, nbranchId);
+       mBranchId = "\'" + nbranchId + "\',";
+ 
++      UtlString nrequestUri;
++      replaceSingleQuotes(requestUri, nrequestUri);
++      mRequestUri = "\'" + nrequestUri + "\',";
++
+       char buffer[10];
+       snprintf(buffer, 10, "%d", via_count);
+       mViaCount = buffer;
+@@ -193,11 +198,11 @@ void CallStateEventBuilder_DB::callRequestEvent(int sequenceNumber,
+  *   - completeCallEvent
+  */
+ void CallStateEventBuilder_DB::callSetupEvent(int sequenceNumber,
+-                                               const OsTime& timestamp,      ///< obtain using getCurTime(OsTime)
+-                                               const UtlString& contact,
+-                                               const UtlString& calleeRoute,
+-                                               const UtlString& branch_id,
+-                                               int              via_count
++                                              const OsTime& timestamp,      ///< obtain using getCurTime(OsTime)
++                                              const UtlString& contact,
++                                              const UtlString& calleeRoute,
++                                              const UtlString& branch_id,
++                                              int              via_count
+                                                )
+ {
+    if (builderStateIsOk(CallSetupEvent))
+diff --git a/sipXproxy/src/CallStateEventBuilder_DB.h b/sipXproxy/src/CallStateEventBuilder_DB.h
+index e1a405c..db65b08 100755
+--- a/sipXproxy/src/CallStateEventBuilder_DB.h
++++ b/sipXproxy/src/CallStateEventBuilder_DB.h
+@@ -55,6 +55,7 @@ class CallStateEventBuilder_DB : public CallStateEventBuilder
+    /// Begin a Call Request Event - an INVITE without a to tag has been observed
+    void callRequestEvent(int sequenceNumber,
+                          const OsTime& timestamp,      ///< obtain using getCurTime(OsTime)
++                         const UtlString& requestUri,
+                          const UtlString& contact,
+                          const UtlString& references,
+                          const UtlString& branch_id,
+diff --git a/sipXproxy/src/CallStateEventBuilder_XML.cpp b/sipXproxy/src/CallStateEventBuilder_XML.cpp
+index c6ab270..db5d1cb 100755
+--- a/sipXproxy/src/CallStateEventBuilder_XML.cpp
++++ b/sipXproxy/src/CallStateEventBuilder_XML.cpp
+@@ -244,6 +244,7 @@ void CallStateEventBuilder_XML::observerEvent(int sequenceNumber, ///< for Obser
+  */
+ void CallStateEventBuilder_XML::callRequestEvent(int sequenceNumber,
+                                                  const OsTime& timestamp,      ///< obtain using getCurTime(OsTime)
++                                                 const UtlString& requestUri,
+                                                  const UtlString& contact,
+                                                  const UtlString& references,
+                                                  const UtlString& branch_id,
+diff --git a/sipXproxy/src/CallStateEventBuilder_XML.h b/sipXproxy/src/CallStateEventBuilder_XML.h
+index 3d2f557..5925fe9 100755
+--- a/sipXproxy/src/CallStateEventBuilder_XML.h
++++ b/sipXproxy/src/CallStateEventBuilder_XML.h
+@@ -55,6 +55,7 @@ class CallStateEventBuilder_XML : public CallStateEventBuilder
+    /// Begin a Call Request Event - an INVITE without a to tag has been observed
+    void callRequestEvent(int sequenceNumber,
+                          const OsTime& timestamp,      ///< obtain using getCurTime(OsTime)
++                         const UtlString& requestUri,
+                          const UtlString& contact,
+                          const UtlString& references,
+                          const UtlString& branch_id,
+diff --git a/sipXproxy/src/SipXProxyCseObserver.cpp b/sipXproxy/src/SipXProxyCseObserver.cpp
+index 717d3ba..a92fe18 100755
+--- a/sipXproxy/src/SipXProxyCseObserver.cpp
++++ b/sipXproxy/src/SipXProxyCseObserver.cpp
+@@ -541,8 +541,10 @@ UtlBoolean SipXProxyCseObserver::handleMessage(OsMsg& eventMessage)
+                               callIdBranchIdTime->setPaiPresent(&paiPresent);
+                            }
+                            else {
+-                              mCallTransMutex.release();
+-                              return(TRUE);
++                             if ( not requestUri.contains("sipxecs-lineid") ) {
++                               mCallTransMutex.release();
++                               return(TRUE);
++                             }
+                            }
+                         }
+                         else {
+@@ -552,7 +554,8 @@ UtlBoolean SipXProxyCseObserver::handleMessage(OsMsg& eventMessage)
+                      }
+                      mCallTransMutex.release();
+                   }
+-                  mpBuilder->callRequestEvent(mSequenceNumber, timeNow, contact, references, branchId, viaCount, paiPresent);
++
++                  mpBuilder->callRequestEvent(mSequenceNumber, timeNow, requestUri, contact, references, branchId, viaCount, paiPresent);
+                   break;
+                   
+                case aCallSetup:
+@@ -570,7 +573,7 @@ UtlBoolean SipXProxyCseObserver::handleMessage(OsMsg& eventMessage)
+                   {
+                      // CallId/BranchId are either not found or doesn't match.  Not a final response.
+                      mCallTransMutex.release();
+-                     return(TRUE);
++                     //return(TRUE);
+                   }
+                   for (int rrNum = 0;
+                        (!routeFound && sipMsg->getRecordRouteUri(rrNum, &recordRoute));
