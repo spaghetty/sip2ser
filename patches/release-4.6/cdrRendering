@@ -1,17 +1,3 @@
-diff --git a/OpenACD b/OpenACD
-index 4c2722a..9ecd844 160000
---- a/OpenACD
-+++ b/OpenACD
-@@ -1 +1 @@
--Subproject commit 4c2722ace4b25c06cd66a24166b6fe0d21f26d3f
-+Subproject commit 9ecd84421b161decdf40a316fa01f5f3559597d1
-diff --git a/freeswitch b/freeswitch
-index ee579db..79fe1b9 160000
---- a/freeswitch
-+++ b/freeswitch
-@@ -1 +1 @@
--Subproject commit ee579db74a23c4a42af711b3eb84c9db96647866
-+Subproject commit 79fe1b9d26fe8bbc59751e9818ed9987ac2eacb0
 diff --git a/sipXconfig/web/context/WEB-INF/cdr/CdrTable.html b/sipXconfig/web/context/WEB-INF/cdr/CdrTable.html
 index 1167358..a272b07 100644
 --- a/sipXconfig/web/context/WEB-INF/cdr/CdrTable.html
