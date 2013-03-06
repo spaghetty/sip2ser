@@ -75,19 +75,18 @@ task :config, [ :jdb ] do |t, args|
     Rake::Task[:create_mak_iso].invoke()
     sh "rm -f 111-BUILD"
     sh "touch 111-ISO"
+  else
     sh "#{$src_dir}/configure #{base_config_string}"
     sh "rm -f 111-ISO"
     sh "touch 111-BUILD"
   end
-  if not File.exists?("#{$build_dir}/.module-inclusion")
-    Rake::Task[:module_inclusion].invoke()    
-  end
+  Rake::Task[:modules_inclusion].invoke()
   Rake::Task[:get_custom].invoke()
 end
 
-task :module_inclusion do
-  sh "cp #{$our_dir}/.modules-include #{$build_dir}"
-  sh "cp #{$our_dir}/.modules-exclude #{$build_dir}"
+desc "Gestisce l'integrazione dei progetti esterni"
+task :modules_inclusion do
+  sh "cp -r #{$our_dir}/.modules* #{$build_dir}"
 end
 
 desc "Gestisce l'integrazione dei progetti esterni"
