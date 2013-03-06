@@ -14,72 +14,23 @@ logger = Logger.new($log_file)
 
 base_config_string="--cache-file=`pwd`/ac-cache-file --prefix=/opt/`pwd | gawk -F /  '{ print $NF  }'` SIPXPBXUSER=`whoami` SIPXECS_NAME=OpSip OPENFIRE_HOME=/opt/openfire/ --enable-mrtg --enable-agent --enable-rpm"
 
-packages_base = "autoconf automake make libtool createrepo gcc-c++ \
- rpm-build ruby rubygem-treetop rubygem-polyglot rubygem-mail rubygem-net-scp \
- rubygem-zip rubygem-libxml rubygem-rmail rubygem-htmlentities-4.3.1 rubygem-rake \
- libxml2 libxml2-devel js git wget  mock thttpd \
- python-psycopg2 python-twisted-web python-lxml python-httplib2 sipx-openfire freeswitch-ruby"
+iso_config_string="--enable-centos-iso ISO_DIR=./ RPM_DIST_DIR=./repo CENTOS_RSYNC_URL=rsync://mirrors.rit.edu OEM_DIR=/home/admin/sipxecs/sip2ser/mak/iso/"
 
+packages_base = "autoconf automake make libtool createrepo gcc-c++ \
+ rpm-build ruby libxml2 libxml2-devel js git wget  mock thttpd \
+ "
+missing_packages = "openacd homer resiprocate-devel mysql-connector-odbc \
+gperftools-libs v8-devel oss_core-devel libdnet-devel poco-devel libconfig-devel libpcap-devel \
+libtool-ltdl-devel libmcrypt-devel \
+"
 
 gem_extra = ""
-
-
-def load_projects
-  a = IO.readlines($projects_file)
-  a.each() { | x |
-    x.chomp!
-  }
-  return a
-end
-
-# packages_mock = "git
-# mock 
-# thttpd"
-
-# # NON VENGONO USATI
-# packages_lev1 = "ant-commons-logging
-# ant-junit
-# ant-nodeps
-# ant-trax
-# apr-devel
-# automake
-# cppunit-devel
-# doxygen
-# findutils
-# gcc-c++
-# httpd-devel
-# jakarta-commons-beanutils
-# jakarta-commons-collections
-# java-devel
-# js
-# net-snmp-devel
-# nsis
-# openssl-devel
-# pcre-devel
-# python
-# ruby
-# ruby-devel
-# rubygem-rake
-# rubygems
-# shadow-utils
-# stunnel
-# unixODBC-devel
-# xalan-j2
-# xerces-c-devel
-# zip
-# patch
-# patchutils
-# freeswitch-ruby" # ESL
-
-# import "tests/tests.rake"
-
 
 task :default => :config
 
 task :test do
   puts $src_dir
   puts $our_dir
-  Rake::Task[:apply_staged].execute()
 end
 
 task :prereq do
@@ -87,20 +38,13 @@ task :prereq do
   sh "sudo usermod -a -G mock $USER"
 end
 
-task :proxy_fixup do
-  if not File.exists?("#{$src_dir}/sipXproxy/src/SipXProxyCstaObserver.cpp")
-    sh "ln -s #{$our_dir}/resources/sipxproxy/SipXProxyCstaObserver.cpp /#{$src_dir}/sipXproxy/src/ "
-    sh "ln -s #{$our_dir}/resources/sipxproxy/SipXProxyCstaObserver.h /#{$src_dir}/sipXproxy/src/ "
-  end
-end
-
 desc "Inizializza il sistema per compilare localmente"
 task :build_env do
-    Rake::Task[:proxy_fixup].execute()
   if File.exists?("#{$build_dir}/config.status")
     Rake::Task[:prereq].invoke()
     sh "make {sipx,lib}.deps-list | grep -v sipx | xargs sudo yum install -y"
     sh "make {sipx,lib}.deps-build-list | grep -v sipx | xargs sudo yum install -y"
+    sh "sudo yum install -y #{missing_packages}"
     gem_extra.split.each { |x| sh "sudo gem install #{x}" } #we need to remove this and start using our rpm
     sh "echo \"%_topdir      $HOME/rpmbuild\" >> ~/.rpmmacros"
     sh "mkdir -p ~/rpmbuild/{BUILD,SOURCES,RPMS,SRPMS,SPECS}"
@@ -110,114 +54,47 @@ task :build_env do
 end
 
 
-task :create_mak do
-  puts "add sip2ser stuff"
-  Rake::Task[:proxy_fixup].execute()
-  p_list = load_projects
-  f1 = IO.readlines("#{$our_dir}/mak/11-s2s.mk.in")
-  f2 = File.new("#{$build_dir}/mak/11-s2s.mk","w")
+task :create_mak_iso do
+  puts "sip2ser iso"
+  f1 = IO.readlines("#{$our_dir}/mak/s2s-iso.mk.in")
+  f2 = File.new("#{$build_dir}/mak/12-s2s-iso.mk","w")
   f1.each do | x |
-    if x.include?("{% projects %}")
-      p_list.each do | prj |
-        f2.puts("\t#{prj} \\")
-      end
-    elsif x.include?("{% libs %}")
-      Dir.foreach("#{$our_dir}/libs/") do | prj |
-        next if prj=='.' or prj=='..'
-        f2.puts("\t#{prj} \\")
-      end
-    else
-      f2.puts(x.chomp)
-    end
+    f2.puts(x.chomp)
   end
   f2.close()
 end
 
 desc "Lancia il configure per attivare la modalita' di debug basta mettere come parametro la costante DEBUG"
 task :config, [ :jdb ] do |t, args|
-  Rake::Task[:proxy_fixup].execute()
-  p_list = load_projects
-  Rake::Task[:projects].execute({:action => "get" })
   if args[:jdb]=="DEBUG"
     sh "#{$src_dir}/configure  JAVAC_DEBUG=on #{base_config_string}"
+    sh "rm -f 111-ISO"
+    sh "touch 111-BUILD"
+  elsif args[:jdb]=="ISO"
+    sh "#{$src_dir}/configure #{iso_config_string}"
+    Rake::Task[:create_mak_iso].invoke()
+    sh "rm -f 111-BUILD"
+    sh "touch 111-ISO"
   else
     sh "#{$src_dir}/configure #{base_config_string}"
+    sh "rm -f 111-ISO"
+    sh "touch 111-BUILD"
   end
-  Rake::Task[:create_mak].invoke()
+  Rake::Task[:modules_inclusion].invoke()
+  Rake::Task[:get_custom].invoke()
 end
 
 desc "Gestisce l'integrazione dei progetti esterni"
-task :projects, [:action] do |t, args|
-  Rake::Task[:proxy_fixup].execute()
-  p_list = load_projects
-  if args[:action] == "list"
-    puts p_list
-  elsif args[:action] == "get"
-    p_list.each { | x |
-      # here we need a more sophisticate techniques to manage exact git revision checkout
-      if not File.directory? "#{$src_dir}/#{x}"
-        sh "git clone http://git.sip2ser.net/#{x.downcase} #{$src_dir}/#{x}"
-      end
-    }
+task :modules_inclusion do
+  sh "cp -r #{$our_dir}/.modules* #{$build_dir}"
+end
+
+desc "Gestisce l'integrazione dei progetti esterni"
+task :get_custom do
+  if not File.directory? "#{$src_dir}/custom"
+    sh "git clone http://git.sip2ser.net/custom #{$src_dir}/custom"
   end
 end
-
-
-# numbering patch is funtamental task consider that 0003 meens that you nust install first 0001 and 0002 to succesfull install this.
-
-
-desc "Managing unstaged patchs" #we have so many hard things to be considered into unstaged stuff.. patch dependencies bla bla bla
-task :apply_unstaged, [:patch] do |t, args|
-end
-
-desc "Applica le patch staged"
-task :apply_staged  do 
-  Rake::Task[:proxy_fixup].execute()
-  Dir.entries("#{$our_dir}/staged/").sort.each do | f |
-    logger.info("Applico le patch staged")
-    if not File.directory?(f) and f[-5..-1] == "patch"
-      begin
-        res = sh "patch -d#{$src_dir} -Np1 < #{$our_dir}/staged/#{f}"
-        logger.info("#{f}: #{res}")
-      rescue
-        logger.info("patch saltata")
-      end
-    end
-    # Rake::Task[:config].invoke() # don't run tasks implicitly into tasks that are called implicitly themselves
-  end
-end
-
-# desc "Applica il tema custom Opsip"
-# task :theme do
-#   path = "/"
-#   begin
-#     temp = %x[grep -e '"prefix".=' config.status]
-#     path = temp.split("=")[1].strip.gsub("\"", "")
-#   rescue
-#   end
-#   Rake::Task[:base_customization].invoke()
-#   sh "cp -r #{$our_dir}/theme/opsip-theme-1.0/* #{path}/etc/sipxpbx/"
-# end
-
-# desc "Applica customizzazioni base e il file che include plugins futuri"
-# task :base_customization do
-#   path = "/"
-#   begin
-#     temp = %x[grep -e '"prefix".=' config.status]
-#     path = temp.split("=")[1].strip.gsub("\"", "")
-#   rescue
-#   end
-#   if not File.exist?("#{path}/etc/sipxpbx/sipxplugin.beans.xml")
-#     sh "cp #{$our_dir}/base_plugin/opsip-plugin-1.0/sipxplugin.beans.xml #{path}/etc/sipxpbx/"
-#     sh "cp #{$our_dir}/base_plugin/opsip-plugin-1.0/myres.properties #{path}/etc/sipxpbx/"
-#     sh "cp #{$our_dir}/base_plugin/opsip-plugin-1.0/myres_it.properties #{path}/etc/sipxpbx/"
-#   end
-# end
-
-# desc "Applica fixture a postgres"
-# task :pgpatch, [:fixture_file] do |t, args|
-#   sh "psql -U postgres -f #{$our_dir}/resources/#{:fixture_file} postgres"
-# end
 
 desc "Sistemare il problema di data e ora del sistema"
 task :datetime do
