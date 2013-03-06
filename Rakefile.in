@@ -23,24 +23,11 @@ missing_packages = "openacd homer resiprocate-devel mysql-connector-odbc"
 
 gem_extra = ""
 
-
-def load_projects
-  a = IO.readlines($projects_file)
-  a.each() { | x |
-    x.chomp!
-  }
-  a = a.select { | x |
-    !x.start_with?("#")
-  }
-  return a
-end
-
 task :default => :config
 
 task :test do
   puts $src_dir
   puts $our_dir
-  Rake::Task[:apply_staged].execute()
 end
 
 task :prereq do
@@ -74,40 +61,15 @@ task :create_mak_iso do
   f2.close()
 end
 
-task :create_mak do
-  puts "add sip2ser stuff"
-  p_list = load_projects
-  f1 = IO.readlines("#{$our_dir}/mak/s2s.mk.in")
-  f2 = File.new("#{$build_dir}/mak/11-s2s.mk","w")
-  f1.each do | x |
-    if x.include?("{% projects %}")
-      p_list.each do | prj |
-        f2.puts("\t#{prj} \\")
-      end
-    elsif x.include?("{% libs %}")
-      Dir.foreach("#{$our_dir}/libs/") do | prj |
-        next if prj=='.' or prj=='..'
-        f2.puts("\t#{prj} \\")
-      end
-    else
-      f2.puts(x.chomp)
-    end
-  end
-  f2.close()
-  Rake::Task[:create_mak_iso].invoke()
-end
-
-
 desc "Lancia il configure per attivare la modalita' di debug basta mettere come parametro la costante DEBUG"
 task :config, [ :jdb ] do |t, args|
-  p_list = load_projects
-  Rake::Task[:projects].execute({:action => "get" })
   if args[:jdb]=="DEBUG"
     sh "#{$src_dir}/configure  JAVAC_DEBUG=on #{base_config_string}"
     sh "rm -f 111-ISO"
     sh "touch 111-BUILD"
   elsif args[:jdb]=="ISO"
     sh "#{$src_dir}/configure #{iso_config_string}"
+    Rake::Task[:create_mak_iso].invoke()
     sh "rm -f 111-BUILD"
     sh "touch 111-ISO"
   else
@@ -115,79 +77,15 @@ task :config, [ :jdb ] do |t, args|
     sh "rm -f 111-ISO"
     sh "touch 111-BUILD"
   end
-  Rake::Task[:create_mak].invoke()
+  Rake::Task[:get_custom].invoke()
 end
 
 desc "Gestisce l'integrazione dei progetti esterni"
-task :projects, [:action] do |t, args|
-  p_list = load_projects
-  if args[:action] == "list"
-    puts p_list
-  elsif args[:action] == "get"
-    p_list.each { | x |
-      # here we need a more sophisticate techniques to manage exact git revision checkout
-      if not File.directory? "#{$src_dir}/#{x}" and not x.starts_with?("#")
-        sh "git clone http://git.sip2ser.net/#{x.downcase} #{$src_dir}/#{x}"
-      end
-    }
+task :get_custom do
+  if not File.directory? "#{$src_dir}/custom"
+    sh "git clone http://git.sip2ser.net/custom #{$src_dir}/custom"
   end
 end
-
-
-# numbering patch is funtamental task consider that 0003 meens that you nust install first 0001 and 0002 to succesfull install this.
-
-
-desc "Managing unstaged patchs" #we have so many hard things to be considered into unstaged stuff.. patch dependencies bla bla bla
-task :apply_unstaged, [:patch] do |t, args|
-end
-
-desc "Applica le patch staged"
-task :apply_staged  do 
-  Dir.entries("#{$our_dir}/staged/").sort.each do | f |
-    logger.info("Applico le patch staged")
-    if not File.directory?(f) and f[-5..-1] == "patch"
-      begin
-        res = sh "patch -d#{$src_dir} -Np1 < #{$our_dir}/staged/#{f}"
-        logger.info("#{f}: #{res}")
-      rescue
-        logger.info("patch saltata")
-      end
-    end
-    # Rake::Task[:config].invoke() # don't run tasks implicitly into tasks that are called implicitly themselves
-  end
-end
-
-# desc "Applica il tema custom Opsip"
-# task :theme do
-#   path = "/"
-#   begin
-#     temp = %x[grep -e '"prefix".=' config.status]
-#     path = temp.split("=")[1].strip.gsub("\"", "")
-#   rescue
-#   end
-#   Rake::Task[:base_customization].invoke()
-#   sh "cp -r #{$our_dir}/theme/opsip-theme-1.0/* #{path}/etc/sipxpbx/"
-# end
-
-# desc "Applica customizzazioni base e il file che include plugins futuri"
-# task :base_customization do
-#   path = "/"
-#   begin
-#     temp = %x[grep -e '"prefix".=' config.status]
-#     path = temp.split("=")[1].strip.gsub("\"", "")
-#   rescue
-#   end
-#   if not File.exist?("#{path}/etc/sipxpbx/sipxplugin.beans.xml")
-#     sh "cp #{$our_dir}/base_plugin/opsip-plugin-1.0/sipxplugin.beans.xml #{path}/etc/sipxpbx/"
-#     sh "cp #{$our_dir}/base_plugin/opsip-plugin-1.0/myres.properties #{path}/etc/sipxpbx/"
-#     sh "cp #{$our_dir}/base_plugin/opsip-plugin-1.0/myres_it.properties #{path}/etc/sipxpbx/"
-#   end
-# end
-
-# desc "Applica fixture a postgres"
-# task :pgpatch, [:fixture_file] do |t, args|
-#   sh "psql -U postgres -f #{$our_dir}/resources/#{:fixture_file} postgres"
-# end
 
 desc "Sistemare il problema di data e ora del sistema"
 task :datetime do
