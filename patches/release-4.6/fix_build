@@ -1,8 +1,20 @@
+diff --git a/mak/OpenACD.sipxecs.mk b/mak/OpenACD.sipxecs.mk
+index b55a7d9..d5b0d1f 100644
+--- a/mak/OpenACD.sipxecs.mk
++++ b/mak/OpenACD.sipxecs.mk
+@@ -9,6 +9,6 @@ OpenACD_SRPM_DEFS = --define "buildno $(OpenACD_REV)"
+ OpenACD_RPM_DEFS = --define="buildno $(OpenACD_REV)"
+ OpenACD_BUILD_ON_CHANGE = $(DEFAULT_ON_CHANGE) -a -not -name commit_ver.hrl
+ 
+-OpenACD.dist :
++OpenACD.dist : $(OpenACD_GIT_SUBMODULE)
+ 	test -d OpenACD || mkdir -p OpenACD
+ 	make -C $(SRC)/OpenACD dist DESTDIR=$(abspath .)/OpenACD/
 diff --git a/mak/build.mk.in b/mak/build.mk.in
-index fe8e062..b91cd38 100644
+index fe8e062..58f9ade 100644
 --- a/mak/build.mk.in
 +++ b/mak/build.mk.in
-@@ -4,12 +4,10 @@
+@@ -4,11 +4,10 @@
  OPTIONS = @OPTIONS@
  DOWNLOAD_LIB_CACHE = @DOWNLOAD_LIB_CACHE@
  
@@ -13,11 +25,10 @@ index fe8e062..b91cd38 100644
 -# pull in dependency make fragments
  include $(SRC)/mak/modules.mk
 -include $(SRC)/mak/*.sipxecs.mk
--include $(SRC)/*/.sipxecs.mk
+ include $(SRC)/*/.sipxecs.mk
  
  # Example .modules-include files
- # - Includes sipxecs core pieces and Italian language pack
-@@ -23,8 +21,8 @@ $(eval sipx_include = $(shell test -f .modules-include && \
+@@ -23,8 +22,8 @@ $(eval sipx_include = $(shell test -f .modules-include && \
  $(eval sipx_exclude = $(shell test -f .modules-exclude && \
  	cat .modules-exclude))
  
@@ -28,7 +39,7 @@ index fe8e062..b91cd38 100644
  
  help.sipx=Build all sipx components including targets autoreconf, configure, all and install targets
  build sipx :
-@@ -37,6 +35,14 @@ $(foreach P,$(sipx),$(eval $(P)_TAR = $(P)/$$(call lowercase,$(P))-$(PACKAGE_VER
+@@ -37,6 +36,14 @@ $(foreach P,$(sipx),$(eval $(P)_TAR = $(P)/$$(call lowercase,$(P))-$(PACKAGE_VER
  # many submodules to be defined, but only requested submodules to be loaded. There
  # is no need to specify which projects are git submodules, all of this is handled
  # by these this section.
@@ -37,13 +48,13 @@ index fe8e062..b91cd38 100644
 +$(SRC)/custom/%/.git :
 +	cd $(SRC)/custom; \
 +	  git submodule init $*; \
-+	  git submodule update $* \
++	  git submodule update $*; \
 +	ln -s $(SRC)/custom/$* $(SRC)
 +
  $(foreach M,$(git_submodules),$(eval $(M)_GIT_SUBMODULE = $(SRC)/$(M)/.git))
  .PRECIOUS: $(SRC)/%/.git
  $(SRC)/%/.git :
-@@ -45,7 +51,11 @@ $(SRC)/%/.git :
+@@ -45,7 +52,10 @@ $(SRC)/%/.git :
  	  git submodule update $*
  
  sipx.git :
@@ -52,19 +63,7 @@ index fe8e062..b91cd38 100644
 +
 +# pull in dependency make fragments
 +include $(SRC)/mak/*.sipxecs.mk
-+include $(SRC)/*/.sipxecs.mk
  
  build_on_change= find $(SRC)/$(PROJ)/ \( ! -regex '.*\/\.git/.*' \) -a  \( -type f -newer $1 -a $(build_on_change_var) \)
  build_on_change_var = $(build_on_change_$(origin $(PROJ)_BUILD_ON_CHANGE))
-diff --git a/sipXhomer b/sipXhomer
---- a/sipXhomer
-+++ b/sipXhomer
-@@ -1 +1 @@
--Subproject commit 6cc6a3472266866f13095176aadc39b92430daf1
-+Subproject commit 6cc6a3472266866f13095176aadc39b92430daf1-dirty
-diff --git a/sipXsbc b/sipXsbc
---- a/sipXsbc
-+++ b/sipXsbc
-@@ -1 +1 @@
--Subproject commit 71b8144c276311e506f48f87aacae7af361b9c3a
-+Subproject commit 71b8144c276311e506f48f87aacae7af361b9c3a-dirty
+
