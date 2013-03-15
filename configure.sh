@@ -100,6 +100,14 @@ if [[ "$distro" -eq "CentOS" ]]; then
 	    wget http://mirror.switch.ch/ftp/mirror/epel/6/x86_64/$epel_pkg
 	fi
 	sudo yum localinstall $epel_pkg
+	echo "would you like to add custom sip2ser repo?[y/*]"
+	read rchoose
+	if [ $rchoose=="y" ]; then
+	    sudo wget http://192.168.64.35/opsip4.6-unstable-centos6.repo -P /etc/yum.repos.d/
+	else
+	    echo "your choose -> $rchoose <- is considered as no-> we are not adding sip2ser repo"
+	fi
+	    
     fi
 fi
 fi
