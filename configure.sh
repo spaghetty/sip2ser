@@ -36,12 +36,13 @@ echo -ne "ruby and rake are necessary "
 
 system_rake=`whereis rake | awk '{ print $2}'`
 system_ruby=`whereis ruby | awk '{ print $2}'`
+epel_pkg="epel-release-6-8.noarch.rpm"
 
 echo  "setting up some environments ...."
 
 LIBS=$sip2ser_dir/libs/*
 
-if [ "$(ls -A `dirname $LIBS`)" ]; then
+if [ "$(ls -A `dirname $LIBS[0]`)" ]; then
     for f in $LIBS
     do
 	dest=$(basename $f)
@@ -87,6 +88,20 @@ else
         echo "your choose -> $choose <- is considered as no"
 	echo "autoreconf missing: remember to run prereq task and then rerun autoreconfig -if"
     fi
+fi
+
+# if on centos we need to install epel
+if [[ -f /etc/redhat-release ]]; then
+distro=`cat /etc/redhat-release | awk '{ print $1 }'`
+version=` cat /etc/redhat-release | awk '{ print $3 }'`
+if [[ "$distro" -eq "CentOS" ]]; then
+    if [[ $version == 6* ]]; then
+	if [[ ! -f $epel_pkg ]]; then
+	    wget http://mirror.switch.ch/ftp/mirror/epel/6/x86_64/$epel_pkg
+	fi
+	sudo yum localinstall $epel_pkg
+    fi
+fi
 fi
 
 GIT_DIR=$src_dir/.git
