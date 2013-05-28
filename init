@@ -1,0 +1,42 @@
+#!/bin/bash
+# this is the start of everything
+
+
+if [ -d "./sip2ser" ]; then
+    #we are out from the project dir, that's great
+    echo "well seems that we are in the right place (outside main tree)"
+else
+    echo "well, the right place to be is just out from the man src folder, move there please and run agin"
+    exit
+fi
+
+base_dir=`pwd`
+s2s_dir=$base_dir"/sip2ser"
+
+cd $s2s_dir
+branch_name=`git branch | grep "\*" | gawk '{ print $2 }'`
+origin_bname=`echo "$branch_name" | sed s/opsip-release//`
+echo $branch_name
+echo $origin_bname
+
+cd ..
+if [ ! -d "./sipxecs/.git" ]; then 
+    git clone git://github.com/spaghetty/sipxecs.git
+fi
+
+cd sipxecs
+currentb_name=`git branch | grep "\*" | gawk '{ print $2 }'`
+echo $currentb_name
+echo "release-$origin_bname"
+if [ "$currentb_name" != "release-$origin_bname" ]; then
+    git checkout release-$origin_bname
+fi
+
+cd ..
+mv sip2ser sipxecs
+
+mkdir sipxecs/build
+
+cd sipxecs/build
+
+../sip2ser/configure.sh
