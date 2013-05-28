@@ -36,6 +36,7 @@ echo -ne "ruby and rake are necessary "
 
 system_rake=`whereis rake | awk '{ print $2}'`
 system_ruby=`whereis ruby | awk '{ print $2}'`
+system_wget=`whereis wget | awk '{ print $2}'`
 epel_pkg="epel-release-6-8.noarch.rpm"
 
 echo  "setting up some environments ...."
@@ -70,6 +71,12 @@ else
     echo "OK"
 fi
 
+if [[ ! -f $system_wget ]]; then
+    sudo yum install -y wget
+else
+    echo "wget found"
+fi
+
 echo -ne "autoreconf needed, check for availability .....\t\t"
 
 reconfig_command=`whereis autoreconf | awk '{ print $2}'`
@@ -87,6 +94,24 @@ else
     else
         echo "your choose -> $choose <- is considered as no"
 	echo "autoreconf missing: remember to run prereq task and then rerun autoreconfig -if"
+    fi
+fi
+
+cd ..
+# we need to add support for go stuff
+GROOT=`pwd`
+
+if [ "$GOROOT"=="" ]; then
+    wget https://go.googlecode.com/files/go1.1.src.tar.gz
+    tar xzpvf go1.1.src.tar.gz
+    cd go/src
+    ./all.bash
+    goroot=`cat ~/.bash_profile | grep GOROOT`
+    if [ $goroot=="" ]; then
+	echo "GOROOT=$GROOT/go" >> ~/.bash_profile
+	echo "export GOROOT" >> ~/.bash_profile
+	echo "PATH=$PATH:$GOROOT/bin" >> ~/.bash_profile
+	echo "export PATH" >> ~/.bash_profile
     fi
 fi
 
