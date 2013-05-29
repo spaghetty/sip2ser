@@ -101,19 +101,26 @@ cd ..
 # we need to add support for go stuff
 GROOT=`pwd`
 
-if [ "$GOROOT"=="" ]; then
-    wget https://go.googlecode.com/files/go1.1.src.tar.gz
-    tar xzpvf go1.1.src.tar.gz
+sudo yum install gcc
+
+if [ "$GOROOT" == "" ]; then
+    if [ ! -d "./go" ]; then
+	wget https://go.googlecode.com/files/go1.1.src.tar.gz
+	tar xzpvf go1.1.src.tar.gz
+    fi
     cd go/src
     ./all.bash
     goroot=`cat ~/.bash_profile | grep GOROOT`
+    gobin="$GOROOT/go/bin"
     if [ $goroot=="" ]; then
 	echo "GOROOT=$GROOT/go" >> ~/.bash_profile
 	echo "export GOROOT" >> ~/.bash_profile
-	echo "PATH=$PATH:$GOROOT/bin" >> ~/.bash_profile
+	echo 'PATH=$PATH:'$GOROOT/go/bin >> ~/.bash_profile
 	echo "export PATH" >> ~/.bash_profile
     fi
 fi
+
+cd $src_dir
 
 # if on centos we need to install epel
 if [[ -f /etc/redhat-release ]]; then
@@ -127,7 +134,7 @@ if [[ "$distro" -eq "CentOS" ]]; then
 	sudo yum localinstall $epel_pkg
 	echo "would you like to add custom sip2ser repo?[y/*]"
 	read rchoose
-	if [ $rchoose=="y" ]; then
+	if [ $rchoose == "y" ]; then
 	    sudo wget http://192.168.64.35/opsip4.6-unstable-centos6.repo -P /etc/yum.repos.d/
 	else
 	    echo "your choose -> $rchoose <- is considered as no-> we are not adding sip2ser repo"
