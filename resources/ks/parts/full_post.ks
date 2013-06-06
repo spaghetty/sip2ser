@@ -37,7 +37,7 @@ cat >> /root/.bashrc <<EOF
 # restore /root/.bashrc and /etc/issue to original states upon successful
 # setup.
 if [ \$? == 0 ]; then
-  sed -i '/^\/usr\/bin\/opsip-setup-system\$/,//d' /root/.bashrc
+  sed -i '/^\/usr\/bin\/sipxecs-setup\$/,//d' /root/.bashrc
   sed -i '/^====/,//d' /etc/issue
 fi
 EOF
