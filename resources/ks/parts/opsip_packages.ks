@@ -12,11 +12,10 @@ epel-release
 @sipxecs
 s2sopsip
 getmail
-ssmtp
 telnet
 emacs-nox
 dhcp
-#wireshark-gnome
+wireshark
 
 %include /tmp/extra_pkg
 

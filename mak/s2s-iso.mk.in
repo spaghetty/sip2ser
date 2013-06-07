@@ -115,10 +115,10 @@ ISO_ADD_BASE = \
 	libgsf-* \
 	xdg-utils* \
 	GConf2* \
-	ORBit2-2*
+	ORBit2-2* \
+	wireshark-gnome*
 #	usermode-gtk* \
 #	postgresql-8* 
-#	wireshark-gnome* \
 #	startup-notification* \
 
 ISO_ADD_S2S_EPEL = \
@@ -129,8 +129,7 @@ ISO_ADD_S2S_EPEL = \
 	rubygem-rspec* \
 	rubygem-json* \
 	rubygem-mocha* \
-	rubygem-activesupport* \
-	ssmtp*
+	rubygem-activesupport* 
 
 ISO_ADD_UPDATES = \
 	sudo* \
