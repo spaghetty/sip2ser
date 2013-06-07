@@ -101,7 +101,7 @@ cd ..
 # we need to add support for go stuff
 GROOT=`pwd`
 
-sudo yum install gcc
+sudo yum install gcc bzr hg
 
 if [ "$GOROOT" == "" ]; then
     if [ ! -d "./go" ]; then
@@ -111,11 +111,11 @@ if [ "$GOROOT" == "" ]; then
     cd go/src
     ./all.bash
     goroot=`cat ~/.bash_profile | grep GOROOT`
-    gobin="$GOROOT/go/bin"
+    gobin="$GROOT/go/bin"
     if [ $goroot=="" ]; then
 	echo "GOROOT=$GROOT/go" >> ~/.bash_profile
 	echo "export GOROOT" >> ~/.bash_profile
-	echo 'PATH=$PATH:'$GOROOT/go/bin >> ~/.bash_profile
+	echo 'PATH=$PATH:'$gobin >> ~/.bash_profile
 	echo "export PATH" >> ~/.bash_profile
     fi
 fi
