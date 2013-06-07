@@ -116,6 +116,10 @@ ISO_ADD_BASE = \
 	xdg-utils* \
 	GConf2* \
 	ORBit2-2* \
+	sudo* \
+	glibc* \
+	dhclient-* \
+	telnet-* \
 	wireshark-gnome*
 #	usermode-gtk* \
 #	postgresql-8* 
@@ -131,11 +135,8 @@ ISO_ADD_S2S_EPEL = \
 	rubygem-mocha* \
 	rubygem-activesupport* 
 
-ISO_ADD_UPDATES = \
-	sudo* \
-	glibc* \
-	dhclient-* \
-	telnet-*
+ISO_ADD_UPDATES = 
+
 
 S2S_KS = \
 	$(S2S_ISO_SRC)/embedded_install_opsip.ks \
