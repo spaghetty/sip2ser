@@ -15,12 +15,14 @@ def my_setup_screen():
     pkglist = [
         ("Fax Spool", "s2sfaxspool"),
         ("Cdr Extractor", "s2scdrextractor"),
-        ("Languages Support", "sipxlang-it", "sipxlang-de")
+        ("Mail Proxy", "s2smailproxy"),
+	("Personal Recorder", "s2srecorder"),
+        ("Italian Languages Support", "sipxlang-it")
         ]
     screen = SnackScreen()
 
-    form = GridForm(screen, 'Select package set', 1, 4)
-    g = CheckboxTree(3)
+    form = GridForm(screen, 'Select package set', 1, 6)
+    g = CheckboxTree(6)
     for e in pkglist:
         g.append(e[0], e[1:])
     form.add(g, 0, 1)

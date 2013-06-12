@@ -24,6 +24,8 @@ gperftools-libs v8-devel oss_core-devel libdnet-devel poco-devel libconfig-devel
 libtool-ltdl-devel libmcrypt-devel \
 "
 
+@s2s_packages = ["s2sfaxspool","s2scdrextractor","s2sopsip","s2smailproxy","s2srecorder","emacs-nox","telnet","sudo","dhcp","getmail","ssmtp","fail2bn","gperftools","mysql-server","wireshark"]
+
 gem_extra = ""
 
 task :default => :config
@@ -100,6 +102,106 @@ desc "Sistemare il problema di data e ora del sistema"
 task :datetime do
   sh "sudo echo UTC=true >> /etc/sysconfig/clock"
   sh "sudo hwclock --systohc --utc"
+end
+
+def get_deps(package)
+  begin
+    done=false
+    if package.include? ':' 
+      basename = package.sub!(/-[\d]:.*$/, "")
+    else 
+      basename = File.basename(package, ".rpm")
+    end
+    fetch_dep_cmd = "repoquery --requires --recursive --resolve --archlist=x86_64,noarch #{basename.chomp}"
+    packages = `#{fetch_dep_cmd}`
+    list = packages.split(/\n/)
+    if list.length > 0
+      list.each do |y|
+        if y.include? ':' 
+          x = y.sub!(/-[\d]:.*$/, "")
+        else
+          x = y
+        end
+        begin
+          if (@s2s_packages.include?x)
+            puts "#{x} ALREADY INCLUDED"
+          else
+            if !done
+              @s2s_packages << x
+              puts "GROWING: #{@s2s_packages} \n"
+              get_deps(x)
+            end
+          end
+        rescue 
+          puts "No deps for #{x}"
+        end
+      end
+    end
+  rescue Exception => ex
+    puts "Done for Nil package #(package)"
+  end
+end
+
+
+
+
+desc "Risoluzione ricorsiva di tutte le dipendenze dei pacchetti. Output in file "
+task :resolv_deps, [ :package, :dest_file, :clean] do |t, args|
+  puts args[:package]
+  puts args[:dest_file]
+  if args[:package]!=nil and args[:package]!=''
+    @s2s_packages = ["#{args[:package]}"]
+  end
+  if args[:dest_file]!=nil and args[:dest_file]!=''
+    target = args[:dest_file]
+  else 
+    target = 'deps_list'
+  end
+  if args[:clean]=='CLEAN'
+    File.delete(target)
+  end
+  begin
+    File.open(target,'a') do |f2|
+      @s2s_packages.each do |x|
+        get_deps(x)
+      end
+      @s2s_packages.each do |x|
+        if x!=nil
+          if x.include? ':' 
+            basename = x.sub!(/-[\d]:.*$/, "")
+          else 
+            basename = File.basename(x, ".rpm")
+          end
+          puts "Added:  #{basename} "
+          f2.puts "#{basename} \n"
+        end
+      end
+      f2.puts "\n"
+    end
+  rescue Exception => e
+    puts e
+  end
+end
+
+
+desc "Download di una lista di pacchetti"
+task :get_packages, [:source_file] do |t, args| 
+  if args[:source_file]!=nil and args[:source_file]!=''
+    src = args[:source_file]
+  else 
+    src = 'deps_list'
+  end
+  begin
+    File.open(src,'r') do |f1|
+      while line=f1.gets
+        puts line
+        download_cmd = "sudo yumdownloader --archlist=x86_64,noarch --resolve --destdir=iso #{line.chomp}"
+        `#{download_cmd}`
+      end
+    end
+  rescue Exception => e
+    puts e
+  end
 end
 
 import "#{$our_dir}/resources/ks/Rakefile"

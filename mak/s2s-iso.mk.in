@@ -14,7 +14,7 @@ APPLICATION_LABEL ?= "s2s @PACKAGE_VERSION@"
 PUBLISHER_ID ?= luciano.berardi@sip2ser.it
 PREPARERER_ID ?= luciano.berardi@sip2ser.it
 ISO_PACKAGES_S2S=$(ARCH)-s2s-Packages
-S2S_ISO_SRC ?= ~/sipxecs/sip2ser/resources/ks
+S2S_ISO_SRC ?= ../sip2ser/resources/ks
 RSYNC_REPO = mirrors.rit.edu
 S2S_RPM_REPO = ./repo
 ISO_S2S ?= S2S-$(ISO_LABEL)-$(PACKAGE_VERSION)-$(ISO_REV)-$(ARCH).iso
@@ -27,10 +27,15 @@ S2S_ISOLINUX_FILES = \
 
 s2s-iso-64 : iso-64 \
 	s2s-iso-disc-64 \
-	s2s-iso-packages-64 \
+	s2s-iso-download-64 \
 	s2s-iso-update-repo-64 \
 	s2s-iso-update-files-64 \
 	iso-assemble-%;
+
+# s2s-iso-64 : s2s-iso-download-64 \
+# 	s2s-iso-update-repo-64 \
+# 	s2s-iso-update-files-64 \
+# 	iso-assemble-%;
 
 # need to make a copy of entire disc so we can modify
 s2s-iso-disc-64 :
@@ -45,7 +50,7 @@ s2s-iso-disc-64 :
 	mv cd.tmp $(ISO_DISC)
 
 # rebuild yum repo after all rpms have been added and removed
-s2s-iso-update-repo-64 :
+s2s-iso-update-repo-64 : s2s-clean-repo
 	MEDIA_ID=$(shell head -1 $(ISO_DISC)/.discinfo); \
 	  cd $(ISO_DISC); \
 	  /usr/bin/createrepo \
@@ -54,24 +59,12 @@ s2s-iso-update-repo-64 :
 
 
 s2s-iso-download-64 : mak/*-s2s-iso.mk
-	rsync -av \
-	$(realpath $(S2S_RPM_REPO))/CentOS_6/$(ARCH)/ $(ISO_DISC)/Packages/
-	rsync -av --delete \
-	$(addprefix rsync://$(RSYNC_REPO)/centos/6/os/$(ARCH)/Packages/, $(ISO_ADD_BASE)) \
-	$(ISO_PACKAGES_S2S)/
-	rsync -av --delete \
-	$(addprefix rsync://$(RSYNC_REPO)/centos/6/updates/$(ARCH)/Packages/, $(ISO_ADD_UPDATES)) \
-	$(ISO_PACKAGES_S2S)/
-	rsync -av --delete \
-	$(addprefix rsync://$(RSYNC_REPO)/epel/6/$(ARCH)/, $(ISO_ADD_S2S_EPEL)) \
-	$(ISO_PACKAGES_S2S)/
-	test -d tmp.dep || mkdir tmp.dep
-	for f in $(ISO_ADD_BASE) $(ISO_ADD_UPDATES) $(ISO_ADD_S2S_EPEL); do \
-	  sudo yumdownloader --archlist=x86_64,noarch --resolve --destdir=tmp.dep `repoquery --requires --recursive --resolve --archlist=x86_64,noarch $$f` ; \
-	  echo "Dependencies of $$f downloaded"; \
+	for file in `cat deps_list`; do \
+		sudo yumdownloader --archlist=x86_64,noarch --resolve --destdir=$(ISO_DISC)/Packages $$file ; \
 	done
-	cp -rf tmp.dep/* $(ISO_PACKAGES_S2S);
-#	! test -d tmp.dep || rm -rf tmp.dep
+	for pack in $(S2S_ADD_PACK); do \
+	  cp -f $(realpath $(S2S_RPM_REPO))/CentOS_6/$(ARCH)/$$pack $(ISO_DISC)/Packages/ ; \
+	done
 
 # add modifications to disc to make it operate
 s2s-iso-update-files-64 :
@@ -86,56 +79,18 @@ s2s-iso-update-files-64 :
 	  rm $$f ; \
 	done
 
-
-s2s-iso-packages-64 : s2s-iso-download-64
-	rsync -av $(ARCH)-s2s-Packages/  $(ISO_DISC)/Packages/
+s2s-clean-repo:
 	find $(ISO_DISC)/Packages -not -name 'java-1.6.0-openjdk-devel-*.rpm' \
-	   | grep $(foreach REGEX,$(ISO_RM_LIST),-e '.*/$(REGEX)') \
-	   | xargs rm
-	for pack in $(S2S_ADD_PACK); do \
-	  cp -f $(realpath $(S2S_RPM_REPO))/CentOS_6/$(ARCH)/$$pack $(ISO_DISC)/Packages/ ; \
-	done
+	   | grep $(foreach REGEX,$(S2S_ISO_RM_LIST),-e '.*/$(REGEX)') \
+	   | xargs rm -f
+
+S2S_ISO_RM_LIST = \
+	mysql-libs.*.i686.*
 
 S2S_ADD_PACK = \
 	freeswitch-ruby* \
 	sipxlang-* \
 	s2scdrextractor-devel*
-
-ISO_ADD_BASE = \
-	emacs-nox* \
-	dhcp* \
-	python-psycopg2* \
-	python-libs* \
-	rubygem-rake* \
-	ghostscript-* \
-	ImageMagick* \
-	librsvg2-* \
-	postgresql-server* \
-	xorg-x11-font-utils* \
-	libgsf-* \
-	xdg-utils* \
-	GConf2* \
-	ORBit2-2* \
-	sudo* \
-	glibc* \
-	dhclient-* \
-	telnet-* \
-	wireshark-gnome*
-#	usermode-gtk* \
-#	postgresql-8* 
-#	startup-notification* \
-
-ISO_ADD_S2S_EPEL = \
-	getmail* \
-	zeromq-* \
-	ruby-sqlite3* \
-	rubygem-mime-types* \
-	rubygem-rspec* \
-	rubygem-json* \
-	rubygem-mocha* \
-	rubygem-activesupport* 
-
-ISO_ADD_UPDATES = 
 
 
 S2S_KS = \
