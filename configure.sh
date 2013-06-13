@@ -105,8 +105,8 @@ sudo yum install gcc bzr hg
 
 if [ "$GOROOT" == "" ]; then
     if [ ! -d "./go" ]; then
-	wget https://go.googlecode.com/files/go1.1.src.tar.gz
-	tar xzpvf go1.1.src.tar.gz
+	wget https://go.googlecode.com/files/go1.1.1.src.tar.gz
+	tar xzpvf go1.1.1.src.tar.gz
     fi
     cd go/src
     ./all.bash
