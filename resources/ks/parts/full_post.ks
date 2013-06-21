@@ -64,16 +64,6 @@ gpgcheck=0
 
 EOF
 
-cat > /etc/yum.repos.d/opsip4.6_unstable.repo <<EOF
-[Opsip]
-name=Opsip for CentOS - \$basearch
-baseurl=http://82.85.187.44/unstable_repo/CentOS_6/\$basearch
-enabled=1
-gpgcheck=0
-
-EOF
-
-
 #... Boot kernel in quiet mode
 sed -i 's/ro root/ro quiet root/g' /boot/grub/grub.conf
 
