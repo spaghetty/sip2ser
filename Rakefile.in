@@ -21,10 +21,10 @@ packages_base = "autoconf automake make libtool createrepo gcc-c++ \
  "
 missing_packages = "openacd homer resiprocate-devel mysql-connector-odbc \
 gperftools-libs v8-devel oss_core-devel libdnet-devel poco-devel libconfig-devel libpcap-devel \
-libtool-ltdl-devel libmcrypt-devel \
+libtool-ltdl-devel libmcrypt-devel dart-sdk\
 "
 
-@s2s_packages = ["s2sfaxspool","s2scdrextractor","s2sopsip","s2smailproxy","s2srecorder","emacs-nox","telnet","sudo","dhcp","getmail","ssmtp","fail2bn","gperftools","mysql-server","wireshark"]
+@s2s_packages = ["s2sfaxspool","s2scdrextractor","s2sopsip","s2smailproxy","s2srecorder","emacs-nox","telnet","sudo","dhcp","getmail","ssmtp","fail2bn","gperftools","mysql-server","wireshark","dart-sdk"]
 
 gem_extra = ""
 
