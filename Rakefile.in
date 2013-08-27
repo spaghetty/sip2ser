@@ -8,7 +8,8 @@ $our_dir="@FASTDATATEL_DIR@"
 $build_dir="@BUILD_DIR@"
 $log_file="fastdatatel_action.log"
 $projects_file = "#{$our_dir}/projects"
-
+$mock_root_dir="#{$build_dir}/mock/centos-6-x86_64/root"
+$go_version="1.1.1"
 
 logger = Logger.new($log_file)
 
@@ -84,6 +85,29 @@ task :config, [ :jdb ] do |t, args|
   end
   Rake::Task[:modules_inclusion].invoke()
   Rake::Task[:get_custom].invoke()
+  if File.exists?("#{$mock_root_dir}/etc/bashrc")
+    Rake::Task[:go_mock_install].invoke()
+  end
+end
+
+desc "Installa go in ambiente chroot"
+task :go_mock_install do
+  if !File.directory?("#{$mock_root_dir}/go")
+    sh "wget -o #{$mock_root_dir}/go#{$go_version}.src.tar.gz https://go.googlecode.com/files/go#{$go_version}.src.tar.gz"
+    sh "tar cxzpvf go#{$go_version}.src.tar.gz #{$mock_root_dir}"
+  end
+  sh "sudo mkdir -p #{$build_dir}/mock/centos-6-x86_64/result"
+  sh "sudo touch #{$build_dir}/mock/centos-6-x86_64/result/state.log"
+  sh "sudo chmod 777 #{$build_dir}/mock/centos-6-x86_64/result/state.log"
+  sh "mock -r centos-6-x86_64 --configdir=#{$build_dir}/mak/mock --shell --chroot /go/src/all.bash"
+  $gobin="/go/bin"
+  if File.readlines("#{$mock_root_dir}/etc/bashrc").grep(/GOROOT/).size<=0
+    sh "mock -r centos-6-x86_64 --configdir=#{$build_dir}/mak/mock --chroot \'echo \"GOROOT=/go\" >> #{$mock_root_dir}/etc/bashrc\'"
+    sh "echo \"GOROOT=/go\" >> #{$mock_root_dir}/etc/bashrc"
+    sh "echo \"export GOROOT\" >> #{$mock_root_dir}/etc/bashrc"
+    sh "echo \"PATH=$PATH:#{$gobin}\" >> #{$mock_root_dir}/etc/bashrc"
+    sh "echo \"export PATH\" >> #{$mock_root_dir}/etc/bashrc"
+  end
 end
 
 desc "Gestisce l'integrazione dei progetti esterni"
